@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 const PricingSignup = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     shopName: "",
     ownerName: "",
@@ -67,20 +71,40 @@ const PricingSignup = () => {
   return (
     <div className="min-h-screen pt-24 pb-16 bg-background">
       <div className="container max-w-6xl mx-auto px-4">
+
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 group font-medium"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Back to AI-Setu
+        </button>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
           {/* Order Summary / Pricing Details Side */}
           <div className="bg-card shadow-lg rounded-2xl p-8 border border-border">
             <h2 className="text-2xl font-bold mb-6 text-foreground">Order Summary</h2>
             <div className="text-center mb-8 bg-muted/30 p-6 rounded-xl border border-border/50">
-              <p className="text-muted-foreground font-medium mb-2">All-Inclusive Package</p>
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-5xl font-extrabold text-foreground">₹12,000</span>
-                <span className="text-muted-foreground text-sm">+ GST</span>
+              <p className="text-muted-foreground font-medium mb-1">All-Inclusive Package</p>
+
+              <div className="flex flex-col items-center justify-center gap-1 mb-2">
+                <div className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full mb-1">Save 60%</div>
+                <span className="text-muted-foreground line-through text-lg font-medium tracking-wide">₹29,999</span>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-5xl font-extrabold text-foreground">₹12,000</span>
+                  <span className="text-muted-foreground text-sm">+ GST</span>
+                </div>
               </div>
+
               <div className="mt-4 pt-4 border-t border-border inline-block min-w-[200px]">
-                <div className="flex justify-between text-sm mb-2 text-muted-foreground">
-                  <span>Base Price</span>
+                <div className="flex justify-between text-sm mb-2 text-muted-foreground line-through opacity-70">
+                  <span>MSRP</span>
+                  <span>₹29,999</span>
+                </div>
+                <div className="flex justify-between text-sm mb-2 text-foreground font-medium">
+                  <span>Offer Price</span>
                   <span>₹12,000</span>
                 </div>
                 <div className="flex justify-between text-sm mb-2 text-muted-foreground">
