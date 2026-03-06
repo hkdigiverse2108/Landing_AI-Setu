@@ -15,8 +15,8 @@ from .models import Policy
 from .serializers import PolicySerializer,EmailTokenObtainPairSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import EmailTokenObtainPairSerializer
 from .serializers import PolicySerializer
 from . import serializers
 
@@ -48,29 +48,29 @@ def book_demo_api(request):
 
     return JsonResponse({"error": "Only POST allowed"}, status=405)
 
-@csrf_exempt
-def user_login(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
+# @csrf_exempt
+# def user_login(request):
+#     if request.method == "POST":
+#         try:
+#             data = json.loads(request.body)
 
-            email = data.POST.get('email')
-            password = data.POST.get('password')
+#             email = data.POST.get('email')
+#             password = data.POST.get('password')
 
-            if not all([email, password]):
-                return JsonResponse({"error": "All fields required"}, status=400)
+#             if not all([email, password]):
+#                 return JsonResponse({"error": "All fields required"}, status=400)
 
-            DemoRequest.objects.create(
-                email=email,
-                password=password,
-            )
+#             DemoRequest.objects.create(
+#                 email=email,
+#                 password=password,
+#             )
 
-            return JsonResponse({"message": "Login successfully"}, status=201)
+#             return JsonResponse({"message": "Login successfully"}, status=201)
 
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+#         except Exception as e:
+#             return JsonResponse({"error": str(e)}, status=400)
 
-    return JsonResponse({"error": "Only POST allowed"}, status=405)
+#     return JsonResponse({"error": "Only POST allowed"}, status=405)
 
 import json
 from django.http import JsonResponse
@@ -79,7 +79,7 @@ from .models import UserLogin  # assuming you have this model
 
 # Fixed passwords for demo (replace with proper auth in production)
 FIXED_USER_PASSWORD = "1234"
-ADMIN_EMAIL = "admin@gmail.com"
+ADMIN_EMAIL = "admin@aisetu.com"
 ADMIN_PASSWORD = "admin123"
 
 @csrf_exempt  # Disable CSRF for API requests from React
@@ -155,40 +155,6 @@ def pricing_signup(request):
         "referral_code": generated_code
     }, status=status.HTTP_201_CREATED)  
     
-User = get_user_model()
-
-# Custom JWT serializer using email
-User = get_user_model()
-
-class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
-    username_field = 'email'  # Use email instead of username
-
-    def validate(self, attrs):
-        email = attrs.get("email")
-        password = attrs.get("password")
-
-        if not email or not password:
-            raise serializers.ValidationError("Email and password are required")
-
-        users = User.objects.filter(email=email)
-        if not users.exists():
-            raise serializers.ValidationError("No user found with this email")
-
-        user = users.first()  # pick the first one if duplicates exist
-
-        if not user.check_password(password):
-            raise serializers.ValidationError("Incorrect password")
-
-        # Use the username to let JWT generate tokens
-        attrs['user'] = user
-        return super().validate({'username': user.username, 'password': password})
-
-class EmailTokenObtainPairView(TokenObtainPairView):
-    serializer_class = EmailTokenObtainPairSerializer
-    
-class EmailTokenObtainPairView(TokenObtainPairView):
-    serializer_class = EmailTokenObtainPairSerializer
-
 # Get policy
 @api_view(["GET"])
 def get_policy(request, title):
@@ -201,10 +167,11 @@ def get_policy(request, title):
 
 # Admin-only update policy
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def update_policy(request):
-    user = request.user
-    if not user.is_staff:  # only admin
+    role = request.data.get("role")   # get role from frontend
+
+    # Only admin can update
+    if role != "admin":
         return Response({"error": "Unauthorized"}, status=403)
 
     title = request.data.get('title')
@@ -213,9 +180,12 @@ def update_policy(request):
     if not title or not content:
         return Response({"error": "Title and content required"}, status=400)
 
-    policy, _ = Policy.objects.get_or_create(title=title)
+    policy, created = Policy.objects.get_or_create(title=title)
     policy.content = content
     policy.save()
 
     serializer = PolicySerializer(policy)
     return Response(serializer.data)
+
+class EmailTokenObtainPairView(TokenObtainPairView):
+    serializer_class = EmailTokenObtainPairSerializer

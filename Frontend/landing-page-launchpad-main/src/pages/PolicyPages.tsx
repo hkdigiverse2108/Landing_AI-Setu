@@ -47,18 +47,28 @@ We use industry-standard encryption and secure cloud infrastructure to protect y
   }, []);
 
   const handleSave = async () => {
-  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
   const res = await fetch("http://127.0.0.1:8000/api/admin/update-policy/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ title: "Privacy Policy", content }),
+    body: JSON.stringify({
+      title: "Privacy Policy",
+      content: content,
+      role: user.role
+    }),
   });
+
   const data = await res.json();
-  if (res.ok) toast.success("Policy updated successfully!");
-  else toast.error(data.error || "Unauthorized");
+
+  if (res.ok) {
+    toast.success("Policy updated successfully!");
+    setEditing(false);
+  } else {
+    toast.error(data.error || "Unauthorized");
+  }
 };
 
   return (

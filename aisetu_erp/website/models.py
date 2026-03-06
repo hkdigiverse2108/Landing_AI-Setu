@@ -11,9 +11,14 @@ class DemoRequest(models.Model):
 
 
 class UserLogin(models.Model):
-    email = models.EmailField()
-    password = models.CharField(max_length=255)
-    login_time = models.DateTimeField(auto_now_add=True)
+    ROLE_CHOICES = (
+        ('admin', 'Admin'),
+        ('user', 'User'),
+    )
+
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=100)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
 
     def __str__(self):
         return self.email
