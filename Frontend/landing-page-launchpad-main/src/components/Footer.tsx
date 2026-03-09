@@ -60,6 +60,7 @@ const Footer = () => (
           <div className="space-y-2 text-sm text-primary-foreground/60">
             <p>ceo@hkdigiverse.com</p>
             <p>501-502, Silver Trade Center,<br />Mota Varachha, Surat,<br />Gujarat, India - 394101</p>
+            <p>+91 12345 67890</p>
           </div>
         </div>
       </div>
