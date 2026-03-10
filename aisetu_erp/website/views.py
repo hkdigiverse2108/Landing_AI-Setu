@@ -235,14 +235,13 @@ def check_referral(request):
         return Response({"error": "Mobile number required"}, status=400)
 
     # Check PricingSignup
-    try:
-        user = PricingSignup.objects.filter(mobile_number=mobile).first()
+    user = PricingSignup.objects.filter(mobile_number=mobile).first()
 
-        if user and user.referral_code:
-            return Response({
-                "referral_code": user.referral_code,
-                "status": "existing_pricing_user"
-            })
+    if user and user.referral_code:
+        return Response({
+            "referral_code": user.referral_code,
+            "status": "existing_pricing_user"
+        })
 
     # Check referral user
     referral_user, created = ReferralUser.objects.get_or_create(
