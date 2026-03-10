@@ -75,7 +75,7 @@ const ContactUsPage = () => {
       icon: Phone,
       title: "Call Us",
       details: "+91 98765 43210",
-      description: "Mon-Fri 9AM-6PM",
+      description: "Mon-Sat 9:30AM-6:30PM",
       color: "from-blue-500 to-cyan-500"
     },
     {
@@ -88,7 +88,7 @@ const ContactUsPage = () => {
     {
       icon: MapPin,
       title: "Visit Us",
-      details: "Delhi NCR, India",
+      details: "Surat, India",
       description: "Schedule a meeting",
       color: "from-green-500 to-emerald-500"
     },

@@ -5,16 +5,18 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import api_view
-from .models import ContactSubmission, PricingSignup, LandingPageContent
+from .models import ContactSubmission, PricingSignup, LandingPageContent, Payment, PricingSignup
 from .serializers import LandingPageContentSerializer,JobApplicationSerializer,ReferralUserSerializer
-
+from .utils import generate_invoice
 import random
 import string
+from bson import ObjectId
+import base64
+import hashlib
+import requests
+import uuid
+from django.conf import settings
+
 
 @csrf_exempt
 def book_demo_api(request):
@@ -97,175 +99,176 @@ def login_view(request):
 
 @api_view(['POST'])
 def pricing_signup(request):
+
     shop_name = request.data.get('shop_name')
     owner_name = request.data.get('owner_name')
     mobile_number = request.data.get('mobile_number')
-    referral_code = request.data.get('referral_code')  # code entered by user
+    referral_code_input = request.data.get('referral_code')
 
-    # Generate 6 digit alphanumeric referral code
-    generated_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    # ❌ Prevent duplicate signup
+    if PricingSignup.objects.filter(mobile_number=mobile_number).exists():
+        return Response({
+            "error": "This mobile number already registered"
+        }, status=400)
 
-    total_referrals = 0
+    generated_code = None
 
-    # Check referral code entered by user
-    if referral_code:
+    # ✔ Check if user came from referral popup
+    referral_user = ReferralUser.objects.filter(
+        mobile_number=mobile_number
+    ).first()
+
+    if referral_user:
+        generated_code = referral_user.referral_code
+    else:
+        generated_code = ''.join(random.choices(
+            string.ascii_uppercase + string.digits, k=6
+        ))
+
+    # ✔ Increase referral count
+    if referral_code_input:
         try:
-            ref_user = PricingSignup.objects.get(referral_code=referral_code)
+            ref_user = PricingSignup.objects.get(referral_code=referral_code_input)
             ref_user.total_referrals += 1
             ref_user.save()
         except PricingSignup.DoesNotExist:
             pass
 
-    # Save new user
-    PricingSignup.objects.create(
+    signup = PricingSignup.objects.create(
         shop_name=shop_name,
         owner_name=owner_name,
         mobile_number=mobile_number,
-        referral_code=generated_code,
-        total_referrals=total_referrals
+        referral_code=generated_code
     )
 
     return Response({
         "message": "Signup successful",
-        "referral_code": generated_code
+        "referral_code": generated_code,
+        "signup_id": str(signup.id)
     }, status=status.HTTP_201_CREATED)  
 
-import base64
-import hashlib
-import json
-import requests
-import uuid
-from django.conf import settings
-from django.http import JsonResponse
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from django.views.decorators.csrf import csrf_exempt
+# @api_view(['POST'])
+# def phonepe_initiate_payment(request):
+#     try:
+#         data = request.data
+#         amount_in_rupees = int(data.get('amount', 0))
+#         user_phone = data.get('phone', '9999999999')
 
-from .models import PricingSignup, PhonePeTransaction
+#         if amount_in_rupees <= 0:
+#             return Response({"error": "Invalid amount"}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-def phonepe_initiate_payment(request):
-    try:
-        data = request.data
-        amount_in_rupees = int(data.get('amount', 0))
-        user_phone = data.get('phone', '9999999999')
+#         amount_in_paise = amount_in_rupees * 100
+#         merchant_transaction_id = str(uuid.uuid4())
 
-        if amount_in_rupees <= 0:
-            return Response({"error": "Invalid amount"}, status=status.HTTP_400_BAD_REQUEST)
+#         # Save pending transaction to DB
+#         transaction = PhonePeTransaction.objects.create(
+#             merchant_transaction_id=merchant_transaction_id,
+#             amount=amount_in_paise,
+#             status='PAYMENT_PENDING',
+#             user_phone=user_phone
+#         )
 
-        amount_in_paise = amount_in_rupees * 100
-        merchant_transaction_id = str(uuid.uuid4())
+#         merchant_id = settings.PHONEPE_MERCHANT_ID
+#         salt_key = settings.PHONEPE_SALT_KEY
+#         salt_index = settings.PHONEPE_SALT_INDEX
+#         env_url = settings.PHONEPE_ENV_URL
 
-        # Save pending transaction to DB
-        transaction = PhonePeTransaction.objects.create(
-            merchant_transaction_id=merchant_transaction_id,
-            amount=amount_in_paise,
-            status='PAYMENT_PENDING',
-            user_phone=user_phone
-        )
+#         # Construct PhonePe Payload
+#         payload = {
+#             "merchantId": merchant_id,
+#             "merchantTransactionId": merchant_transaction_id,
+#             "merchantUserId": f"USER_{user_phone}",
+#             "amount": amount_in_paise,
+#             "redirectUrl": "http://localhost:8080/payment-success",
+#             "redirectMode": "POST",
+#             "callbackUrl": "http://127.0.0.1:8000/api/phonepe/callback/",
+#             "mobileNumber": user_phone,
+#             "paymentInstrument": {
+#                 "type": "PAY_PAGE"
+#             }
+#         }
 
-        merchant_id = settings.PHONEPE_MERCHANT_ID
-        salt_key = settings.PHONEPE_SALT_KEY
-        salt_index = settings.PHONEPE_SALT_INDEX
-        env_url = settings.PHONEPE_ENV_URL
+#         # Encode Payload to Base64
+#         payload_json = json.dumps(payload)
+#         base64_payload = base64.b64encode(payload_json.encode('utf-8')).decode('utf-8')
 
-        # Construct PhonePe Payload
-        payload = {
-            "merchantId": merchant_id,
-            "merchantTransactionId": merchant_transaction_id,
-            "merchantUserId": f"USER_{user_phone}",
-            "amount": amount_in_paise,
-            "redirectUrl": "http://localhost:8080/payment-success",
-            "redirectMode": "POST",
-            "callbackUrl": "http://127.0.0.1:8000/api/phonepe/callback/",
-            "mobileNumber": user_phone,
-            "paymentInstrument": {
-                "type": "PAY_PAGE"
-            }
-        }
+#         # Calculate X-VERIFY Signature
+#         # Formula: SHA256(Base64EncodedPayload + "/pg/v1/pay" + saltKey) + "###" + saltIndex
+#         string_to_hash = base64_payload + "/pg/v1/pay" + salt_key
+#         hash_result = hashlib.sha256(string_to_hash.encode('utf-8')).hexdigest()
+#         x_verify = hash_result + "###" + salt_index
 
-        # Encode Payload to Base64
-        payload_json = json.dumps(payload)
-        base64_payload = base64.b64encode(payload_json.encode('utf-8')).decode('utf-8')
+#         # Make API Call to PhonePe
+#         headers = {
+#             "Content-Type": "application/json",
+#             "X-VERIFY": x_verify
+#         }
+#         phonepe_request_data = {
+#             "request": base64_payload
+#         }
 
-        # Calculate X-VERIFY Signature
-        # Formula: SHA256(Base64EncodedPayload + "/pg/v1/pay" + saltKey) + "###" + saltIndex
-        string_to_hash = base64_payload + "/pg/v1/pay" + salt_key
-        hash_result = hashlib.sha256(string_to_hash.encode('utf-8')).hexdigest()
-        x_verify = hash_result + "###" + salt_index
+#         endpoint = f"{env_url}/pg/v1/pay"
+#         response = requests.post(endpoint, json=phonepe_request_data, headers=headers)
+#         response_data = response.json()
 
-        # Make API Call to PhonePe
-        headers = {
-            "Content-Type": "application/json",
-            "X-VERIFY": x_verify
-        }
-        phonepe_request_data = {
-            "request": base64_payload
-        }
+#         if response_data.get('success'):
+#             payment_url = response_data['data']['instrumentResponse']['redirectInfo']['url']
+#             return Response({"payment_url": payment_url, "merchant_transaction_id": merchant_transaction_id}, status=status.HTTP_200_OK)
+#         else:
+#             return Response({"error": "Failed to initiate payment", "details": response_data}, status=status.HTTP_400_BAD_REQUEST)
 
-        endpoint = f"{env_url}/pg/v1/pay"
-        response = requests.post(endpoint, json=phonepe_request_data, headers=headers)
-        response_data = response.json()
+#     except Exception as e:
+#         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        if response_data.get('success'):
-            payment_url = response_data['data']['instrumentResponse']['redirectInfo']['url']
-            return Response({"payment_url": payment_url, "merchant_transaction_id": merchant_transaction_id}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "Failed to initiate payment", "details": response_data}, status=status.HTTP_400_BAD_REQUEST)
+# @csrf_exempt
+# def phonepe_callback(request):
+#     if request.method == "POST":
+#         try:
+#             # PhonePe sends the data in a base64 encoded format inside `response` key
+#             data = json.loads(request.body)
+#             base64_response = data.get('response')
 
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#             if not base64_response:
+#                 return JsonResponse({"error": "No response data"}, status=400)
 
-@csrf_exempt
-def phonepe_callback(request):
-    if request.method == "POST":
-        try:
-            # PhonePe sends the data in a base64 encoded format inside `response` key
-            data = json.loads(request.body)
-            base64_response = data.get('response')
+#             # Decode to verify S2S callback
+#             decoded_json = base64.b64decode(base64_response).decode('utf-8')
+#             response_data = json.loads(decoded_json)
 
-            if not base64_response:
-                return JsonResponse({"error": "No response data"}, status=400)
+#             merchant_transaction_id = response_data.get('data', {}).get('merchantTransactionId')
+#             phonepe_transaction_id = response_data.get('data', {}).get('transactionId')
+#             payment_state = response_data.get('code')  # e.g., 'PAYMENT_SUCCESS'
 
-            # Decode to verify S2S callback
-            decoded_json = base64.b64decode(base64_response).decode('utf-8')
-            response_data = json.loads(decoded_json)
+#             # Verify signature if needed (Server-to-Server)
+#             # Checksum formula: SHA256(base64_response + salt_key) + "###" + salt_index
+#             received_signature = request.META.get('HTTP_X_VERIFY')
+#             string_to_hash = base64_response + settings.PHONEPE_SALT_KEY
+#             hash_result = hashlib.sha256(string_to_hash.encode('utf-8')).hexdigest()
+#             expected_signature = hash_result + "###" + settings.PHONEPE_SALT_INDEX
 
-            merchant_transaction_id = response_data.get('data', {}).get('merchantTransactionId')
-            phonepe_transaction_id = response_data.get('data', {}).get('transactionId')
-            payment_state = response_data.get('code')  # e.g., 'PAYMENT_SUCCESS'
+#             if received_signature != expected_signature:
+#                 return JsonResponse({"error": "Invalid signature"}, status=400)
 
-            # Verify signature if needed (Server-to-Server)
-            # Checksum formula: SHA256(base64_response + salt_key) + "###" + salt_index
-            received_signature = request.META.get('HTTP_X_VERIFY')
-            string_to_hash = base64_response + settings.PHONEPE_SALT_KEY
-            hash_result = hashlib.sha256(string_to_hash.encode('utf-8')).hexdigest()
-            expected_signature = hash_result + "###" + settings.PHONEPE_SALT_INDEX
-
-            if received_signature != expected_signature:
-                return JsonResponse({"error": "Invalid signature"}, status=400)
-
-            if merchant_transaction_id:
-                try:
-                    transaction = PhonePeTransaction.objects.get(merchant_transaction_id=merchant_transaction_id)
-                    transaction.phonepe_transaction_id = phonepe_transaction_id
+#             if merchant_transaction_id:
+#                 try:
+#                     transaction = PhonePeTransaction.objects.get(merchant_transaction_id=merchant_transaction_id)
+#                     transaction.phonepe_transaction_id = phonepe_transaction_id
                     
-                    if payment_state == 'PAYMENT_SUCCESS':
-                        transaction.status = 'PAYMENT_SUCCESS'
-                    else:
-                        transaction.status = 'PAYMENT_ERROR'
+#                     if payment_state == 'PAYMENT_SUCCESS':
+#                         transaction.status = 'PAYMENT_SUCCESS'
+#                     else:
+#                         transaction.status = 'PAYMENT_ERROR'
                         
-                    transaction.save()
-                except PhonePeTransaction.DoesNotExist:
-                    return JsonResponse({"error": "Transaction not found"}, status=404)
+#                     transaction.save()
+#                 except PhonePeTransaction.DoesNotExist:
+#                     return JsonResponse({"error": "Transaction not found"}, status=404)
 
-            return JsonResponse({"message": "Callback received"}, status=200)
+#             return JsonResponse({"message": "Callback received"}, status=200)
 
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+#         except Exception as e:
+#             return JsonResponse({"error": str(e)}, status=500)
     
-    return JsonResponse({"error": "Invalid method"}, status=405)
+#     return JsonResponse({"error": "Invalid method"}, status=405)
 
 @api_view(['GET'])
 def landing_page_content_api(request):
@@ -339,25 +342,24 @@ def apply_job(request):
 
 @api_view(['POST'])
 def check_referral(request):
+
+    print("Incoming Data:", request.data)
+
     mobile = request.data.get("mobile_number")
 
     if not mobile:
         return Response({"error": "Mobile number required"}, status=400)
 
-    # Check PricingSignup
-    try:
-        user = PricingSignup.objects.get(mobile_number=mobile)
+    # Check if user already signed up
+    signup_user = PricingSignup.objects.filter(mobile_number=mobile).first()
 
-        if user.referral_code:
-            return Response({
-                "referral_code": user.referral_code,
-                "status": "existing_pricing_user"
-            })
+    if signup_user:
+        return Response({
+            "referral_code": signup_user.referral_code,
+            "status": "existing_pricing_user"
+        })
 
-    except PricingSignup.DoesNotExist:
-        pass
-
-    # Check ReferralMobile
+    # Check referral user
     referral_user, created = ReferralUser.objects.get_or_create(
         mobile_number=mobile
     )
@@ -365,4 +367,100 @@ def check_referral(request):
     return Response({
         "referral_code": referral_user.referral_code,
         "status": "new_user" if created else "existing_referral_user"
+    })
+
+MERCHANT_ID = "PGTESTPAYUAT"
+SALT_KEY = "099eb0cd-02cf-4e2a-8aca-3e6c6aff0399"
+SALT_INDEX = "1"
+
+@csrf_exempt
+def initiate_payment(request):
+    print("Request Data:", request.body)
+
+    data = json.loads(request.body)
+
+    print("Parsed data:", data)
+
+    amount = data.get("amount")
+    phone = data.get("phone")
+    signup_id = data.get("signup_id")
+
+    if not amount or not phone or not signup_id:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    transaction_id = str(uuid.uuid4())
+
+    signup = PricingSignup.objects.get(id=ObjectId(signup_id))
+
+    payment = Payment.objects.create(
+        pricing_signup=signup,
+        transaction_id=transaction_id,
+        amount=amount,
+        status="PENDING"
+    )
+    payload = {
+        "merchantId": MERCHANT_ID,
+        "merchantTransactionId": transaction_id,
+        "merchantUserId": phone,
+        "amount": amount * 100,
+        "redirectUrl": "http://localhost:5173/payment-success",
+        "redirectMode": "POST",
+        "callbackUrl": "http://127.0.0.1:8000/payment-callback/",
+        "mobileNumber": phone,
+        "paymentInstrument": {
+            "type": "PAY_PAGE"
+        }
+    }
+
+    payload_json = json.dumps(payload)
+    payload_base64 = base64.b64encode(payload_json.encode()).decode()
+
+    string = payload_base64 + "/pg/v1/pay" + SALT_KEY
+    sha256 = hashlib.sha256(string.encode()).hexdigest()
+
+    checksum = sha256 + "###" + SALT_INDEX
+
+    url = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-VERIFY": checksum
+    }
+
+    response = requests.post(
+        url,
+        json={"request": payload_base64},
+        headers=headers
+    )
+
+    response_data = response.json()
+
+    print("PhonePe Response:", response_data)
+
+    if response_data.get("success"):
+        payment_url = response_data["data"]["instrumentResponse"]["redirectInfo"]["url"]
+        return JsonResponse({"payment_url": payment_url})
+    else:
+        return JsonResponse({
+            "error": "PhonePe API error",
+            "details": response_data
+        }, status=400)
+
+@csrf_exempt
+def payment_callback(request):
+
+    data = json.loads(request.body)
+
+    transaction_id = data.get("transactionId")
+
+    payment = Payment.objects.get(transaction_id=transaction_id)
+
+    payment.status = "SUCCESS"
+    payment.save()
+
+    invoice_path = generate_invoice(payment)
+
+    return JsonResponse({
+        "status": "success",
+        "invoice": invoice_path
     })

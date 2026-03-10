@@ -22,19 +22,26 @@ const ReferralPopup = ({ open, onClose }: { open: boolean; onClose: () => void }
   const submitMobile = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setCopied(false);
 
     try {
+
       const res = await axios.post(
         "http://127.0.0.1:8000/referral-check/",
         { mobile_number: mobile }
       );
 
       setReferralCode(res.data.referral_code);
-      toast.success("Referral code retrieved successfully!");
-    } catch (error) {
+      toast.success("Referral code generated!");
+
+    } catch (error: any) {
+
+      if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Something went wrong");
+      }
+
       console.error(error);
-      toast.error("Something went wrong. Please try again.");
     }
 
     setLoading(false);

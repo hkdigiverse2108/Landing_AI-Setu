@@ -38,19 +38,24 @@ const PricingSignup = () => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to submit form data");
+      const signupData = await response.json();
+
+      if (signupData.error) {
+        alert(signupData.error);
+        return;
       }
 
-      // 2. Initiate PhonePe Payment
-      const paymentResponse = await fetch("http://127.0.0.1:8000/api/phonepe/initiate/", {
+      const signupId = signupData.signup_id;
+
+      const paymentResponse = await fetch("http://127.0.0.1:8000/phonepe/initiate/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: 14160, // 12000 + 18% GST = 14160 Rupees
+          amount: 14160,
           phone: formData.mobileNumber,
+          signup_id: signupId
         }),
       });
 

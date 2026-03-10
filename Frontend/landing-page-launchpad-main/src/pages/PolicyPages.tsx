@@ -24,85 +24,17 @@ const PolicyLayout = ({ title, children }: PolicyPageProps) => (
   </>
 );
 
-export const PrivacyPolicy = () => {
-  const [content, setContent] = useState(
-`AI-Setu ERP by Harikrushn DigiVerse LLP is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your personal data.
-
-Information We Collect
-We collect name, phone number, email, store details, and usage data to provide and improve our services.
-
-How We Use Your Data
-Your data is used to provide ERP services, customer support, and to send relevant updates about our products.
-
-Data Security
-We use industry-standard encryption and secure cloud infrastructure to protect your data.`
-  );
-  const [editing, setEditing] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
-
-  // --- Get user info from localStorage
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    setUserRole(user.role || null);
-  }, []);
-
-  const handleSave = async () => {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-  const res = await fetch("http://127.0.0.1:8000/api/admin/update-policy/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      title: "Privacy Policy",
-      content: content,
-      role: user.role
-    }),
-  });
-
-  const data = await res.json();
-
-  if (res.ok) {
-    toast.success("Policy updated successfully!");
-    setEditing(false);
-  } else {
-    toast.error(data.error || "Unauthorized");
-  }
-};
-
-  return (
-    <PolicyLayout title="Privacy Policy">
-      {editing ? (
-        <div className="space-y-3">
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="w-full p-3 border rounded-md border-border text-black"
-            rows={15}
-          />
-          <div className="flex gap-2">
-            <Button onClick={handleSave} className="bg-gold-gradient text-accent-foreground">
-              Save
-            </Button>
-            <Button onClick={() => setEditing(false)} className="bg-gray-300 text-black">
-              Cancel
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <>
-          <p className="text-muted-foreground mb-6 whitespace-pre-line">{content}</p>
-          {userRole === "admin" && (
-            <Button onClick={() => setEditing(true)} className="bg-blue-600 text-white">
-              Edit Privacy Policy
-            </Button>
-          )}
-        </>
-      )}
-    </PolicyLayout>
-  );
-};
+export const PrivacyPolicy = () => (
+  <PolicyLayout title="Privacy Policy">
+    <p className="text-muted-foreground">AI-Setu ERP by Harikrushn DigiVerse LLP is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your personal data.</p>
+    <h3 className="font-heading font-bold text-foreground mt-6">Information We Collect</h3>
+    <p className="text-muted-foreground">We collect name, phone number, email, store details, and usage data to provide and improve our services.</p>
+    <h3 className="font-heading font-bold text-foreground mt-6">How We Use Your Data</h3>
+    <p className="text-muted-foreground">Your data is used to provide ERP services, customer support, and to send relevant updates about our products.</p>
+    <h3 className="font-heading font-bold text-foreground mt-6">Data Security</h3>
+    <p className="text-muted-foreground">We use industry-standard encryption and secure cloud infrastructure to protect your data.</p>
+  </PolicyLayout>
+);
 
 export const TermsConditions = () => (
   <PolicyLayout title="Terms & Conditions">

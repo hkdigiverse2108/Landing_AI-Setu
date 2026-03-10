@@ -23,24 +23,26 @@ class UserLogin(models.Model):
 class PricingSignup(models.Model):
     shop_name = models.CharField(max_length=200)
     owner_name = models.CharField(max_length=200)
-    mobile_number = models.CharField(max_length=15)
+    mobile_number = models.CharField(max_length=15, unique=True)
+
     referral_code = models.CharField(max_length=50, blank=True, null=True)
     total_referrals = models.IntegerField(default=0)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.shop_name
 
-class PhonePeTransaction(models.Model):
-    merchant_transaction_id = models.CharField(max_length=100, unique=True)
-    phonepe_transaction_id = models.CharField(max_length=100, blank=True, null=True)
-    amount = models.IntegerField()  # Amount in paise
-    status = models.CharField(max_length=50, default='PAYMENT_PENDING')
-    user_phone = models.CharField(max_length=15, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+# class PhonePeTransaction(models.Model):
+#     merchant_transaction_id = models.CharField(max_length=100, unique=True)
+#     phonepe_transaction_id = models.CharField(max_length=100, blank=True, null=True)
+#     amount = models.IntegerField()  # Amount in paise
+#     status = models.CharField(max_length=50, default='PAYMENT_PENDING')
+#     user_phone = models.CharField(max_length=15, blank=True, null=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.merchant_transaction_id} - {self.status}"
+#     def __str__(self):
+#         return f"{self.merchant_transaction_id} - {self.status}"
 
 class LandingPageContent(models.Model):
     # Singleton model for Landing Page Content
@@ -114,19 +116,23 @@ class JobApplication(models.Model):
         return f"{self.first_name} - {self.job_position}"
 
 def generate_referral_code():
-    characters = string.ascii_uppercase + string.digits
-    return ''.join(random.choices(characters, k=6))
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
 
 class ReferralUser(models.Model):
     mobile_number = models.CharField(max_length=15, unique=True)
-    referral_code = models.CharField(max_length=6, unique=True, blank=True)
+    referral_code = models.CharField(max_length=10, default=generate_referral_code)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def save(self, *args, **kwargs):
-        if not self.referral_code:
-            self.referral_code = generate_referral_code()
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.mobile_number
+
+class Payment(models.Model):
+    pricing_signup = models.ForeignKey(PricingSignup, on_delete=models.CASCADE)
+    transaction_id = models.CharField(max_length=200)
+    amount = models.IntegerField()
+    status = models.CharField(max_length=50, default="PENDING")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.transaction_id

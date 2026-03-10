@@ -30,7 +30,7 @@ const Header = () => {
     { label: "Features", href: "/features" },
     { label: "Pricing", href: "/pricing" },
     { label: "Referral Program", href: "/referral" },
-    { label: "Login", href: "/login" },
+    { label: "Login", href: "https://ai-setu.com/auth/signin" },
   ];
 
   return (
