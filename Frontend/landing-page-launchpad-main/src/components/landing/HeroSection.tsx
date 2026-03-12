@@ -22,10 +22,13 @@ const defaultHighlights = [
 
 const HeroSection = () => {
   const [demoOpen, setDemoOpen] = useState(false);
-  const [videoOpen, setVideoOpen] = useState(false); // New state for video modal
+  const [videoOpen, setVideoOpen] = useState(false);
   const [content, setContent] = useState<LandingPageContent | null>(null);
 
-  const demoVideoUrl = "https://www.youtube.com"; // Replace with your video link
+  // ✅ LIVE PREVIEW DATA FROM DJANGO ADMIN
+  const [livePreview, setLivePreview] = useState<any>(null);
+
+  const demoVideoUrl = "https://www.youtube.com";
 
   useEffect(() => {
     const loadContent = async () => {
@@ -37,7 +40,28 @@ const HeroSection = () => {
     loadContent();
   }, []);
 
-  const highlights = content?.hero_highlights
+  useEffect(() => {
+
+  const handler = (event:any) => {
+
+    if(event.data){
+      setContent((prev:any)=>({
+        ...prev,
+        ...event.data
+      }))
+    }
+
+  }
+
+  window.addEventListener("message", handler)
+
+  return () => window.removeEventListener("message", handler)
+
+},[])
+
+  const highlights = livePreview?.hero_highlights
+    ? livePreview.hero_highlights.split(",").map((h: string) => h.trim())
+    : content?.hero_highlights
     ? content.hero_highlights.split(",").map((h) => h.trim())
     : defaultHighlights;
 
@@ -45,7 +69,7 @@ const HeroSection = () => {
     <>
       <section className="bg-hero text-primary-foreground relative overflow-hidden min-h-[90vh] flex items-center">
 
-        {/* Decorative background blobs */}
+        {/* Background blobs */}
         <div
           className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full opacity-10 blur-3xl pointer-events-none"
           style={{
@@ -54,6 +78,7 @@ const HeroSection = () => {
             transform: "translate(-30%, -40%)",
           }}
         />
+
         <div
           className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full opacity-10 blur-3xl pointer-events-none"
           style={{
@@ -65,13 +90,13 @@ const HeroSection = () => {
 
         <div className="container relative z-10 py-16 lg:py-24 grid lg:grid-cols-2 gap-16 items-center">
 
-          {/* Left Column */}
+          {/* LEFT COLUMN */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
-            {/* Eyebrow badge */}
+            {/* Eyebrow */}
             <motion.div
               initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -80,24 +105,30 @@ const HeroSection = () => {
                 glass-card border border-yellow-400/30 text-yellow-300 text-sm font-semibold"
             >
               <Sparkles className="w-4 h-4 animate-pulse" />
-              {content?.hero_eyebrow || "India's Smartest Retail ERP"}
+
+              {livePreview?.hero_eyebrow ||
+                content?.hero_eyebrow ||
+                "India's Smartest Retail ERP"} 
             </motion.div>
 
             <h1 className="text-4xl lg:text-5xl xl:text-[3.8rem] font-extrabold leading-[1.1] mb-6 tracking-tight">
-              {content?.hero_title || "Smart ERP for"}{" "}
+              {livePreview?.hero_title || content?.hero_title || "Smart ERP for"}{" "}
               <span className="text-gradient-animate">
-                {content?.hero_highlighted_title || "Indian Retailers"}
+                {livePreview?.hero_highlighted_title ||
+                  content?.hero_highlighted_title ||
+                  "Indian Retailers"}
               </span>
             </h1>
 
             <p className="text-lg lg:text-xl text-primary-foreground/75 mb-8 max-w-lg leading-relaxed whitespace-pre-line">
-              {content?.hero_subtitle ||
-                "AI-powered billing, inventory & store management — built specifically for Indian retail businesses. Save time, reduce errors, grow faster."}
+              {livePreview?.hero_subtitle ||
+                content?.hero_subtitle ||
+                "AI-powered billing, inventory & store management — built specifically for Indian retail businesses."}
             </p>
 
             {/* Highlight pills */}
             <div className="flex flex-wrap gap-3 mb-10">
-              {highlights.map((h) => (
+              {highlights.map((h: string) => (
                 <span
                   key={h}
                   className="inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full
@@ -111,7 +142,7 @@ const HeroSection = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-wrap gap-4">
-              {/* Book Demo */}
+
               <Button
                 size="lg"
                 onClick={() => setDemoOpen(true)}
@@ -120,11 +151,13 @@ const HeroSection = () => {
                   hover:scale-105 hover:shadow-[0_0_28px_rgba(255,200,50,0.55)]
                   active:scale-95 animate-pulse-glow group"
               >
-                {content?.primary_cta_text || "Book Free Demo"}
+                {livePreview?.primary_cta_text ||
+                  content?.primary_cta_text ||
+                  "Book Free Demo"}
+
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
 
-              {/* Watch Demo Video */}
               <Button
                 size="lg"
                 variant="outline"
@@ -132,12 +165,16 @@ const HeroSection = () => {
                   hover:bg-white/15 hover:border-white/40 transition-all duration-200 px-8 py-6 font-semibold"
                 onClick={() => setVideoOpen(true)}
               >
-                <Play className="mr-2 h-4 w-4 fill-current" />{" "}
-                {content?.secondary_cta_text || "Watch Demo"}
+                <Play className="mr-2 h-4 w-4 fill-current" />
+
+                {livePreview?.secondary_cta_text ||
+                  content?.secondary_cta_text ||
+                  "Watch Demo"}
               </Button>
+
             </div>
 
-            {/* Social proof */}
+            {/* Social Proof */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -146,20 +183,21 @@ const HeroSection = () => {
             >
               ⭐⭐⭐⭐⭐ Trusted by{" "}
               <span className="text-yellow-400 font-semibold">
-                {content?.trusted_retailers_count || "500+"}
+                {livePreview?.trusted_retailers_count ||
+                  content?.trusted_retailers_count ||
+                  "500+"}
               </span>{" "}
               Indian retailers
             </motion.p>
           </motion.div>
 
-          {/* Right Column: Premium Image Showcase */}
+          {/* RIGHT COLUMN */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             className="relative hidden lg:flex items-center justify-center pb-12 pr-4"
           >
-            {/* Glow ring behind image */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div
                 className="w-[420px] h-[420px] rounded-full opacity-25 blur-2xl"
@@ -170,7 +208,6 @@ const HeroSection = () => {
               />
             </div>
 
-            {/* Main image with premium frame */}
             <div className="relative w-full max-w-[480px] animate-float">
               <div
                 className="absolute -inset-[3px] rounded-3xl opacity-60 blur-sm pointer-events-none"
@@ -179,13 +216,13 @@ const HeroSection = () => {
                     "linear-gradient(135deg, hsl(43 96% 56% / 0.6), transparent 60%)",
                 }}
               />
+
               <img
                 src={heroImg}
                 alt="AI-Setu ERP Dashboard"
                 className="relative rounded-2xl shadow-2xl w-full object-cover border border-white/15"
               />
 
-              {/* Floating stat card top-right */}
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -193,18 +230,22 @@ const HeroSection = () => {
                 className="absolute -top-5 -right-5 glass-card rounded-xl px-4 py-2.5 shadow-xl border border-yellow-400/20"
               >
                 <p className="text-xs text-primary-foreground/60 font-medium">
-                  {content?.hero_stats_label || "Today's Sales"}
+                  {livePreview?.hero_stats_label ||
+                    content?.hero_stats_label ||
+                    "Today's Sales"}
                 </p>
+
                 <p className="text-xl font-bold text-yellow-400">
-                  {content?.hero_stats_value || "₹1,24,500"}
+                  {livePreview?.hero_stats_value ||
+                    content?.hero_stats_value ||
+                    "₹1,24,500"}
                 </p>
               </motion.div>
 
-              {/* Floating AI badge bottom-right */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.0, duration: 0.5 }}
+                transition={{ delay: 1 }}
                 className="absolute -bottom-4 -right-4 glass-card rounded-xl px-3 py-2 shadow-xl
                   border border-white/15 flex items-center gap-2"
               >
@@ -214,7 +255,6 @@ const HeroSection = () => {
                 </span>
               </motion.div>
 
-              {/* Floating mini image overlay bottom-left */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -232,26 +272,27 @@ const HeroSection = () => {
           </motion.div>
         </div>
 
-        {/* Bottom fade */}
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
       </section>
 
-      {/* Demo Form Modal */}
+      {/* DEMO FORM MODAL */}
       <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
         <DialogContent className="sm:max-w-sm bg-card border border-border">
           <DialogHeader>
             <DialogTitle className="font-heading font-bold text-2xl text-foreground">
               Book A Free Demo
             </DialogTitle>
+
             <DialogDescription className="text-sm text-muted-foreground">
               Fill the form and our team will contact you shortly.
             </DialogDescription>
           </DialogHeader>
+
           <DemoForm />
         </DialogContent>
       </Dialog>
 
-      {/* Video Modal */}
+      {/* VIDEO MODAL */}
       {videoOpen && (
         <div
           className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
@@ -261,7 +302,6 @@ const HeroSection = () => {
             className="bg-white p-4 rounded-lg w-[800px] max-w-full relative"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
             <button
               className="absolute top-2 right-3 text-black text-xl"
               onClick={() => setVideoOpen(false)}
@@ -269,14 +309,13 @@ const HeroSection = () => {
               ✕
             </button>
 
-            {/* YouTube Video */}
             <iframe
               width="100%"
               height="450"
               src={`${demoVideoUrl}?autoplay=1`}
               title="Demo Video"
               frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="rounded"
             ></iframe>

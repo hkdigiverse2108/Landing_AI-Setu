@@ -44,10 +44,10 @@ const App = () => (
           <Route path="/career" element={<Career />} />
           <Route path="/career/:jobId" element={<JobDetails />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="*" element={<NotFound />} />
           <Route path="/pricing-signup" element={<PricingSignup />} />
           <Route path="/career/apply/:jobId" element={<ApplyJob />} />
           <Route path="/referral" element={<ReferralPage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

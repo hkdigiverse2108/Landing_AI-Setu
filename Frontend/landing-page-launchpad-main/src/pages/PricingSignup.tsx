@@ -20,59 +20,87 @@ const PricingSignup = () => {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const getCSRFToken = () => {
+    const cookies = document.cookie.split(";");
 
-    try {
-      // 1. Submit signup form data
-      const response = await fetch("http://127.0.0.1:8000/pricing-signup/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          shop_name: formData.shopName,
-          owner_name: formData.ownerName,
-          mobile_number: formData.mobileNumber,
-          referral_code: formData.referralCode,
-        }),
-      });
+    for (let cookie of cookies) {
+      const [name, value] = cookie.trim().split("=");
 
-      const signupData = await response.json();
-
-      if (signupData.error) {
-        alert(signupData.error);
-        return;
+      if (name === "csrftoken") {
+        return value;
       }
+    }
 
-      const signupId = signupData.signup_id;
+    return "";
+  };
+  const [loading, setLoading] = useState(false);
 
-      const paymentResponse = await fetch("http://127.0.0.1:8000/phonepe/initiate/", {
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    // 1️⃣ Submit signup form
+    const response = await fetch("http://127.0.0.1:8000/pricing-signup/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        shop_name: formData.shopName,
+        owner_name: formData.ownerName,
+        mobile_number: formData.mobileNumber,
+        referral_code: formData.referralCode,
+      }),
+    });
+
+    const signupData = await response.json();
+
+    if (!response.ok || signupData.error) {
+      alert(signupData.error || "Signup failed");
+      return;
+    }
+
+    const signupId = signupData.signup_id;
+
+    const paymentResponse = await fetch(
+      "http://127.0.0.1:8000/phonepe/initiate/",
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),
         },
+        credentials: "include",
         body: JSON.stringify({
           amount: 14160,
           phone: formData.mobileNumber,
-          signup_id: signupId
+          signup_id: signupId,
         }),
-      });
-
-      const paymentData = await paymentResponse.json();
-
-      if (paymentResponse.ok && paymentData.payment_url) {
-        // Redirect the user to PhonePe gateway
-        window.location.href = paymentData.payment_url;
-      } else {
-        throw new Error(paymentData.error || "Failed to initiate payment");
       }
+    );
 
-    } catch (error: any) {
-      console.error(error);
-      alert(error.message || "An error occurred during submission");
+    const paymentData = await paymentResponse.json();
+
+    console.log("Payment Response:", paymentData);
+
+    if (!paymentResponse.ok) {
+      alert(paymentData.error || "Payment initiation failed");
+      return;
     }
-  };
+
+    // Redirect to PhonePe
+    if (paymentData.payment_url) {
+      window.location.href = paymentData.payment_url;
+    } else {
+      alert("Payment URL not received from server");
+    }
+
+  } catch (error: any) {
+    console.error("Error:", error);
+    alert("Something went wrong while processing payment");
+  }
+};
   return (
     <div className="min-h-screen pt-24 pb-16 bg-background">
       <div className="container max-w-6xl mx-auto px-4">

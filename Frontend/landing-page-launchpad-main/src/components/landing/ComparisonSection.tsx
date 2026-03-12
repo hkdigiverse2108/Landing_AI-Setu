@@ -1,15 +1,7 @@
-import { motion,Variants } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Check, X } from "lucide-react";
-
-const rows = [
-  { feature: "AI Photo Billing", us: true, them: false },
-  { feature: "Simple Interface", us: true, them: false },
-  { feature: "One Package Pricing", us: true, them: false },
-  { feature: "Retail-Focused", us: true, them: false },
-  { feature: "GST Ready", us: true, them: true },
-  { feature: "Cloud-Based", us: true, them: false },
-  { feature: "24/7 Support", us: true, them: false },
-];
+import { useEffect, useState } from "react";
+import { fetchLandingPageContent } from "@/services/api";
 
 const rowVariants: Variants = {
   hidden: { opacity: 0, x: -40 },
@@ -25,8 +17,101 @@ const rowVariants: Variants = {
 };
 
 const ComparisonSection = () => {
+
+  const [content, setContent] = useState<any>(null);
+  const [livePreview, setLivePreview] = useState<any>(null);
+
+  // Fetch DB content
+  useEffect(() => {
+    const loadContent = async () => {
+      const data = await fetchLandingPageContent();
+      if (data) {
+        setContent(data);
+      }
+    };
+    loadContent();
+  }, []);
+
+  // Live preview listener
+  useEffect(() => {
+
+    const handler = (event:any) => {
+      if(event.data){
+        setLivePreview((prev:any)=>({
+          ...prev,
+          ...event.data
+        }))
+      }
+    }
+
+    window.addEventListener("message", handler)
+
+    return () => window.removeEventListener("message", handler)
+
+  },[])
+
+  const rows = [
+    {
+      feature:
+        livePreview?.comparison_feature1 ||
+        content?.comparison_feature1 ||
+        "AI Photo Billing",
+      us: true,
+      them: false,
+    },
+    {
+      feature:
+        livePreview?.comparison_feature2 ||
+        content?.comparison_feature2 ||
+        "Simple Interface",
+      us: true,
+      them: false,
+    },
+    {
+      feature:
+        livePreview?.comparison_feature3 ||
+        content?.comparison_feature3 ||
+        "One Package Pricing",
+      us: true,
+      them: false,
+    },
+    {
+      feature:
+        livePreview?.comparison_feature4 ||
+        content?.comparison_feature4 ||
+        "Retail-Focused",
+      us: true,
+      them: false,
+    },
+    {
+      feature:
+        livePreview?.comparison_feature5 ||
+        content?.comparison_feature5 ||
+        "GST Ready",
+      us: true,
+      them: true,
+    },
+    {
+      feature:
+        livePreview?.comparison_feature6 ||
+        content?.comparison_feature6 ||
+        "Cloud Access",
+      us: true,
+      them: false,
+    },
+    {
+      feature:
+        livePreview?.comparison_feature7 ||
+        content?.comparison_feature7 ||
+        "24/7 Support",
+      us: true,
+      them: false,
+    },
+  ];
+
   return (
     <section className="py-20 lg:py-28 bg-gradient-to-b from-slate-50 to-slate-100">
+
       <div className="container mx-auto px-6">
 
         {/* TITLE */}
@@ -37,14 +122,19 @@ const ComparisonSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
+
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
-            AI-Setu ERP vs Traditional Software
+            {livePreview?.comparison_title ||
+             content?.comparison_title ||
+             "AI-Setu ERP vs Traditional Software"}
           </h2>
 
           <p className="mt-4 text-gray-500 max-w-xl mx-auto">
-            Discover why retailers are switching to AI-Setu ERP for faster,
-            smarter store management.
+            {livePreview?.comparison_subtitle ||
+             content?.comparison_subtitle ||
+             "Discover why retailers are switching to AI-Setu ERP for faster, smarter store management."}
           </p>
+
         </motion.div>
 
         {/* COMPARISON CARD */}
@@ -60,7 +150,6 @@ const ComparisonSection = () => {
           {/* HEADER */}
           <div className="relative grid grid-cols-3 text-center font-semibold text-sm p-5 bg-gradient-to-r from-[#1F2E4D] to-[#2D3748] text-white">
 
-            {/* shimmer animation */}
             <motion.div
               animate={{ x: ["-100%", "100%"] }}
               transition={{
@@ -71,9 +160,24 @@ const ComparisonSection = () => {
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
             />
 
-            <span className="text-left relative z-10">Feature</span>
-            <span className="text-yellow-400 relative z-10">AI-Setu ERP</span>
-            <span className="opacity-80 relative z-10">Traditional</span>
+            <span className="text-left relative z-10">
+              {livePreview?.comparison_title1 ||
+               content?.comparison_title1 ||
+               "Feature"}
+            </span>
+
+            <span className="text-yellow-400 relative z-10">
+              {livePreview?.comparison_title2 ||
+               content?.comparison_title2 ||
+               "AI-Setu ERP"}
+            </span>
+
+            <span className="opacity-80 relative z-10">
+              {livePreview?.comparison_title3 ||
+               content?.comparison_title3 ||
+               "Traditional"}
+            </span>
+
           </div>
 
           {/* ROWS */}
@@ -92,12 +196,10 @@ const ComparisonSection = () => {
               className="grid grid-cols-3 items-center px-6 py-4 border-b last:border-none text-sm transition-all"
             >
 
-              {/* FEATURE */}
               <span className="text-left font-medium text-gray-800">
                 {row.feature}
               </span>
 
-              {/* AI SETU */}
               <span className="flex justify-center">
                 {row.us ? (
                   <motion.div
@@ -123,7 +225,6 @@ const ComparisonSection = () => {
                 )}
               </span>
 
-              {/* TRADITIONAL */}
               <span className="flex justify-center">
                 {row.them ? (
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
@@ -144,10 +245,14 @@ const ComparisonSection = () => {
                   </motion.div>
                 )}
               </span>
+
             </motion.div>
           ))}
+
         </motion.div>
+
       </div>
+
     </section>
   );
 };

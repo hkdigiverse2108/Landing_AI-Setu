@@ -1,24 +1,57 @@
+import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
-import { CreditCard, Package, Heart, Calculator, UserCheck, BarChart3 } from "lucide-react";
+import {
+  CreditCard,
+  Package,
+  Heart,
+  Calculator,
+  UserCheck,
+  BarChart3,
+} from "lucide-react";
+import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
-const modules = [
-  { icon: CreditCard, title: "POS Billing", desc: "Lightning-fast billing with GST compliance", color: "from-blue-600 to-blue-800" },
-  { icon: Package, title: "Inventory Management", desc: "Real-time stock tracking & alerts", color: "from-blue-700 to-blue-900" },
-  { icon: Heart, title: "CRM & Loyalty", desc: "Customer management & loyalty programs", color: "from-blue-800 to-indigo-900" },
-  { icon: Calculator, title: "Accounting", desc: "Automated bookkeeping & reports", color: "from-indigo-700 to-indigo-900" },
-  { icon: UserCheck, title: "Employee Management", desc: "Attendance, payroll & performance", color: "from-blue-800 to-purple-900" },
-  { icon: BarChart3, title: "Reports & Dashboard", desc: "Insights at a glance with smart analytics", color: "from-purple-700 to-purple-900" },
+const defaultModules = [
+  {
+    icon: CreditCard,
+    title: "POS Billing",
+    desc: "Lightning-fast billing with GST compliance",
+    color: "from-blue-600 to-blue-800",
+  },
+  {
+    icon: Package,
+    title: "Inventory Management",
+    desc: "Real-time stock tracking & alerts",
+    color: "from-blue-700 to-blue-900",
+  },
+  {
+    icon: Heart,
+    title: "CRM & Loyalty",
+    desc: "Customer management & loyalty programs",
+    color: "from-blue-800 to-indigo-900",
+  },
+  {
+    icon: Calculator,
+    title: "Accounting",
+    desc: "Automated bookkeeping & reports",
+    color: "from-indigo-700 to-indigo-900",
+  },
+  {
+    icon: UserCheck,
+    title: "Employee Management",
+    desc: "Attendance, payroll & performance",
+    color: "from-blue-800 to-purple-900",
+  },
+  {
+    icon: BarChart3,
+    title: "Reports & Dashboard",
+    desc: "Insights at a glance with smart analytics",
+    color: "from-purple-700 to-purple-900",
+  },
 ];
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
-    },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.3 } },
 };
 
 const cardVariants: Variants = {
@@ -27,190 +60,163 @@ const cardVariants: Variants = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 12,
-    },
+    transition: { type: "spring", stiffness: 100, damping: 12 },
   },
 };
 
-const iconVariants: Variants = {
-  idle: { y: 0 },
-  hover: { y: -5, scale: 1.1 },
-  float: {
-    y: [-2, 2, -2],
-    transition: {
-      duration: 3,
-      repeat: Infinity,
-      ease: "easeInOut",
+const SolutionSection = () => {
+  const [content, setContent] = useState<LandingPageContent | null>(null);
+  const [livePreview, setLivePreview] = useState<any>(null);
+
+  // Fetch DB data
+  useEffect(() => {
+    const loadContent = async () => {
+      const data = await fetchLandingPageContent();
+      if (data) setContent(data);
+    };
+    loadContent();
+  }, []);
+
+  // Live preview from admin
+  useEffect(() => {
+    const handler = (event: any) => {
+      if (event.data) {
+        setLivePreview((prev: any) => ({
+          ...prev,
+          ...event.data,
+        }));
+      }
+    };
+
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
+
+  const modules = [
+    {
+      icon: CreditCard,
+      title:
+        livePreview?.solution1_title ||
+        content?.solution1_title ||
+        defaultModules[0].title,
+      desc:
+        livePreview?.solution1_desc ||
+        content?.solution1_desc ||
+        defaultModules[0].desc,
+      color: defaultModules[0].color,
     },
-  },
-};
+    {
+      icon: Package,
+      title:
+        livePreview?.solution2_title ||
+        content?.solution2_title ||
+        defaultModules[1].title,
+      desc:
+        livePreview?.solution2_desc ||
+        content?.solution2_desc ||
+        defaultModules[1].desc,
+      color: defaultModules[1].color,
+    },
+    {
+      icon: Heart,
+      title:
+        livePreview?.solution3_title ||
+        content?.solution3_title ||
+        defaultModules[2].title,
+      desc:
+        livePreview?.solution3_desc ||
+        content?.solution3_desc ||
+        defaultModules[2].desc,
+      color: defaultModules[2].color,
+    },
+    {
+      icon: Calculator,
+      title:
+        livePreview?.solution4_title ||
+        content?.solution4_title ||
+        defaultModules[3].title,
+      desc:
+        livePreview?.solution4_desc ||
+        content?.solution4_desc ||
+        defaultModules[3].desc,
+      color: defaultModules[3].color,
+    },
+    {
+      icon: UserCheck,
+      title:
+        livePreview?.solution5_title ||
+        content?.solution5_title ||
+        defaultModules[4].title,
+      desc:
+        livePreview?.solution5_desc ||
+        content?.solution5_desc ||
+        defaultModules[4].desc,
+      color: defaultModules[4].color,
+    },
+    {
+      icon: BarChart3,
+      title:
+        livePreview?.solution6_title ||
+        content?.solution6_title ||
+        defaultModules[5].title,
+      desc:
+        livePreview?.solution6_desc ||
+        content?.solution6_desc ||
+        defaultModules[5].desc,
+      color: defaultModules[5].color,
+    },
+  ];
 
-const SolutionSection = () => (
-  <section className="relative py-16 lg:py-24 bg-gradient-to-br from-background via-secondary to-muted overflow-hidden">
-    {/* Animated Background Elements */}
-    <div className="absolute inset-0">
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          rotate: [0, 180, 360],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-        className="absolute top-20 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl"
-      />
-      <motion.div
-        animate={{
-          scale: [1.2, 1, 1.2],
-          rotate: [360, 180, 0],
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-        className="absolute bottom-20 right-10 w-80 h-80 bg-accent/5 rounded-full blur-3xl"
-      />
-      <motion.div
-        animate={{
-          x: [-100, 100, -100],
-          y: [-50, 50, -50],
-        }}
-        transition={{
-          duration: 15,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute top-1/2 left-1/2 w-32 h-32 bg-primary/3 rounded-full blur-2xl"
-      />
-    </div>
+  return (
+    <section className="relative py-16 lg:py-24 bg-gradient-to-br from-background via-secondary to-muted overflow-hidden">
+      <div className="container relative z-10">
 
-    <div className="container relative z-10">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="text-center mb-16"
-      >
-        <motion.span
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="inline-block px-4 py-2 bg-accent text-accent-foreground font-semibold text-sm uppercase tracking-wider rounded-full shadow-lg mb-4"
-        >
-          The Solution
-        </motion.span>
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-          className="text-4xl lg:text-5xl font-bold text-foreground leading-tight"
-        >
-          One Smart ERP For Complete Store Management
-        </motion.h2>
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <span className="inline-block px-4 py-2 bg-accent text-accent-foreground font-semibold text-sm uppercase tracking-wider rounded-full shadow-lg mb-4">
+            {livePreview?.solution_section_label ||
+              content?.solution_section_label ||
+              "The Solution"}
+          </span>
+
+          <h2 className="text-4xl lg:text-5xl font-bold text-foreground leading-tight">
+            {livePreview?.solution_section_title ||
+              content?.solution_section_title ||
+              "One Smart ERP For Complete Store Management"}
+          </h2>
+        </div>
+
+        {/* Cards */}
         <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true }}
-          transition={{ delay: 0.8, duration: 0.6 }}
-          className="w-24 h-1 bg-accent mx-auto mt-6 rounded-full"
-        />
-      </motion.div>
-
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
-        className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
-      >
-        {modules.map((m, i) => (
-          <motion.div
-            key={m.title}
-            variants={cardVariants}
-            whileHover={{
-              scale: 1.05,
-              rotateY: 5,
-              rotateX: 5,
-              transition: { type: "spring", stiffness: 300, damping: 20 },
-            }}
-            className="group relative bg-card/80 backdrop-blur-lg rounded-2xl p-8 shadow-card border border-border hover:shadow-card-hover transition-all duration-500 overflow-hidden"
-          >
-            {/* Card Background Gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${m.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`} />
-
-            {/* Floating Particles Effect */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <motion.div
-                animate={{
-                  x: [0, 20, 0],
-                  y: [0, -15, 0],
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="absolute top-4 right-4 w-2 h-2 bg-accent rounded-full"
-              />
-              <motion.div
-                animate={{
-                  x: [0, -15, 0],
-                  y: [0, 20, 0],
-                  scale: [1, 0.8, 1],
-                }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 0.5,
-                }}
-                className="absolute bottom-4 left-4 w-1.5 h-1.5 bg-primary rounded-full"
-              />
-            </div>
-
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          {modules.map((m, i) => (
             <motion.div
-              variants={iconVariants}
-              initial="idle"
-              whileHover="hover"
-              animate="float"
-              className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${m.color} flex items-center justify-center mb-6 shadow-lg group-hover:shadow-xl transition-all duration-300`}
+              key={i}
+              variants={cardVariants}
+              className="group bg-card rounded-2xl p-8 shadow-card border border-border hover:shadow-card-hover transition-all"
             >
-              <m.icon className="h-8 w-8 text-white group-hover:scale-110 transition-transform duration-300" />
+              <div
+                className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${m.color} flex items-center justify-center mb-6`}
+              >
+                <m.icon className="h-8 w-8 text-white" />
+              </div>
+
+              <h3 className="font-bold text-xl text-foreground mb-3">
+                {m.title}
+              </h3>
+
+              <p className="text-muted-foreground">{m.desc}</p>
             </motion.div>
-
-            <motion.h3
-              initial={{ opacity: 0.8 }}
-              whileHover={{ opacity: 1, scale: 1.02 }}
-              className="font-bold text-xl text-foreground mb-3 group-hover:text-primary transition-colors duration-300"
-            >
-              {m.title}
-            </motion.h3>
-
-            <motion.p
-              initial={{ opacity: 0.7 }}
-              whileHover={{ opacity: 1 }}
-              className="text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors duration-300"
-            >
-              {m.desc}
-            </motion.p>
-
-            {/* Hover Glow Effect */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/0 via-accent/0 to-primary/0 group-hover:from-primary/5 group-hover:via-accent/5 group-hover:to-primary/5 transition-all duration-500 pointer-events-none" />
-          </motion.div>
-        ))}
-      </motion.div>
-    </div>
-  </section>
-);
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+};
 
 export default SolutionSection;

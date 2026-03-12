@@ -9,6 +9,10 @@ urlpatterns = [
     path("api/contact/submit/", submit_contact, name="submit_contact"),
     path("apply-job/", apply_job, name="apply_job"),
     path('referral-check/', check_referral, name='check_referral'),
+    # path("initiate-payment/", initiate_payment),
+    path("payment-callback/", payment_callback),
     path("phonepe/initiate/", initiate_payment, name="initiate_payment"),
-    path("payment-callback/", payment_callback, name="payment_callback"),
+    # path("admin/login/", views.admin_login),
+    # path("admin/demos/", views.admin_demo_list),
+    # path("admin/delete-demo/<int:id>/", views.delete_demo),
 ]

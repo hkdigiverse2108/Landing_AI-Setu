@@ -15,6 +15,7 @@ import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 const FinalCTA = () => {
   const [demoOpen, setDemoOpen] = useState(false);
   const [content, setContent] = useState<LandingPageContent | null>(null);
+  const [livePreview, setLivePreview] = useState<any>(null);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -24,14 +25,33 @@ const FinalCTA = () => {
     loadContent();
   }, []);
 
+  // Live preview listener
+  useEffect(() => {
+    const handler = (event: any) => {
+      if (event.data) {
+        setLivePreview((prev: any) => ({
+          ...prev,
+          ...event.data,
+        }));
+      }
+    };
+
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
   return (
     <>
       <section className="py-20 lg:py-32 bg-hero text-primary-foreground relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full blur-3xl opacity-10"
-            style={{ background: "radial-gradient(ellipse, hsl(43 96% 56%), transparent 70%)" }}
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+            w-[800px] h-[400px] rounded-full blur-3xl opacity-10"
+            style={{
+              background:
+                "radial-gradient(ellipse, hsl(43 96% 56%), transparent 70%)",
+            }}
           />
         </div>
 
@@ -43,18 +63,26 @@ const FinalCTA = () => {
             transition={{ duration: 0.6 }}
           >
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6
-              glass-card border border-yellow-400/30 text-yellow-300 text-sm font-semibold">
+            <div
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6
+              glass-card border border-yellow-400/30 text-yellow-300 text-sm font-semibold"
+            >
               <Sparkles className="w-4 h-4" />
-              Join {content?.trusted_retailers_count || "500+"} Happy Retailers
+              {livePreview?.cta_badge ||
+                content?.cta_badge ||
+                "Join 500+ Happy Retailers"}
             </div>
 
             <h2 className="text-3xl lg:text-5xl font-extrabold mb-5 leading-tight tracking-tight">
-              Ready to Upgrade{" "}
-              <span className="text-gradient-animate">Your Store?</span>
+              {livePreview?.cta_title ||
+                content?.cta_title ||
+                "Ready to Upgrade Your Store?"}
             </h2>
+
             <p className="text-primary-foreground/65 mb-10 text-lg max-w-xl mx-auto leading-relaxed">
-              Join hundreds of Indian retailers who've switched to smarter billing with AI-Setu ERP. Get started in minutes, no tech skills needed.
+              {livePreview?.cta_description ||
+                content?.cta_description ||
+                "Join hundreds of Indian retailers who've switched to smarter billing with AI-Setu ERP. Get started in minutes, no tech skills needed."}
             </p>
 
             <Button
@@ -65,12 +93,17 @@ const FinalCTA = () => {
                 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,200,50,0.5)]
                 active:scale-95 animate-pulse-glow group"
             >
-              {content?.primary_cta_text || "Book Your Free Demo"}
+              {livePreview?.cta_button_text ||
+                content?.cta_button_text ||
+                "Book Free Demo"}
+
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
 
             <p className="mt-6 text-sm text-primary-foreground/40">
-              No credit card required · Free setup · Cancel anytime
+              {livePreview?.cta_small_text ||
+                content?.cta_small_text ||
+                "No credit card required · Free setup · Cancel anytime"}
             </p>
           </motion.div>
         </div>

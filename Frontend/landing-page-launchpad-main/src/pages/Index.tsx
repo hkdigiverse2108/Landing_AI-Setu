@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/landing/HeroSection";
@@ -15,28 +17,49 @@ import FAQSection from "@/components/landing/FAQSection";
 import FinalCTA from "@/components/landing/FinalCTA";
 import DemoPopup from "@/components/DemoPopup";
 
-const Index = () => (
-  <>
-    <DemoPopup />
-    <Header />
-    <main>
-      <HeroSection />
-      <TrustStrip />
-      <ProblemSection />
-      <SolutionSection />
-      <USPSection />
-      <HowItWorks />
-      <WhoIsThisFor />
-      <PricingSection />
-      <ReferralSection />
-      <ComparisonSection />
-      <TestimonialsSection />
-      <FAQSection />
-      <FinalCTA />
-    </main>
-    <Footer />
-    
-  </>
-);
+const Index = () => {
+
+  const [previewData, setPreviewData] = useState<any>(null);
+
+  useEffect(() => {
+
+    const handler = (event:any) => {
+      setPreviewData(event.data);
+    };
+
+    window.addEventListener("message", handler);
+
+    return () => window.removeEventListener("message", handler);
+
+  }, []);
+
+  return (
+    <>
+      <DemoPopup />
+      <Header />
+
+      <main>
+
+        {/* Pass preview data ONLY to hero */}
+        <HeroSection />
+        <TrustStrip />
+        <ProblemSection />
+        <SolutionSection />
+        <USPSection />
+        <HowItWorks />
+        <WhoIsThisFor />
+        <PricingSection />
+        <ReferralSection />
+        <ComparisonSection />
+        <TestimonialsSection />
+        <FAQSection />
+        <FinalCTA />
+
+      </main>
+
+      <Footer />
+    </>
+  );
+};
 
 export default Index;

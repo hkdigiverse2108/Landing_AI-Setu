@@ -5,15 +5,16 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import ContactSubmission, PricingSignup, LandingPageContent, Payment, PricingSignup
+from .models import ContactSubmission, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser
 from .serializers import LandingPageContentSerializer,JobApplicationSerializer,ReferralUserSerializer
-from .utils import generate_invoice
+from .utils import generate_invoice, admin_required
 import random
 import string
 from bson import ObjectId
 import base64
 import hashlib
 import requests
+import jwt
 import uuid
 from django.conf import settings
 
@@ -71,31 +72,46 @@ def user_login(request):
     return JsonResponse({"error": "Only POST allowed"}, status=405)
 
 FIXED_PASSWORD = "1234"
-
-@csrf_exempt  # Disable CSRF for API requests from React
+@csrf_exempt
 def login_view(request):
+
     if request.method == "POST":
+
+        data = json.loads(request.body)
+
+        email = data.get("email")
+        password = data.get("password")
+
+        if not email or not password:
+            return JsonResponse({"error": "All fields required"}, status=400)
+
+        # ✅ Check Admin
         try:
-            # Handle JSON data from React
-            data = json.loads(request.body)
-            email = data.get('email')
-            password = data.get('password')
+            admin = AdminUser.objects.get(email=email)
 
-            if not email or not password:
-                return JsonResponse({"error": "All fields are required"}, status=400)
+            if admin.password == password:
+                return JsonResponse({
+                    "message": "Admin login successful",
+                    "role": "admin"
+                })
 
-            # Check fixed password
-            if password == FIXED_PASSWORD:
-                UserLogin.objects.create(email=email, password=password)
-                return JsonResponse({"message": "Login successful!"}, status=200)
-            else:
-                return JsonResponse({"error": "Incorrect password. Please contact admin."}, status=401)
+        except AdminUser.DoesNotExist:
+            pass
 
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+        # ✅ Check User
+        if password == FIXED_PASSWORD:
+
+            UserLogin.objects.create(email=email, password=password)
+
+            return JsonResponse({
+                "message": "User login successful",
+                "role": "user"
+            })
+
+        return JsonResponse({"error": "Invalid credentials"}, status=401)
 
     return JsonResponse({"error": "Only POST allowed"}, status=405)
-
+        
 
 @api_view(['POST'])
 def pricing_signup(request):
@@ -253,98 +269,126 @@ def check_referral(request):
         "status": "new_user" if created else "existing_referral_user"
     })
 
-MERCHANT_ID = "PGTESTPAYUAT"
-SALT_KEY = "099eb0cd-02cf-4e2a-8aca-3e6c6aff0399"
-SALT_INDEX = "1"
+# MERCHANT_ID = "PGTESTPAYUAT"
+# SALT_KEY = "099eb0cd-02cf-4e2a-8aca-3e6c6aff0399"
+# SALT_INDEX = "1"
 
 @csrf_exempt
+@api_view(["POST"])
 def initiate_payment(request):
-    print("Request Data:", request.body)
+    try:
+        signup_id = request.data.get("signup_id")
+        amount = request.data.get("amount")
 
-    data = json.loads(request.body)
+        if not signup_id:
+            return Response({"error": "signup_id is missing"}, status=400)
+        if not amount:
+            return Response({"error": "amount is missing"}, status=400)
 
-    print("Parsed data:", data)
+        signup = PricingSignup.objects.filter(id=signup_id).first()
+        if not signup:
+            # This is a common cause for 400/404 errors
+            return Response({"error": f"Signup with ID {signup_id} not found"}, status=400)
 
-    amount = data.get("amount")
-    phone = data.get("phone")
-    signup_id = data.get("signup_id")
+        # -------------------------------
+        # Validate Merchant Keys
+        # -------------------------------
+        if not getattr(settings, "PHONEPE_MERCHANT_ID", None) or \
+           not getattr(settings, "PHONEPE_SALT_KEY", None) or \
+           not getattr(settings, "PHONEPE_SALT_INDEX", None) or \
+           not getattr(settings, "PHONEPE_BASE_URL", None):
+            return Response({"error": "PhonePe merchant keys not configured"}, status=500)
 
-    if not amount or not phone or not signup_id:
-        return JsonResponse({"error": "Missing required fields"}, status=400)
+        print("Merchant ID:", settings.PHONEPE_MERCHANT_ID)
+        print("Salt Index:", settings.PHONEPE_SALT_INDEX)
 
-    transaction_id = str(uuid.uuid4())
+        payment = Payment.objects.create(
+            pricing_signup=signup,
+            amount=amount
+        )
 
-    signup = PricingSignup.objects.get(id=ObjectId(signup_id))
-
-    payment = Payment.objects.create(
-        pricing_signup=signup,
-        transaction_id=transaction_id,
-        amount=amount,
-        status="PENDING"
-    )
-    payload = {
-        "merchantId": MERCHANT_ID,
-        "merchantTransactionId": transaction_id,
-        "merchantUserId": phone,
-        "amount": amount * 100,
-        "redirectUrl": "http://localhost:5173/payment-success",
-        "redirectMode": "POST",
-        "callbackUrl": "http://127.0.0.1:8000/payment-callback/",
-        "mobileNumber": phone,
-        "paymentInstrument": {
-            "type": "PAY_PAGE"
+        # -------------------------------
+        # Prepare Payload
+        # -------------------------------
+        payload = {
+            "merchantId": settings.PHONEPE_MERCHANT_ID,
+            "merchantTransactionId": str(payment.transaction_id),
+            "merchantUserId": str(signup.id),
+            "amount": int(amount) * 100,  # in paise
+            "redirectUrl": "http://localhost:8000/payment-success/",
+            "redirectMode": "POST",
+            "callbackUrl": "http://localhost:8000/payment-callback/",
+            "paymentInstrument": {
+                "type": "PAY_PAGE"
+            }
         }
-    }
+        print("Payment Payload:", payload)
+        payload_base64 = base64.b64encode(json.dumps(payload).encode()).decode()
 
-    payload_json = json.dumps(payload)
-    payload_base64 = base64.b64encode(payload_json.encode()).decode()
+        # -------------------------------
+        # Generate Checksum
+        # -------------------------------
+        string = payload_base64 + "/pg/v1/pay" + settings.PHONEPE_SALT_KEY
+        sha256 = hashlib.sha256(string.encode()).hexdigest()
+        checksum = sha256 + "###" + str(settings.PHONEPE_SALT_INDEX)
 
-    string = payload_base64 + "/pg/v1/pay" + SALT_KEY
-    sha256 = hashlib.sha256(string.encode()).hexdigest()
+        headers = {
+            "Content-Type": "application/json",
+            "X-VERIFY": checksum
+        }
 
-    checksum = sha256 + "###" + SALT_INDEX
+        url = settings.PHONEPE_BASE_URL + "/pg/v1/pay"
 
-    url = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
+        print("Request URL:", url)
+        # -------------------------------
+        # Make Request to PhonePe
+        # -------------------------------
+        phonepe_response = requests.post(
+            url,
+            json={"request": payload_base64},
+            headers=headers,
+            timeout=15
+        )
 
-    headers = {
-        "Content-Type": "application/json",
-        "X-VERIFY": checksum
-    }
+        phonepe_data = phonepe_response.json()
+        print("PhonePe Response:", phonepe_data)
 
-    response = requests.post(
-        url,
-        json={"request": payload_base64},
-        headers=headers
-    )
+        if not phonepe_data.get("success"):
+            return Response({
+                "error": phonepe_data.get("message", "Payment failed")
+            }, status=400)
 
-    response_data = response.json()
+        payment_url = phonepe_data["data"]["instrumentResponse"]["redirectInfo"]["url"]
 
-    print("PhonePe Response:", response_data)
+        print("Payment URL:", payment_url)
 
-    if response_data.get("success"):
-        payment_url = response_data["data"]["instrumentResponse"]["redirectInfo"]["url"]
-        return JsonResponse({"payment_url": payment_url})
-    else:
-        return JsonResponse({
-            "error": "PhonePe API error",
-            "details": response_data
-        }, status=400)
+        return Response({
+            "payment_url": payment_url
+        })
 
+    except Exception as e:
+        print("Payment Error:", str(e))
+        return Response({
+            "error": "Internal server error",
+            "details": str(e)
+        }, status=500)
+
+# -------------------------------
+# PhonePe Callback
+# -------------------------------
 @csrf_exempt
 def payment_callback(request):
+    try:
+        data = json.loads(request.body)
+        transaction_id = data["data"]["merchantTransactionId"]
 
-    data = json.loads(request.body)
+        payment = Payment.objects.get(transaction_id=transaction_id)
+        payment.status = "SUCCESS"
+        payment.save()
 
-    transaction_id = data.get("transactionId")
+        return JsonResponse({"message": "Payment verified"})
 
-    payment = Payment.objects.get(transaction_id=transaction_id)
-
-    payment.status = "SUCCESS"
-    payment.save()
-
-    invoice_path = generate_invoice(payment)
-
-    return JsonResponse({
-        "status": "success",
-        "invoice": invoice_path
-    })
+    except Payment.DoesNotExist:
+        return JsonResponse({"error": "Payment not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": "Internal server error", "details": str(e)}, status=500)

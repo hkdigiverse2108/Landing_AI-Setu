@@ -34,8 +34,6 @@ const Login = () => {
       const data = await res.json();
 
       if (res.ok) {
-        // Save token
-        localStorage.setItem("token", data.token);
 
         // Save user info
         localStorage.setItem(
@@ -48,8 +46,13 @@ const Login = () => {
 
         toast.success("Login successful!");
 
-        // redirect
-        navigate("/");
+        // ✅ Redirect based on role
+        if (data.role === "admin") {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/");
+        }
+
       } else {
         toast.error(data.error || "Invalid credentials");
       }
