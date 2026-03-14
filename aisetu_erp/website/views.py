@@ -5,8 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import APIView, api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import FAQ, ComparisonFeature, ContactPageContent, ContactSubmission, Feature, HowItWorksStep, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
-from .serializers import AboutPageSerializer, CareerPageSerializer, ComparisonFeatureSerializer, FAQSerializer, LandingPageContentSerializer,JobApplicationSerializer,ReferralUserSerializer, ContactPageContentSerializer
+from .models import FAQ, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, HowItWorksStep, LoginLink, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
+from .serializers import AboutPageSerializer, CareerPageSerializer, ComparisonFeatureSerializer, FAQSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer,ReferralUserSerializer, ContactPageContentSerializer
 from .utils import generate_invoice, admin_required
 import random
 import string
@@ -591,4 +591,37 @@ def get_faqs(request):
             "question": f.question,
             "answer": f.answer,
         })
+    return Response(data)
+
+@api_view(["GET"])
+def get_login_link(request):
+
+    login = LoginLink.objects.filter(is_active=True).first()
+
+    if not login:
+        return Response({})
+
+    data = {
+        "id": str(login.id),   # convert ObjectId to string
+        "label": login.label,
+        "url": login.url,
+        "is_active": login.is_active,
+    }
+
+    return Response(data)
+
+@api_view(["GET"])
+def get_demo_video(request):
+
+    video = DemoVideo.objects.filter(is_active=True).first()
+
+    if not video:
+        return Response({})
+
+    data = {
+        "id": str(video.id),
+        "title": video.title,
+        "video_url": video.video_url
+    }
+
     return Response(data)

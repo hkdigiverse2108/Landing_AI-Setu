@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser
+from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, LoginLink, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser
 
 
 class DemoRequestSerializer(serializers.ModelSerializer):
@@ -72,3 +72,8 @@ class FAQSerializer(serializers.ModelSerializer):
     class Meta:
         model = FAQ
         fields = '__all__'
+
+class LoginLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LoginLink
+        fields = "__all__"

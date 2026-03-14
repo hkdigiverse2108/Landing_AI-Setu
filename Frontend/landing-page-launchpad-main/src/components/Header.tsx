@@ -17,6 +17,9 @@ const Header = () => {
   const [demoOpen, setDemoOpen] = useState(false);
   const [content, setContent] = useState<LandingPageContent | null>(null);
 
+  // ✅ Login link state
+  const [loginLink, setLoginLink] = useState<any>(null);
+
   useEffect(() => {
     const loadContent = async () => {
       const data = await fetchLandingPageContent();
@@ -25,14 +28,30 @@ const Header = () => {
     loadContent();
   }, []);
 
+  // ✅ Fetch login link from Django API
+  useEffect(() => {
+    const loadLoginLink = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/login-link/");
+        const data = await res.json();
+        setLoginLink(data);
+      } catch (err) {
+        console.error("Failed to fetch login link:", err);
+      }
+    };
+
+    loadLoginLink();
+  }, []);
 
   const navItems = [
     { label: "Features", href: "/features" },
     { label: "Pricing", href: "/pricing-signup" },
     { label: "Referral Program", href: "/referral" },
-    { label: "Login", href: "https://ai-setu.com/auth/signin" },
-    // { label: "Login", href: "/login" },
 
+    // ✅ LOGIN LINK NOW COMES FROM ADMIN
+    { label: loginLink?.label || "Login", href: loginLink?.url || "#" },
+
+    // { label: "Login", href: "/login" },
   ];
 
   return (
@@ -43,7 +62,9 @@ const Header = () => {
             <div className="w-9 h-9 rounded-lg bg-hero flex items-center justify-center">
               <span className="text-accent font-heading font-bold text-lg">A</span>
             </div>
-            <span className="font-heading font-bold text-xl text-foreground">AI-Setu ERP</span>
+            <span className="font-heading font-bold text-xl text-foreground">
+              AI-Setu ERP
+            </span>
           </Link>
 
           {/* Desktop Nav */}
@@ -69,7 +90,10 @@ const Header = () => {
           </nav>
 
           {/* Mobile Toggle */}
-          <button className="md:hidden text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
+          <button
+            className="md:hidden text-foreground"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -88,7 +112,10 @@ const Header = () => {
               </Link>
             ))}
             <Button
-              onClick={() => { setDemoOpen(true); setMobileOpen(false); }}
+              onClick={() => {
+                setDemoOpen(true);
+                setMobileOpen(false);
+              }}
               className="w-full bg-gold-gradient text-accent-foreground font-semibold
                 transition-all duration-200
                 hover:scale-105 hover:shadow-[0_0_20px_rgba(255,200,50,0.5)]
@@ -119,4 +146,3 @@ const Header = () => {
 };
 
 export default Header;
-

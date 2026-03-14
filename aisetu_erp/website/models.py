@@ -337,71 +337,6 @@ class LandingPageContent(models.Model):
         
     )
 
-    faq1_question = models.CharField(
-        max_length=255,
-        default="Is it GST Ready?",
-        
-    )
-
-    faq1_answer = models.TextField(
-        default="Yes! AI-Setu ERP is fully GST compliant with automatic tax calculations, GSTIN integration, and GST-ready invoicing.",
-        
-    )
-
-    faq2_question = models.CharField(
-        max_length=255,
-        default="Is Internet Required?",
-        
-    )
-
-    faq2_answer = models.TextField(
-        default="AI-Setu ERP is cloud-based for the best experience. However, basic billing can work offline and syncs when internet is available.",
-        
-    )
-
-    faq3_question = models.CharField(
-        max_length=255,
-        default="Do I need Barcode?",
-        
-    )
-
-    faq3_answer = models.TextField(
-        default="No! Our AI-powered photo detection lets you bill products without barcodes — just snap a photo and the product is identified automatically.",
-        
-    )
-
-    faq4_question = models.CharField(
-        max_length=255,
-        default="Is Support Provided?",
-        
-    )
-
-    faq4_answer = models.TextField(
-        default="Yes, we provide 24/7 customer support via phone, email, and chat. Our team is always ready to help.",
-        
-    )
-
-    faq5_question = models.CharField(
-        max_length=255,
-        default="Is Training Included?",
-        
-    )
-
-    faq5_answer = models.TextField(
-        default="Absolutely. We provide complete setup and training for you and your staff as part of the package.",
-        
-    )
-
-    faq6_question = models.CharField(
-        max_length=255,
-        default="What About Renewal?",
-        
-    )
-
-    faq6_answer = models.TextField(
-        default="Annual renewal is available at a competitive rate. Refer others and earn ₹1,000 per renewal incentive!",
-        
-    )
 
     # CTA SECTION
 
@@ -700,6 +635,7 @@ class CareerPageContent(models.Model):
     # ==========================
     # HERO SECTION
     # ==========================
+  
     hero_title = models.CharField(
         max_length=255, 
         default="Build Your Career With AI-Setu 🚀"
@@ -1129,3 +1065,24 @@ class FAQ(models.Model):
 
     def __str__(self):
         return self.question
+    
+class LoginLink(models.Model):
+    label = models.CharField(max_length=100, default="Login")
+    url = models.URLField()
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.label
+
+class DemoVideo(models.Model):
+
+    title = models.CharField(max_length=200, default="Watch Demo")
+
+    video_url = models.URLField()
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title

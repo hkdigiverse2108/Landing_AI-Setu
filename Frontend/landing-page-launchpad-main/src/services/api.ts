@@ -64,16 +64,6 @@ export interface LandingPageContent {
     all_reviews_title: string;
     all_reviews_desc: string;
     faq_title: string;
-    faq1_question: string;
-    faq1_answer: string;
-    faq2_question: string;
-    faq2_answer: string;
-    faq3_question: string;
-    faq3_answer: string;
-    faq4_question: string;
-    faq4_answer: string;
-    faq5_question: string;
-    faq5_answer: string;
     cta_badge: string;
     cta_title: string;
     cta_description: string;
@@ -237,3 +227,28 @@ export const fetchContactPageContent = async (): Promise<ContactPageContent | nu
     return null;
   }
 };
+
+
+export interface DemoVideo {
+  id: string
+  title: string
+  video_url: string
+}
+
+export const fetchDemoVideo = async (): Promise<DemoVideo | null> => {
+
+  try {
+
+    const res = await fetch("http://127.0.0.1:8000/api/demo-video/")
+
+    const data = await res.json()
+
+    return data
+
+  } catch (error) {
+
+    console.error("Failed to load demo video", error)
+
+    return null
+  }
+}
