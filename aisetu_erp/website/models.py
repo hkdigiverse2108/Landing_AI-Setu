@@ -79,26 +79,6 @@ class LandingPageContent(models.Model):
         default="Retailers Face These Daily Problems"
     )
 
-    # Problem Card 1
-    problem1_title = models.CharField(max_length=200, default="Slow Billing")
-    problem1_description = models.TextField(default="Manual billing wastes time & creates long queues")
-
-    # Problem Card 2
-    problem2_title = models.CharField(max_length=200, default="No Stock Control")
-    problem2_description = models.TextField(default="Inventory mismatches lead to lost sales")
-
-    # Problem Card 3
-    problem3_title = models.CharField(max_length=200, default="Unknown Profit Margin")
-    problem3_description = models.TextField(default="Can't track real profit per product")
-
-    # Problem Card 4
-    problem4_title = models.CharField(max_length=200, default="Staff Dependency")
-    problem4_description = models.TextField(default="Business stops when key staff is absent")
-
-    # Problem Card 5
-    problem5_title = models.CharField(max_length=200, default="Barcode Not Available")
-    problem5_description = models.TextField(default="Most Indian products lack barcodes")
-
     feature_title = models.CharField(
         max_length=100,
         default="Features",
@@ -123,77 +103,6 @@ class LandingPageContent(models.Model):
         
     )
 
-    # Card 1
-    solution1_title = models.CharField(
-        max_length=200,
-        default="POS Billing",
-        
-    )
-
-    solution1_desc = models.TextField(
-        default="Lightning-fast billing with GST compliance",
-        
-    )
-
-    # Card 2
-    solution2_title = models.CharField(
-        max_length=200,
-        default="Inventory Management",
-        
-    )
-
-    solution2_desc = models.TextField(
-        default="Real-time stock tracking & alerts",
-        
-    )
-
-    # Card 3
-    solution3_title = models.CharField(
-        max_length=200,
-        default="CRM & Loyalty",
-        
-    )
-
-    solution3_desc = models.TextField(
-        default="Customer management & loyalty programs",
-        
-    )
-
-    # Card 4
-    solution4_title = models.CharField(
-        max_length=200,
-        default="Accounting",
-        
-    )
-
-    solution4_desc = models.TextField(
-        default="Automated bookkeeping & reports",
-        
-    )
-
-    # Card 5
-    solution5_title = models.CharField(
-        max_length=200,
-        default="Employee Management",
-        
-    )
-
-    solution5_desc = models.TextField(
-        default="Attendance, payroll & performance",
-        
-    )
-
-    # Card 6
-    solution6_title = models.CharField(
-        max_length=200,
-        default="Reports & Dashboard",
-        
-    )
-
-    solution6_desc = models.TextField(
-        default="Insights at a glance with smart analytics",
-        
-    )
 
     usp_badge_text = models.CharField(
         max_length=200,
@@ -212,18 +121,6 @@ class LandingPageContent(models.Model):
         
     )
 
-    # Feature 1
-    usp_feature1_title = models.CharField(max_length=200, default="Photo-Based Product Detection")
-    usp_feature1_desc = models.TextField(default="Instant product recognition from images")
-
-    # Feature 2
-    usp_feature2_title = models.CharField(max_length=200, default="AI Auto Identify Product")
-    usp_feature2_desc = models.TextField(default="Smart AI-powered identification system")
-
-    # Feature 3
-    usp_feature3_title = models.CharField(max_length=200, default="Add Directly to Bill")
-    usp_feature3_desc = models.TextField(default="Seamless one-click billing integration")
-
     # ===============================
     # HOW IT WORKS SECTION
     # ===============================
@@ -240,42 +137,6 @@ class LandingPageContent(models.Model):
         
     )
 
-    howitworks_step1_title = models.CharField(
-        max_length=200,
-        default="Book Demo",
-        
-    )
-
-    howitworks_step1_desc = models.CharField(
-        max_length=255,
-        default="Schedule a quick demo with our team",
-        
-    )
-
-    howitworks_step2_title = models.CharField(
-        max_length=200,
-        default="Setup & Training",
-        
-    )
-
-    howitworks_step2_desc = models.CharField(
-        max_length=255,
-        default="We configure everything for you",
-        
-    )
-
-    howitworks_step3_title = models.CharField(
-        max_length=200,
-        default="Start Smart Billing",
-        
-    )
-
-    howitworks_step3_desc = models.CharField(
-        max_length=255,
-        default="Go live and start selling instantly",
-        
-    )
-
 
     # ===============================
     # WHO IS THIS FOR
@@ -289,36 +150,6 @@ class LandingPageContent(models.Model):
     who_title = models.CharField(
         max_length=255,
         default="Who Is This For?",
-        
-    )
-
-    who1 = models.CharField(
-        max_length=200,
-        default="Kirana Stores",
-        
-    )
-
-    who2 = models.CharField(
-        max_length=200,
-        default="General Stores",
-        
-    )
-
-    who3 = models.CharField(
-        max_length=200,
-        default="Medical Shops",
-        
-    )
-
-    who4 = models.CharField(
-        max_length=200,
-        default="Hardware Stores",
-        
-    )
-
-    who5 = models.CharField(
-        max_length=200,
-        default="Margin Business Retailers",
         
     )
 
@@ -450,53 +281,6 @@ class LandingPageContent(models.Model):
         
     )
 
-    referral_item1_value = models.CharField(
-        max_length=100,
-        default="₹2,000",
-        
-    )
-
-    referral_item1_text = models.CharField(
-        max_length=200,
-        default="Per Successful Sale",
-        
-    )
-
-    referral_item2_value = models.CharField(
-        max_length=100,
-        default="₹1,000",
-        
-    )
-
-    referral_item2_text = models.CharField(
-        max_length=200,
-        default="Renewal Incentive",
-        
-    )
-
-    referral_item3_value = models.CharField(
-        max_length=100,
-        default="₹1,000",
-        
-    )
-
-    referral_item3_text = models.CharField(
-        max_length=200,
-        default="For Every Successful Referral Purchase",
-        
-    )
-
-    referral_item4_value = models.CharField(
-        max_length=100,
-        default="Unlimited",
-        
-    )
-
-    referral_item4_text = models.CharField(
-        max_length=200,
-        default="Referral Income",
-        
-    )
 
     join_referral = models.CharField(max_length=50, default="Join Referral Program")
 
@@ -544,56 +328,13 @@ class LandingPageContent(models.Model):
         
     )
 
-    testimonial1_name = models.CharField(
-        max_length=200,
-        default="Rajesh Patel",
-        
-    )
+    review_button = models.CharField(max_length=50, default="View All Reviews")
 
-    testimonial1_role = models.CharField(
-        max_length=200,
-        default="Kirana Store,Surat",
-        
-    )
-
-    testimonial1_text = models.TextField(
-        default="AI-Setu ERP transformed my billing process. The AI photo detection is a game changer — no more barcode hassles!",
-        
-    )
-
-    testimonial2_name = models.CharField(
-        max_length=200,
-        default="Priya Sharma",
-        
-    )
-
-    testimonial2_role = models.CharField(
-        max_length=200,
-        default="Medical Shop,Surat",
-        
-    )
-
-    testimonial2_text = models.TextField(
-        default="Simple to use and my staff learned it in one day. GST billing is now automatic. Highly recommended!",
-        
-    )
-
-    testimonial3_name = models.CharField(
-        max_length=200,
-        default="Amit Desai",
-        
-    )
-
-    testimonial3_role = models.CharField(
-        max_length=200,
-        default="General Store, Vadodara",
-        
-    )
-
-    testimonial3_text = models.TextField(
-        default="Finally an ERP that understands Indian retail. The pricing is fair and support team is always available.",
-        
-    )
+    all_reviews_title = models.CharField(
+        max_length=255,default="Customer Reviews")
+    
+    all_reviews_desc = models.CharField(
+        max_length=255,default="See what retailers across India are saying about AI-Setu ERP.")
 
     # ----------------------------
     # FAQ Section
@@ -1242,3 +983,133 @@ class ContactPageContent(models.Model):
     def __str__(self):
         return "Contact Page Content"
     
+class Problem(models.Model):
+
+    title = models.CharField(max_length=200)
+
+    description = models.TextField()
+
+    icon = models.CharField(
+        max_length=50,
+        help_text="lucide-react icon name (clock, package, trending-down, users, barcode)"
+    )
+
+    order = models.PositiveIntegerField(default=0)
+
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ["order"]
+
+class Feature(models.Model):
+
+    title = models.CharField(max_length=200)
+
+    description = models.TextField()
+
+    icon = models.CharField(
+        max_length=50,
+        help_text="lucide-react icon name (zap, bar-chart, shield, etc)"
+    )
+
+    order = models.PositiveIntegerField(default=0)
+
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ["order"]
+
+class USPFeature(models.Model):
+
+    title = models.CharField(max_length=200)
+
+    description = models.TextField()
+
+    icon = models.CharField(max_length=50)
+
+    order = models.PositiveIntegerField(default=0)
+
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ["order"]
+
+class HowItWorksStep(models.Model):
+
+    title = models.CharField(max_length=200)
+
+    description = models.TextField()
+
+    icon = models.CharField(max_length=50)
+
+    step_number = models.PositiveIntegerField(default=1)
+
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Step {self.step_number} - {self.title}"
+
+    class Meta:
+        ordering = ["step_number"]
+
+class StoreType(models.Model):
+
+    title = models.CharField(max_length=200)
+
+    icon = models.CharField(max_length=50)
+
+    order = models.PositiveIntegerField(default=0)
+
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ["order"]
+
+class ReferralPerk(models.Model):
+
+    value = models.CharField(max_length=100)
+    text = models.CharField(max_length=255)
+
+    icon = models.CharField(max_length=50)
+
+    order = models.PositiveIntegerField(default=0)
+
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return "Referral Perk"
+
+    class Meta:
+        ordering = ["order"]
+
+class Testimonial(models.Model):
+
+    name = models.CharField(max_length=200)
+    role = models.CharField(max_length=200)
+    review = models.TextField()
+
+    image = models.ImageField(upload_to="testimonials/", blank=True, null=True)
+
+    rating = models.IntegerField(default=5)
+
+    is_active = models.BooleanField(default=True)
+
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.name

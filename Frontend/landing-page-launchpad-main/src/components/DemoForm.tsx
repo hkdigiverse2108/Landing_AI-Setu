@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const storeTypes = ["Kirana Store", "General Store", "Medical Store", "Hardware Store", "Margin Business"];
 
 const DemoForm = ({ variant = "default" }: { variant?: "default" | "compact" }) => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", mobile: "", storeType: "", city: "" });
   const [loading, setLoading] = useState(false);
 
@@ -19,27 +21,24 @@ const DemoForm = ({ variant = "default" }: { variant?: "default" | "compact" }) 
 
     try {
       setLoading(true);
-
       const response = await fetch("http://127.0.0.1:8000/book-demo/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
-          contact_number: form.mobile,   
-          store_type: form.storeType,    
+          contact_number: form.mobile,
+          store_type: form.storeType,
           city: form.city,
         }),
       });
 
-      const data = await response.json();
+      // const data = await response.json();
 
       if (response.ok) {
-        toast.success("Demo request submitted! We'll contact you soon.");
-        setForm({ name: "", mobile: "", storeType: "", city: "" });
-        window.location.href = "/";
+        // Use navigate instead of window.location.href
+        navigate("/demo-success"); 
       } else {
+        const data = await response.json();
         toast.error(data.error || "Something went wrong");
       }
     } catch (error) {

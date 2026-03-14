@@ -2,84 +2,46 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Camera, Cpu, Zap, Sparkles } from "lucide-react";
 import aiScan from "@/assets/ai-scan.jpg";
-import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
+
+const iconMap: any = {
+  camera: Camera,
+  cpu: Cpu,
+  zap: Zap,
+};
 
 const USPSection = () => {
 
-  const [content, setContent] = useState<LandingPageContent | null>(null);
-  const [livePreview, setLivePreview] = useState<any>(null);
+  const [features, setFeatures] = useState<any[]>([]);
 
   useEffect(() => {
-    const loadContent = async () => {
-      const data = await fetchLandingPageContent();
-      if (data) setContent(data);
-    };
 
-    loadContent();
-  }, []);
+    const loadFeatures = async () => {
 
-  // LIVE PREVIEW
-  useEffect(() => {
-    const handler = (event: any) => {
+      try {
 
-      if (event.data) {
-        setLivePreview((prev: any) => ({
-          ...prev,
-          ...event.data
-        }));
+        const res = await fetch("http://127.0.0.1:8000/api/usp-features/");
+
+        const data = await res.json();
+
+        setFeatures(data);
+
+      } catch (err) {
+
+        console.error("USP feature load error", err);
+
       }
 
     };
 
-    window.addEventListener("message", handler);
-
-    return () => window.removeEventListener("message", handler);
+    loadFeatures();
 
   }, []);
-
-  const features = [
-    {
-      icon: Camera,
-      title:
-        livePreview?.usp_feature1_title ||
-        content?.usp_feature1_title ||
-        "Photo-Based Product Detection",
-
-      desc:
-        livePreview?.usp_feature1_desc ||
-        content?.usp_feature1_desc ||
-        "Instant product recognition from images",
-    },
-    {
-      icon: Cpu,
-      title:
-        livePreview?.usp_feature2_title ||
-        content?.usp_feature2_title ||
-        "AI Auto Identify Product",
-
-      desc:
-        livePreview?.usp_feature2_desc ||
-        content?.usp_feature2_desc ||
-        "Smart AI-powered identification system",
-    },
-    {
-      icon: Zap,
-      title:
-        livePreview?.usp_feature3_title ||
-        content?.usp_feature3_title ||
-        "Add Directly to Bill",
-
-      desc:
-        livePreview?.usp_feature3_desc ||
-        content?.usp_feature3_desc ||
-        "Seamless one-click billing integration",
-    },
-  ];
 
   return (
     <section className="relative py-16 lg:py-32 bg-gradient-to-br from-[#1F2E4D] via-[#2D3748] to-[#1A202C] text-primary-foreground overflow-hidden">
 
       <div className="container relative z-10">
+
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
           {/* LEFT CONTENT */}
@@ -89,28 +51,19 @@ const USPSection = () => {
             transition={{ duration: 0.7 }}
           >
 
-            {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full border border-accent/30 mb-6">
               <Sparkles className="h-4 w-4 text-accent" />
               <span className="text-accent font-semibold text-sm uppercase tracking-wider">
-                {livePreview?.usp_badge_text ||
-                  content?.usp_badge_text ||
-                  "AI-Powered (Beta Feature)"}
+                AI-Powered (Beta Feature)
               </span>
             </div>
 
-            {/* Title */}
             <h2 className="text-4xl lg:text-5xl font-bold leading-tight mb-6">
-              {livePreview?.usp_title ||
-                content?.usp_title ||
-                "No Barcode? No Problem."}
+              No Barcode? No Problem.
             </h2>
 
-            {/* Description */}
             <p className="text-lg text-gray-300 mb-10 max-w-md leading-relaxed">
-              {livePreview?.usp_description ||
-                content?.usp_description ||
-                "Our AI technology identifies products from photos — just snap and bill. No barcode scanner needed. Lightning-fast, accurate, and incredibly simple."}
+              Our AI technology identifies products from photos — just snap and bill.
             </p>
 
             {/* FEATURES */}
@@ -118,16 +71,18 @@ const USPSection = () => {
 
               {features.map((f, i) => {
 
-                const Icon = f.icon;
+                const Icon = iconMap[f.icon];
 
                 return (
+
                   <motion.div
                     key={i}
                     whileHover={{ scale: 1.04, x: 8 }}
                     className="group flex items-start gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-lg border border-white/10 hover:border-accent/30 hover:bg-accent/5 transition-all duration-300"
                   >
+
                     <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-accent to-yellow-500 flex items-center justify-center">
-                      <Icon className="h-6 w-6 text-[#1F2E4D]" />
+                      {Icon && <Icon className="h-6 w-6 text-[#1F2E4D]" />}
                     </div>
 
                     <div>
@@ -136,10 +91,12 @@ const USPSection = () => {
                       </h3>
 
                       <p className="text-sm text-gray-400">
-                        {f.desc}
+                        {f.description}
                       </p>
                     </div>
+
                   </motion.div>
+
                 );
 
               })}
@@ -169,7 +126,9 @@ const USPSection = () => {
           </motion.div>
 
         </div>
+
       </div>
+
     </section>
   );
 };

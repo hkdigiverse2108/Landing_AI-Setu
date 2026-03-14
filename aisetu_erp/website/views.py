@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import APIView, api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import ContactPageContent, ContactSubmission, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent
+from .models import ContactPageContent, ContactSubmission, Feature, HowItWorksStep, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
 from .serializers import AboutPageSerializer, CareerPageSerializer, LandingPageContentSerializer,JobApplicationSerializer,ReferralUserSerializer, ContactPageContentSerializer
 from .utils import generate_invoice, admin_required
 import random
@@ -430,3 +430,140 @@ def contactus_page_content(request):
     
     serializer = ContactPageContentSerializer(content)
     return Response(serializer.data)
+
+
+@api_view(["GET"])
+def get_problems(request):
+
+    problems = Problem.objects.filter(is_active=True)
+
+    data = []
+
+    for p in problems:
+        data.append({
+            "title": p.title,
+            "description": p.description,
+            "icon": p.icon
+        })
+
+    return Response(data)
+
+
+@api_view(["GET"])
+def get_features(request):
+
+    features = Feature.objects.filter(is_active=True)
+
+    data = []
+
+    for f in features:
+        data.append({
+            "title": f.title,
+            "description": f.description,
+            "icon": f.icon
+        })
+
+    return Response(data)
+
+@api_view(["GET"])
+def get_usp_features(request):
+
+    features = USPFeature.objects.filter(is_active=True)
+
+    data = []
+
+    for f in features:
+        data.append({
+            "title": f.title,
+            "description": f.description,
+            "icon": f.icon
+        })
+
+    return Response(data)
+
+@api_view(["GET"])
+def get_how_it_works_steps(request):
+
+    steps = HowItWorksStep.objects.filter(is_active=True)
+
+    data = []
+
+    for s in steps:
+
+        data.append({
+            "title": s.title,
+            "description": s.description,
+            "icon": s.icon,
+            "step_number": s.step_number
+        })
+
+    return Response(data)
+
+@api_view(["GET"])
+def get_store_types(request):
+
+    stores = StoreType.objects.filter(is_active=True)
+
+    data = []
+
+    for s in stores:
+        data.append({
+            "title": s.title,
+            "icon": s.icon
+        })
+
+    return Response(data)
+
+@api_view(["GET"])
+def get_referral_perks(request):
+
+    perks = ReferralPerk.objects.filter(is_active=True)
+
+    data = []
+
+    for p in perks:
+        data.append({
+            "value": p.value,
+            "text": p.text,
+            "icon": p.icon
+        })
+
+    return Response(data)
+
+@api_view(["GET"])
+def get_home_testimonials(request):
+
+    testimonials = Testimonial.objects.filter(is_active=True)[:3]
+
+    data = []
+
+    for t in testimonials:
+
+        data.append({
+            "name": t.name,
+            "role": t.role,
+            "text": t.review,
+            "rating": t.rating,
+            "image": request.build_absolute_uri(t.image.url) if t.image else None
+        })
+
+    return Response(data)
+
+@api_view(["GET"])
+def get_all_testimonials(request):
+
+    testimonials = Testimonial.objects.filter(is_active=True)
+
+    data = []
+
+    for t in testimonials:
+
+        data.append({
+            "name": t.name,
+            "role": t.role,
+            "text": t.review,
+            "rating": t.rating,
+            "image": request.build_absolute_uri(t.image.url) if t.image else None
+        })
+
+    return Response(data)

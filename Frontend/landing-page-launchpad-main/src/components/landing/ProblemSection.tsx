@@ -3,64 +3,74 @@ import { motion } from "framer-motion";
 import { Clock, Package, TrendingDown, Users, Barcode } from "lucide-react";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
-const defaultProblems = [
-  {
-    icon: Clock,
-    title: "Slow Billing",
-    desc: "Manual billing wastes time & creates long queues",
-  },
-  {
-    icon: Package,
-    title: "No Stock Control",
-    desc: "Inventory mismatches lead to lost sales",
-  },
-  {
-    icon: TrendingDown,
-    title: "Unknown Profit Margin",
-    desc: "Can't track real profit per product",
-  },
-  {
-    icon: Users,
-    title: "Staff Dependency",
-    desc: "Business stops when key staff is absent",
-  },
-  {
-    icon: Barcode,
-    title: "Barcode Not Available",
-    desc: "Most Indian products lack barcodes",
-  },
-];
+const iconMap: any = {
+  clock: Clock,
+  package: Package,
+  "trending-down": TrendingDown,
+  users: Users,
+  barcode: Barcode,
+};
 
 const ProblemSection = () => {
 
   const [content, setContent] = useState<LandingPageContent | null>(null);
-
   const [livePreview, setLivePreview] = useState<any>(null);
+  const [problems, setProblems] = useState<any[]>([]);
 
-  // Fetch data from Django API
+  // Load section heading from LandingPageContent
   useEffect(() => {
 
     const loadContent = async () => {
+
       const data = await fetchLandingPageContent();
+
       if (data) {
         setContent(data);
       }
+
     };
 
     loadContent();
 
   }, []);
 
-  // Listen for admin live preview
+  // Fetch problems from Django API
+  useEffect(() => {
+
+    const loadProblems = async () => {
+
+      try {
+
+        const res = await fetch("http://127.0.0.1:8000/api/problems/");
+
+        const data = await res.json();
+
+        setProblems(data);
+
+      } catch (error) {
+
+        console.error("Failed to load problems:", error);
+
+      }
+
+    };
+
+    loadProblems();
+
+  }, []);
+
+  // Live preview support
   useEffect(() => {
 
     const handler = (event: any) => {
 
       if (event.data) {
+
         setLivePreview((prev: any) => ({
           ...prev,
           ...event.data,
         }));
+
       }
 
     };
@@ -70,64 +80,6 @@ const ProblemSection = () => {
     return () => window.removeEventListener("message", handler);
 
   }, []);
-
-  const problems = [
-    {
-      icon: Clock,
-      title:
-        livePreview?.problem1_title ||
-        content?.problem1_title ||
-        defaultProblems[0].title,
-      desc:
-        livePreview?.problem1_description ||
-        content?.problem1_description ||
-        defaultProblems[0].desc,
-    },
-    {
-      icon: Package,
-      title:
-        livePreview?.problem2_title ||
-        content?.problem2_title ||
-        defaultProblems[1].title,
-      desc:
-        livePreview?.problem2_description ||
-        content?.problem2_description ||
-        defaultProblems[1].desc,
-    },
-    {
-      icon: TrendingDown,
-      title:
-        livePreview?.problem3_title ||
-        content?.problem3_title ||
-        defaultProblems[2].title,
-      desc:
-        livePreview?.problem3_description ||
-        content?.problem3_description ||
-        defaultProblems[2].desc,
-    },
-    {
-      icon: Users,
-      title:
-        livePreview?.problem4_title ||
-        content?.problem4_title ||
-        defaultProblems[3].title,
-      desc:
-        livePreview?.problem4_description ||
-        content?.problem4_description ||
-        defaultProblems[3].desc,
-    },
-    {
-      icon: Barcode,
-      title:
-        livePreview?.problem5_title ||
-        content?.problem5_title ||
-        defaultProblems[4].title,
-      desc:
-        livePreview?.problem5_description ||
-        content?.problem5_description ||
-        defaultProblems[4].desc,
-    },
-  ];
 
   return (
     <section className="py-16 lg:py-24 bg-background">
@@ -163,32 +115,38 @@ const ProblemSection = () => {
         {/* Problem Cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
 
-          {problems.map((p, i) => (
+          {problems.map((p, i) => {
 
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-card rounded-xl p-6 shadow-card border border-border hover:shadow-card-hover transition-shadow"
-            >
+            const Icon = iconMap[p.icon];
 
-              <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center mb-4">
-                <p.icon className="h-5 w-5 text-destructive" />
-              </div>
+            return (
 
-              <h3 className="font-heading font-bold text-foreground mb-1">
-                {p.title}
-              </h3>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-card rounded-xl p-6 shadow-card border border-border hover:shadow-card-hover transition-shadow"
+              >
 
-              <p className="text-sm text-muted-foreground">
-                {p.desc}
-              </p>
+                <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center mb-4">
+                  {Icon && <Icon className="h-5 w-5 text-destructive" />}
+                </div>
 
-            </motion.div>
+                <h3 className="font-heading font-bold text-foreground mb-1">
+                  {p.title}
+                </h3>
 
-          ))}
+                <p className="text-sm text-muted-foreground">
+                  {p.description}
+                </p>
+
+              </motion.div>
+
+            );
+
+          })}
 
         </div>
 

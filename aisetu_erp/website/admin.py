@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AboutPageContent, CareerPageContent, ContactPageContent, ContactPageContent, LandingPageContent
+from .models import AboutPageContent, CareerPageContent, ContactPageContent, ContactPageContent, Feature, HowItWorksStep, LandingPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
 
 # @admin.register(LandingPageContent)
 # class LandingPageContentAdmin(admin.ModelAdmin):
@@ -38,3 +38,52 @@ class ContactPageContentAdmin(admin.ModelAdmin):
         if ContactPageContent.objects.exists():
             return False
         return True
+
+@admin.register(Problem)
+class ProblemAdmin(admin.ModelAdmin):
+
+    list_display = ["title", "order", "is_active"]
+
+    list_editable = ["order", "is_active"]
+
+@admin.register(Feature)
+class FeatureAdmin(admin.ModelAdmin):
+
+    list_display = ["title", "order", "is_active"]
+
+    list_editable = ["order", "is_active"]
+
+@admin.register(USPFeature)
+class USPFeatureAdmin(admin.ModelAdmin):
+
+    list_display = ["title", "order", "is_active"]
+
+    list_editable = ["order", "is_active"]
+
+@admin.register(HowItWorksStep)
+class HowItWorksStepAdmin(admin.ModelAdmin):
+
+    list_display = ["step_number", "title", "is_active"]
+
+    list_editable = ["is_active"]
+
+@admin.register(StoreType)
+class StoreTypeAdmin(admin.ModelAdmin):
+
+    list_display = ["title", "order", "is_active"]
+
+    list_editable = ["order", "is_active"]
+
+@admin.register(ReferralPerk)
+class ReferralPerkAdmin(admin.ModelAdmin):
+
+    list_display = ["value", "text", "order", "is_active"]
+
+    list_editable = ["order", "is_active"]
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+
+    list_display = ["name", "role", "rating", "is_active", "order"]
+
+    list_editable = ["rating", "is_active", "order"]

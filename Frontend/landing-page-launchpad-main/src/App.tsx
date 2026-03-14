@@ -17,6 +17,8 @@ import JobDetails from "@/pages/JobDetails";
 import ApplyJob from "./pages/ApplyJob";
 import ReferralPage from "@/components/landing/ReferralSection";
 import BlogPost from "./pages/BlogPost"; // import new blog post detail component
+import DemoSuccess from "./pages/DemoSuccess";
+import AllTestimonials from "./pages/AllTestimonials";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,8 @@ const App = () => (
           <Route path="/pricing-signup" element={<PricingSignup />} />
           <Route path="/career/apply/:jobId" element={<ApplyJob />} />
           <Route path="/referral" element={<ReferralPage />} />
+           <Route path="/demo-success" element={<DemoSuccess />} />
+           <Route path="/reviews" element={<AllTestimonials />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

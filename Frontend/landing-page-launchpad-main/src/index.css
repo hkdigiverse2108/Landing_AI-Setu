@@ -197,3 +197,16 @@
     scrollbar-width: none;
   }
 }
+
+@keyframes scrollTestimonials {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scrollTestimonials 25s linear infinite;
+}

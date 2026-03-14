@@ -5,33 +5,68 @@ import { useState, useEffect } from "react";
 import ReferralPopup from "@/components/ReferralPopup";
 import { fetchLandingPageContent } from "@/services/api";
 
+const iconMap:any = {
+  gift: Gift,
+  renewal: RefreshCw,
+  user: UserPlus,
+  unlimited: Infinity
+};
+
 const ReferralSection = () => {
 
   const [openPopup, setOpenPopup] = useState(false);
   const [content, setContent] = useState<any>(null);
   const [livePreview, setLivePreview] = useState<any>(null);
+  const [perks, setPerks] = useState<any[]>([]);
 
-  // Fetch DB content
+  // Fetch DB content (for text + button)
   useEffect(() => {
+
     const loadContent = async () => {
+
       const data = await fetchLandingPageContent();
-      if (data) {
-        setContent(data);
-      }
+      if (data) setContent(data);
+
     };
+
     loadContent();
+
   }, []);
 
-  // Live preview listener
+  // Fetch perks (CRUD)
+  useEffect(() => {
+
+    const loadPerks = async () => {
+
+      try{
+
+        const res = await fetch("http://127.0.0.1:8000/api/referral-perks/");
+        const data = await res.json();
+
+        setPerks(data);
+
+      }catch(err){
+        console.error("Referral perks error", err);
+      }
+
+    };
+
+    loadPerks();
+
+  }, []);
+
+  // Live preview listener (unchanged)
   useEffect(() => {
 
     const handler = (event:any) => {
+
       if(event.data){
         setLivePreview((prev:any)=>({
           ...prev,
           ...event.data
         }))
       }
+
     }
 
     window.addEventListener("message", handler)
@@ -40,30 +75,6 @@ const ReferralSection = () => {
 
   },[])
 
-  const perks = [
-    {
-      icon: Gift,
-      title: livePreview?.referral_item1_value || content?.referral_item1_value || "₹2,000",
-      desc: livePreview?.referral_item1_text || content?.referral_item1_text || "Per Successful Sale"
-    },
-    {
-      icon: RefreshCw,
-      title: livePreview?.referral_item2_value || content?.referral_item2_value || "₹1,000",
-      desc: livePreview?.referral_item2_text || content?.referral_item2_text || "Renewal Incentive"
-    },
-    {
-      icon: UserPlus,
-      title: livePreview?.referral_item3_value || content?.referral_item3_value || "₹1,000",
-      desc: livePreview?.referral_item3_text || content?.referral_item3_text || "For Every Successful Referral Purchase"
-    },
-    {
-      icon: Infinity,
-      title: livePreview?.referral_item4_value || content?.referral_item4_value || "Unlimited",
-      desc: livePreview?.referral_item4_text || content?.referral_item4_text || "Referrals Allowed"
-    }
-  ];
-
-  // Popup reset handler (unchanged)
   const handleOpenPopup = () => {
     setOpenPopup(false);
     setTimeout(() => setOpenPopup(true), 10);
@@ -95,11 +106,12 @@ const ReferralSection = () => {
 
         </motion.div>
 
+        {/* CRUD PERKS */}
         <div className="grid md:grid-cols-4 gap-8 max-w-4xl mx-auto mb-10">
 
           {perks.map((p, i) => {
 
-            const Icon = p.icon;
+            const Icon = iconMap[p.icon];
 
             return (
               <motion.div
@@ -112,15 +124,15 @@ const ReferralSection = () => {
               >
 
                 <div className="w-14 h-14 rounded-xl bg-accent/20 flex items-center justify-center mx-auto mb-3">
-                  <Icon className="h-7 w-7 text-accent" />
+                  {Icon && <Icon className="h-7 w-7 text-accent" />}
                 </div>
 
                 <h3 className="text-2xl font-bold text-gradient-gold">
-                  {p.title}
+                  {p.value}
                 </h3>
 
                 <p className="text-primary-foreground/70 text-sm mt-1">
-                  {p.desc}
+                  {p.text}
                 </p>
 
               </motion.div>
@@ -131,6 +143,7 @@ const ReferralSection = () => {
         </div>
 
         <div className="text-center">
+
           <Button
             onClick={handleOpenPopup}
             className="bg-gold-gradient text-accent-foreground font-semibold hover:opacity-90 px-8"
@@ -139,6 +152,7 @@ const ReferralSection = () => {
              content?.join_referral ||
              "Join Referral Program"}
           </Button>
+
         </div>
 
       </div>

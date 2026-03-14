@@ -2,165 +2,119 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { fetchLandingPageContent } from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const TestimonialsSection = () => {
+  const navigate = useNavigate();
 
   const [content, setContent] = useState<any>(null);
   const [livePreview, setLivePreview] = useState<any>(null);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
 
-  // Fetch DB content
+  // 1. Fetch Content & Testimonials
   useEffect(() => {
-    const loadContent = async () => {
+    const loadData = async () => {
       const data = await fetchLandingPageContent();
-      if (data) {
-        setContent(data);
-      }
+      if (data) setContent(data);
+      
+      const res = await fetch("http://127.0.0.1:8000/api/testimonials/");
+      const tData = await res.json();
+      setTestimonials(tData);
     };
-    loadContent();
+    loadData();
   }, []);
 
-  // Live preview listener
+  // 2. Live preview listener
   useEffect(() => {
-
-    const handler = (event:any) => {
-      if(event.data){
-        setLivePreview((prev:any)=>({
-          ...prev,
-          ...event.data
-        }))
+    const handler = (event: any) => {
+      if (event.data) {
+        setLivePreview((prev: any) => ({ ...prev, ...event.data }));
       }
-    }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
-    window.addEventListener("message", handler)
-
-    return () => window.removeEventListener("message", handler)
-
-  },[])
-
-  const testimonials = [
-    {
-      name:
-        livePreview?.testimonial1_name ||
-        content?.testimonial1_name ||
-        "Rajesh Patel",
-
-      store:
-        livePreview?.testimonial1_role ||
-        content?.testimonial1_role ||
-        "Kirana Store, Surat",
-
-      text:
-        livePreview?.testimonial1_text ||
-        content?.testimonial1_text ||
-        "AI-Setu ERP transformed my billing process. The AI photo detection is a game changer — no more barcode hassles!",
-
-      rating: 5
-    },
-    {
-      name:
-        livePreview?.testimonial2_name ||
-        content?.testimonial2_name ||
-        "Priya Sharma",
-
-      store:
-        livePreview?.testimonial2_role ||
-        content?.testimonial2_role ||
-        "Medical Shop, Surat",
-
-      text:
-        livePreview?.testimonial2_text ||
-        content?.testimonial2_text ||
-        "Simple to use and my staff learned it in one day. GST billing is now automatic. Highly recommended!",
-
-      rating: 5
-    },
-    {
-      name:
-        livePreview?.testimonial3_name ||
-        content?.testimonial3_name ||
-        "Amit Desai",
-
-      store:
-        livePreview?.testimonial3_role ||
-        content?.testimonial3_role ||
-        "General Store, Vadodara",
-
-      text:
-        livePreview?.testimonial3_text ||
-        content?.testimonial3_text ||
-        "Finally an ERP that understands Indian retail. The pricing is fair and support team is always available.",
-
-      rating: 5
-    }
-  ];
+  // 3. Duplicate items to create the "Infinite" loop effect
+  // We double the array so that as the first set exits, the second set enters seamlessly
+  const infiniteTestimonials = [...testimonials, ...testimonials, ...testimonials];
 
   return (
-    <section className="py-16 lg:py-24 bg-background">
-
+    <section className="py-16 lg:py-24 bg-background overflow-hidden">
       <div className="container">
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-
-          <span className="text-accent font-semibold text-sm uppercase tracking-wider">
-            {livePreview?.testimonial_label ||
-             content?.testimonial_label ||
-             "Testimonials"}
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <span className="text-[#F4B400] font-bold text-sm uppercase tracking-widest">
+            {livePreview?.testimonial_label || content?.testimonial_label || "TESTIMONIALS"}
           </span>
-
-          <h2 className="text-3xl lg:text-4xl font-bold mt-2 text-foreground">
-            {livePreview?.testimonial_title ||
-             content?.testimonial_title ||
-             "What Our Customers Say"}
+          <h2 className="text-3xl lg:text-5xl font-bold mt-3 text-[#1F2E4D]">
+            {livePreview?.testimonial_title || content?.testimonial_title || "What Our Customers Say"}
           </h2>
-
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-
-          {testimonials.map((t, i) => (
-
-            <motion.div
-              key={t.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-card rounded-xl p-6 shadow-card border border-border"
-            >
-
-              <div className="flex gap-1 mb-3">
-                {Array.from({ length: t.rating }).map((_, j) => (
-                  <Star key={j} className="h-4 w-4 fill-accent text-accent" />
-                ))}
-              </div>
-
-              <p className="text-sm text-muted-foreground mb-4">
-                "{t.text}"
-              </p>
-
-              <div>
-                <p className="font-heading font-bold text-foreground text-sm">
-                  {t.name}
-                </p>
-
-                <p className="text-xs text-muted-foreground">
-                  {t.store}
-                </p>
-              </div>
-
-            </motion.div>
-
-          ))}
-
         </div>
 
+        {/* The Infinite Scroll Wrapper */}
+        <div className="relative flex overflow-hidden group">
+          {/* Left/Right Fades to make it look smooth at the edges */}
+          <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+
+          {/* This container moves continuously */}
+          <div className="flex gap-8 animate-infinite-scroll group-hover:[animation-play-state:paused] py-4">
+            {infiniteTestimonials.map((t, i) => (
+              <div
+                key={i}
+                className="w-[350px] flex-shrink-0 bg-white rounded-[2rem] p-8 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] border border-gray-50 whitespace-normal"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#F4B400]/20">
+                    <img
+                      src={t.image || "/placeholder-user.jpg"}
+                      alt={t.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-bold text-lg text-[#1F2E4D]">{t.name}</p>
+                    <p className="text-sm text-gray-500">{t.role}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <Star key={j} className="h-4 w-4 fill-[#F4B400] text-[#F4B400]" />
+                  ))}
+                </div>
+
+                <p className="text-gray-600 leading-relaxed italic">
+                  "{t.text}"
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Button */}
+        <div className="text-center mt-14">
+          <Button
+            onClick={() => navigate("/reviews")}
+            className="bg-gradient-to-r from-[#F4B400] to-[#E6B800] text-white font-extrabold px-12 py-7 rounded-2xl hover:scale-105 transition-transform shadow-xl shadow-yellow-100"
+          >
+            {livePreview?.review_button || content?.review_button || "View More Reviews"}
+          </Button>
+        </div>
       </div>
 
+      {/* Tailwind Extension CSS */}
+      <style>{`
+        @keyframes infinite-scroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(calc(-33.33% - 21.3px)); } 
+        }
+        .animate-infinite-scroll {
+          animation: infinite-scroll 40s linear infinite;
+        }
+      `}</style>
     </section>
   );
 };
