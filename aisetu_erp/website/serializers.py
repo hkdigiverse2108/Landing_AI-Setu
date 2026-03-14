@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AboutPageContent, CareerPageContent, ContactPageContent, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost
+from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, LoginLink, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost
 
 # ... rest of file until the end ...
 
