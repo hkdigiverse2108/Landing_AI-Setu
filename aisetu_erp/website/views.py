@@ -6,8 +6,8 @@ from rest_framework.decorators import APIView, api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from .models import FAQ, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, HowItWorksStep, LoginLink, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
-from .serializers import AboutPageSerializer, CareerPageSerializer, ComparisonFeatureSerializer, FAQSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer
+from .models import FAQ, AllStoreType, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, HowItWorksStep, LoginLink, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .serializers import AboutPageSerializer, AllStoreTypeSerializer, CareerPageSerializer, ComparisonFeatureSerializer, FAQSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer
 
 # ... rest of file until the end ...
 
@@ -658,3 +658,13 @@ def get_demo_video(request):
     }
 
     return Response(data)
+    
+
+@api_view(["GET"])
+def all_store_type(request):
+
+    stores = AllStoreType.objects.filter(is_active=True).order_by("name")
+
+    serializer = AllStoreTypeSerializer(stores, many=True)
+
+    return Response(serializer.data)

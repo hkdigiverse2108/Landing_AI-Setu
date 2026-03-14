@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, LoginLink, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost
+from .models import FAQ, AboutPageContent, AllStoreType, CareerPageContent, ComparisonFeature, ContactPageContent, LoginLink, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost
 
 # ... rest of file until the end ...
 
@@ -108,3 +108,10 @@ class LoginLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = LoginLink
         fields = "__all__"
+
+class AllStoreTypeSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(source="_id", read_only=True)
+    
+    class Meta:
+        model = AllStoreType
+        fields = ["id", "name"]

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo_1.png";
 import {
   Dialog,
   DialogContent,
@@ -59,12 +60,11 @@ const Header = () => {
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border">
         <div className="container flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-hero flex items-center justify-center">
-              <span className="text-accent font-heading font-bold text-lg">A</span>
-            </div>
-            <span className="font-heading font-bold text-xl text-foreground">
-              AI-Setu ERP
-            </span>
+            <img
+              src={logo}
+              alt="AI-Setu ERP"
+              className="h-10 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Nav */}

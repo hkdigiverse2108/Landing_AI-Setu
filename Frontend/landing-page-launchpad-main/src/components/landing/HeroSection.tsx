@@ -12,7 +12,7 @@ import {
 import DemoForm from "@/components/DemoForm";
 import heroImg from "@/assets/image.png";
 import aiScanImg from "@/assets/ai-scan.jpg";
-import { fetchLandingPageContent, fetchDemoVideo, LandingPageContent } from "@/services/api";
+import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 const defaultHighlights = [
   "GST-Ready Billing",
@@ -25,13 +25,10 @@ const HeroSection = () => {
   const [videoOpen, setVideoOpen] = useState(false);
   const [content, setContent] = useState<LandingPageContent | null>(null);
 
-  // Demo video state
-  const [demoVideo, setDemoVideo] = useState<any>(null);
-
-  // LIVE PREVIEW DATA FROM DJANGO ADMIN
+  // ✅ LIVE PREVIEW DATA FROM DJANGO ADMIN
   const [livePreview, setLivePreview] = useState<any>(null);
 
-  const demoVideoUrl = demoVideo?.video_url || "";
+  const demoVideoUrl = "https://www.youtube.com";
 
   useEffect(() => {
     const loadContent = async () => {
@@ -43,34 +40,24 @@ const HeroSection = () => {
     loadContent();
   }, []);
 
-  // Fetch demo video
-  useEffect(() => {
-    const loadVideo = async () => {
-      const data = await fetchDemoVideo();
-      if (data) setDemoVideo(data);
-    };
-
-    loadVideo();
-  }, []);
-
   useEffect(() => {
 
-    const handler = (event:any) => {
+  const handler = (event:any) => {
 
-      if(event.data){
-        setContent((prev:any)=>({
-          ...prev,
-          ...event.data
-        }))
-      }
-
+    if(event.data){
+      setContent((prev:any)=>({
+        ...prev,
+        ...event.data
+      }))
     }
 
-    window.addEventListener("message", handler)
+  }
 
-    return () => window.removeEventListener("message", handler)
+  window.addEventListener("message", handler)
 
-  },[])
+  return () => window.removeEventListener("message", handler)
+
+},[])
 
   const highlights = livePreview?.hero_highlights
     ? livePreview.hero_highlights.split(",").map((h: string) => h.trim())
@@ -82,6 +69,7 @@ const HeroSection = () => {
     <>
       <section className="bg-hero text-primary-foreground relative overflow-hidden min-h-[90vh] flex items-center">
 
+        {/* Background blobs */}
         <div
           className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full opacity-10 blur-3xl pointer-events-none"
           style={{
@@ -108,7 +96,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
-
+            {/* Eyebrow */}
             <motion.div
               initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -138,6 +126,7 @@ const HeroSection = () => {
                 "AI-powered billing, inventory & store management — built specifically for Indian retail businesses."}
             </p>
 
+            {/* Highlight pills */}
             <div className="flex flex-wrap gap-3 mb-10">
               {highlights.map((h: string) => (
                 <span
@@ -151,6 +140,7 @@ const HeroSection = () => {
               ))}
             </div>
 
+            {/* CTA Buttons */}
             <div className="flex flex-wrap gap-4">
 
               <Button
@@ -168,26 +158,23 @@ const HeroSection = () => {
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
 
-              {/* WATCH DEMO BUTTON ONLY IF VIDEO EXISTS */}
-              {demoVideoUrl && (
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/25 text-primary-foreground bg-white/5 backdrop-blur-sm
-                    hover:bg-white/15 hover:border-white/40 transition-all duration-200 px-8 py-6 font-semibold"
-                  onClick={() => setVideoOpen(true)}
-                >
-                  <Play className="mr-2 h-4 w-4 fill-current" />
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/25 text-primary-foreground bg-white/5 backdrop-blur-sm
+                  hover:bg-white/15 hover:border-white/40 transition-all duration-200 px-8 py-6 font-semibold"
+                onClick={() => setVideoOpen(true)}
+              >
+                <Play className="mr-2 h-4 w-4 fill-current" />
 
-                  {demoVideo?.title ||
-                    livePreview?.secondary_cta_text ||
-                    content?.secondary_cta_text ||
-                    "Watch Demo"}
-                </Button>
-              )}
+                {livePreview?.secondary_cta_text ||
+                  content?.secondary_cta_text ||
+                  "Watch Demo"}
+              </Button>
 
             </div>
 
+            {/* Social Proof */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -204,14 +191,13 @@ const HeroSection = () => {
             </motion.p>
           </motion.div>
 
-          {/* RIGHT COLUMN (UNCHANGED) */}
+          {/* RIGHT COLUMN */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             className="relative hidden lg:flex items-center justify-center pb-12 pr-4"
           >
-
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div
                 className="w-[420px] h-[420px] rounded-full opacity-25 blur-2xl"
@@ -223,6 +209,13 @@ const HeroSection = () => {
             </div>
 
             <div className="relative w-full max-w-[480px] animate-float">
+              <div
+                className="absolute -inset-[3px] rounded-3xl opacity-60 blur-sm pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(135deg, hsl(43 96% 56% / 0.6), transparent 60%)",
+                }}
+              />
 
               <img
                 src={heroImg}
@@ -275,12 +268,11 @@ const HeroSection = () => {
                   className="w-full object-cover"
                 />
               </motion.div>
-
             </div>
           </motion.div>
-
         </div>
 
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
       </section>
 
       {/* DEMO FORM MODAL */}
@@ -301,7 +293,7 @@ const HeroSection = () => {
       </Dialog>
 
       {/* VIDEO MODAL */}
-      {videoOpen && demoVideoUrl && (
+      {videoOpen && (
         <div
           className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
           onClick={() => setVideoOpen(false)}

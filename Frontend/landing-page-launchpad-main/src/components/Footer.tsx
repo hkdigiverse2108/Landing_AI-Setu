@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import logo from "@/assets/logo_2.png";
+
 
 const Footer = () => (
   <footer className="bg-primary text-primary-foreground">
@@ -7,10 +9,11 @@ const Footer = () => (
         {/* Logo & Description */}
         <div className="col-span-2 md:col-span-1">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-gold-gradient flex items-center justify-center">
-              <span className="font-heading font-bold text-accent-foreground">A</span>
-            </div>
-            <span className="font-heading font-bold text-lg">AI-Setu ERP</span>
+            <img
+              src={logo}
+              alt="AI-Setu ERP"
+              className="h-10 w-auto object-contain"
+            />
           </div>
           <p className="text-sm text-primary-foreground/60">
             Smart ERP for Indian retailers. AI-powered billing & store management.

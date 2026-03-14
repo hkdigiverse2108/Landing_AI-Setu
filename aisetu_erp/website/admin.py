@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, ContactPageContent, DemoVideo, Feature, HowItWorksStep, LandingPageContent, LoginLink, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .models import FAQ, AboutPageContent, AllStoreType, CareerPageContent, ComparisonFeature, ContactPageContent, ContactPageContent, DemoVideo, Feature, HowItWorksStep, LandingPageContent, LoginLink, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
 
 # ... existing code ...
 
@@ -125,3 +125,9 @@ class LoginLinkAdmin(admin.ModelAdmin):
 @admin.register(DemoVideo)
 class DemoVideoAdmin(admin.ModelAdmin):
     list_display = ("title", "video_url", "is_active", "created_at")
+
+@admin.register(AllStoreType)
+class AllStoreTypeAdmin(admin.ModelAdmin):
+    list_display = ("name", "is_active", "created_at")
+    search_fields = ("name",)
+    list_filter = ("is_active",)
