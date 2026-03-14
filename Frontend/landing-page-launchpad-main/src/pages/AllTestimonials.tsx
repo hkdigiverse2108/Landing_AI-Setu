@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { fetchLandingPageContent, fetchAllTestimonials } from "@/services/api";
 
 const AllTestimonials = () => {
   const [content, setContent] = useState<any>(null);
@@ -12,9 +13,8 @@ const AllTestimonials = () => {
 
   useEffect(() => {
   const interval = setInterval(async () => {
-    const res = await fetch("http://127.0.0.1:8000/api/landing-page/");
-    const data = await res.json();
-    setContent(data);
+    const data = await fetchLandingPageContent();
+    if (data) setContent(data);
   }, 5000); // fetch every 5 seconds
   return () => clearInterval(interval);
 }, []);
@@ -36,8 +36,7 @@ const AllTestimonials = () => {
 
   useEffect(() => {
     const loadReviews = async () => {
-      const res = await fetch("http://127.0.0.1:8000/api/testimonials/");
-      const data = await res.json();
+      const data = await fetchAllTestimonials();
       setReviews(data);
     };
     loadReviews();

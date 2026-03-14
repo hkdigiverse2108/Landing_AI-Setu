@@ -3,7 +3,7 @@ import { Gift, RefreshCw, Infinity, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import ReferralPopup from "@/components/ReferralPopup";
-import { fetchLandingPageContent } from "@/services/api";
+import { fetchLandingPageContent, fetchReferralPerks } from "@/services/api";
 
 const iconMap:any = {
   gift: Gift,
@@ -38,16 +38,8 @@ const ReferralSection = () => {
 
     const loadPerks = async () => {
 
-      try{
-
-        const res = await fetch("http://127.0.0.1:8000/api/referral-perks/");
-        const data = await res.json();
-
-        setPerks(data);
-
-      }catch(err){
-        console.error("Referral perks error", err);
-      }
+      const data = await fetchReferralPerks();
+      setPerks(data);
 
     };
 

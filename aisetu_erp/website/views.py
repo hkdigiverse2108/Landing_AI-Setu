@@ -2,7 +2,8 @@ from website.models import DemoRequest,UserLogin, ReferralUser
 from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import APIView, api_view
+from rest_framework.decorators import APIView, api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .models import ContactPageContent, ContactSubmission, Feature, HowItWorksStep, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
@@ -11,6 +12,7 @@ from .serializers import AboutPageSerializer, CareerPageSerializer, LandingPageC
 # ... rest of file until the end ...
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_blog_posts(request):
     posts = BlogPost.objects.filter(is_published=True)
     category_slug = request.GET.get('category')
@@ -21,6 +23,7 @@ def get_blog_posts(request):
     return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_blog_post_detail(request, slug):
     try:
         post = BlogPost.objects.get(slug=slug, is_published=True)
@@ -30,6 +33,7 @@ def get_blog_post_detail(request, slug):
         return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_blog_categories(request):
     categories = BlogCategory.objects.all()
     serializer = BlogCategorySerializer(categories, many=True)
@@ -558,6 +562,7 @@ def get_referral_perks(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_home_testimonials(request):
 
     testimonials = Testimonial.objects.filter(is_active=True)[:3]
@@ -577,6 +582,7 @@ def get_home_testimonials(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_all_testimonials(request):
 
     testimonials = Testimonial.objects.filter(is_active=True)

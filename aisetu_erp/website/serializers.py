@@ -4,11 +4,14 @@ from .models import AboutPageContent, CareerPageContent, ContactPageContent, Pri
 # ... rest of file until the end ...
 
 class BlogCategorySerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = BlogCategory
         fields = '__all__'
 
 class BlogPostSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    category = serializers.CharField(source='category.id', read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
     featured_image_url = serializers.SerializerMethodField()
 
@@ -26,11 +29,13 @@ class BlogPostSerializer(serializers.ModelSerializer):
 
 
 class DemoRequestSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = DemoRequest
         fields = '__all__'
 
 class PricingSignupSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = PricingSignup
         fields = '__all__'
@@ -43,16 +48,19 @@ class LandingPageContentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ContactSubmissionSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = ContactSubmission
         fields = "__all__"
 
 class JobApplicationSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = JobApplication
         fields = "__all__"
 
 class ReferralUserSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = ReferralUser
         fields = "__all__"

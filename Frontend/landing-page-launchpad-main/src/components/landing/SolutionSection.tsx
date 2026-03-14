@@ -9,6 +9,8 @@ import {
   BarChart3,
 } from "lucide-react";
 
+import { fetchSolutions } from "@/services/api";
+
 const iconMap: any = {
   "credit-card": CreditCard,
   package: Package,
@@ -44,19 +46,8 @@ const SolutionSection = () => {
 
     const loadSolutions = async () => {
 
-      try {
-
-        const res = await fetch("http://127.0.0.1:8000/api/features/");
-
-        const data = await res.json();
-
-        setSolutions(data);
-
-      } catch (err) {
-
-        console.error("Failed to load solutions", err);
-
-      }
+      const data = await fetchSolutions();
+      setSolutions(data);
 
     };
 

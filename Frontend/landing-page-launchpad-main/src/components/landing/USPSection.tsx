@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Camera, Cpu, Zap, Sparkles } from "lucide-react";
 import aiScan from "@/assets/ai-scan.jpg";
+import { fetchUSPFeatures } from "@/services/api";
 
 const iconMap: any = {
   camera: Camera,
@@ -17,19 +18,8 @@ const USPSection = () => {
 
     const loadFeatures = async () => {
 
-      try {
-
-        const res = await fetch("http://127.0.0.1:8000/api/usp-features/");
-
-        const data = await res.json();
-
-        setFeatures(data);
-
-      } catch (err) {
-
-        console.error("USP feature load error", err);
-
-      }
+      const data = await fetchUSPFeatures();
+      setFeatures(data);
 
     };
 

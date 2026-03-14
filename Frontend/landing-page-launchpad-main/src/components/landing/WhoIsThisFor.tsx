@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Store, ShoppingBag, Pill, Wrench, TrendingUp } from "lucide-react";
+import { fetchStoreTypes } from "@/services/api";
 
 const iconMap: any = {
   store: Store,
@@ -18,18 +19,8 @@ const WhoIsThisFor = () => {
 
     const loadStoreTypes = async () => {
 
-      try {
-
-        const res = await fetch("http://127.0.0.1:8000/api/store-types/");
-        const data = await res.json();
-
-        setTypes(data);
-
-      } catch (err) {
-
-        console.error("Error loading store types", err);
-
-      }
+      const data = await fetchStoreTypes();
+      setTypes(data);
 
     };
 
