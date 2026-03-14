@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchLandingPageContent, fetchAllTestimonials } from "@/services/api";
+import { fetchAllTestimonials } from "@/services/api";
 import { fetchLandingPageContent } from "@/services/api";
 
 const AllTestimonials = () => {
