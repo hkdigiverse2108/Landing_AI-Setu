@@ -2,60 +2,76 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
-const jobData: any = {
-  "frontend-developer": {
-    title: "Frontend Developer",
-    location: "Ahmedabad",
-    experience: "1-3 Years",
-    description: [
-      "Develop modern UI using React.",
-      "Integrate APIs from backend.",
-      "Work with UI/UX designers.",
-      "Improve performance and responsiveness."
-    ],
-    skills: ["React", "JavaScript", "Tailwind", "HTML", "CSS"]
-  },
-
-  "backend-developer": {
-    title: "Backend Developer (Python/Django)",
-    location: "Ahmedabad",
-    experience: "2-4 Years",
-    description: [
-      "Develop scalable REST APIs using Django.",
-      "Work with databases and data models.",
-      "Collaborate with frontend developers.",
-      "Optimize backend performance."
-    ],
-    skills: ["Python", "Django", "REST API", "PostgreSQL", "Docker"]
-  },
-
-  "ai-engineer": {
-    title: "AI Engineer",
-    location: "Remote / Ahmedabad",
-    experience: "2+ Years",
-    description: [
-      "Develop AI powered ERP features.",
-      "Integrate machine learning models.",
-      "Work with LLMs and automation.",
-      "Improve business intelligence systems."
-    ],
-    skills: ["Python", "Machine Learning", "LLM", "TensorFlow", "PyTorch"]
-  }
-};
+interface Job {
+  title: string;
+  slug: string;
+  location: string;
+  experience: string;
+  descriptions: { text: string }[];
+  skills: { name: string }[];
+}
 
 const JobDetails = () => {
-
   const { jobId } = useParams();
-  const navigate = useNavigate(); // ✅ FIXED
+  const navigate = useNavigate();
 
-  const job = jobData[jobId as keyof typeof jobData];
+  const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  if (!job) {
+  useEffect(() => {
+    if (!jobId) {
+      setError("Invalid job link");
+      setLoading(false);
+      return;
+    }
+
+    const fetchJob = async () => {
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8000/api/job/${jobId}/`
+        );
+
+        if (!response.ok) {
+          throw new Error("Job not found");
+        }
+
+        const data = await response.json();
+        setJob(data);
+      } catch (err) {
+        console.error("Error loading job:", err);
+        setError("Failed to load job details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [jobId]);
+
+  if (loading) {
     return (
-      <div className="text-center py-20 text-xl font-semibold">
-        Job Not Found
-      </div>
+      <>
+        <Header />
+        <div className="text-center py-24 text-xl font-semibold">
+          Loading Job...
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error || !job) {
+    return (
+      <>
+        <Header />
+        <div className="text-center py-24 text-xl font-semibold text-red-500">
+          {error || "Job Not Found"}
+        </div>
+        <Footer />
+      </>
     );
   }
 
@@ -66,9 +82,7 @@ const JobDetails = () => {
       <main className="bg-[#F5F6FA] min-h-screen">
 
         {/* HERO */}
-
         <section className="bg-[#1F2E4D] text-white py-16">
-
           <div className="container mx-auto px-6 max-w-4xl">
 
             <motion.h1
@@ -80,45 +94,31 @@ const JobDetails = () => {
               {job.title}
             </motion.h1>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="opacity-80 text-lg"
-            >
+            <p className="opacity-80 text-lg">
               {job.experience} • {job.location}
-            </motion.p>
+            </p>
 
           </div>
-
         </section>
 
-
-        {/* JOB DETAILS CARD */}
-
+        {/* DETAILS */}
         <section className="py-20">
-
           <div className="container mx-auto px-6 max-w-4xl">
 
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
               className="bg-white p-10 rounded-xl shadow-lg space-y-10"
             >
 
-              {/* Description */}
-
+              {/* DESCRIPTION */}
               <div>
-
                 <h2 className="text-2xl font-semibold mb-6 text-[#1F2E4D]">
                   Job Description
                 </h2>
 
                 <ul className="space-y-3">
-
-                  {job.description.map((item: string, i: number) => (
-
+                  {job.descriptions?.map((item, i) => (
                     <motion.li
                       key={i}
                       initial={{ opacity: 0, x: -20 }}
@@ -126,67 +126,44 @@ const JobDetails = () => {
                       transition={{ delay: i * 0.1 }}
                       className="flex items-start gap-3 text-gray-700"
                     >
-
-                      <span className="text-[#F4B400] font-bold text-lg">
-                        •
-                      </span>
-
-                      {item}
-
+                      <span className="text-[#F4B400] font-bold">•</span>
+                      {item.text}
                     </motion.li>
-
                   ))}
-
                 </ul>
-
               </div>
 
-
-              {/* Skills */}
-
+              {/* SKILLS */}
               <div>
-
                 <h2 className="text-2xl font-semibold mb-6 text-[#1F2E4D]">
                   Required Skills
                 </h2>
 
                 <div className="flex flex-wrap gap-3">
-
-                  {job.skills.map((skill: string, i: number) => (
-
+                  {job.skills?.map((skill, i) => (
                     <motion.span
                       key={i}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.1 }}
                       whileHover={{ scale: 1.1 }}
-                      className="bg-[#FFF3CD] text-[#1F2E4D] px-4 py-2 rounded-lg font-medium shadow-sm cursor-default"
+                      className="bg-[#FFF3CD] text-[#1F2E4D] px-4 py-2 rounded-lg font-medium shadow-sm"
                     >
-                      {skill}
+                      {skill.name}
                     </motion.span>
-
                   ))}
-
                 </div>
-
               </div>
 
-
-              {/* Apply Button */}
-
+              {/* APPLY BUTTON */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigate(`/career/apply/${jobId}`)}
+                onClick={() => navigate(`/career/apply/${job.slug}`)}
                 className="bg-gradient-to-r from-[#F4B400] to-[#F6C34A] text-black font-bold px-8 py-4 rounded-lg shadow-md hover:shadow-xl transition"
               >
                 Apply For This Job
               </motion.button>
 
             </motion.div>
-
           </div>
-
         </section>
 
       </main>

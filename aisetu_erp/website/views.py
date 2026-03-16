@@ -6,8 +6,8 @@ from rest_framework.decorators import APIView, api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from .models import FAQ, AllStoreType, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, HowItWorksStep, LoginLink, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
-from .serializers import AboutPageSerializer, AllStoreTypeSerializer, CareerPageSerializer, ComparisonFeatureSerializer, FAQSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, Footer, HowItWorksStep, JobPosition, LoginLink, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .serializers import AboutPageSerializer, AllStoreTypeSerializer, CareerPageSerializer, ChildJobPositionSerializer, ComparisonFeatureSerializer, FAQSerializer, JobPositionSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer
 
 # ... rest of file until the end ...
 
@@ -459,17 +459,17 @@ def about_page_content(request):
     serializer = AboutPageSerializer(content)
     return Response(serializer.data)
 
-@api_view(["GET"])
-def career_page_content(request):
-    # Fetch the ONLY record
-    content = CareerPageContent.objects.first()
+# @api_view(["GET"])
+# def career_page_content(request):
+#     # Fetch the ONLY record
+#     content = CareerPageContent.objects.first()
 
-    if not content:
-        # Only happens the very first time
-        content = CareerPageContent.objects.create()
+#     if not content:
+#         # Only happens the very first time
+#         content = CareerPageContent.objects.create()
     
-    serializer = CareerPageSerializer(content)
-    return Response(serializer.data)
+#     serializer = CareerPageSerializer(content)
+#     return Response(serializer.data)
 
 
 
@@ -691,3 +691,65 @@ def all_store_type(request):
     serializer = AllStoreTypeSerializer(stores, many=True)
 
     return Response(serializer.data)
+
+@api_view(["GET"])
+def get_footer(request):
+
+    footer = Footer.objects.first()
+
+    if not footer:
+        return Response({"error": "No footer found"})
+
+    return Response({
+        "description": footer.description,
+        "email": footer.email,
+        "address": footer.address,
+        "phone": footer.phone,
+        "quick_links": footer.quick_links,
+        "policies": footer.policies
+    })
+
+
+
+def convert_objectid(data):
+    """
+    Recursively convert ObjectId to string
+    """
+    if isinstance(data, list):
+        return [convert_objectid(item) for item in data]
+
+    if isinstance(data, dict):
+        new_data = {}
+        for key, value in data.items():
+            if isinstance(value, ObjectId):
+                new_data[key] = str(value)
+            else:
+                new_data[key] = convert_objectid(value)
+        return new_data
+
+    return data
+
+
+class CareerPageAPIView(APIView):
+
+    def get(self, request):
+        career = CareerPage.objects.first()
+
+        serializer = CareerPageSerializer(career)
+
+        data = convert_objectid(serializer.data)
+
+        return Response(data)
+    
+class JobDetailAPIView(APIView):
+
+    def get(self, request, slug):
+
+        job = ChildJobPosition.objects.prefetch_related(
+            "descriptions",
+            "skills"
+        ).get(slug=slug)
+
+        serializer = ChildJobPositionSerializer(job)
+
+        return Response(serializer.data)
