@@ -2,6 +2,7 @@ from django.db import models
 import random
 import string
 import uuid
+from django.utils.text import slugify
     
 class DemoRequest(models.Model):
     name = models.CharField(max_length=100)
@@ -664,79 +665,79 @@ class AboutPageContent(models.Model):
     
 from django.db import models
 
-class CareerPageContent(models.Model):
-    # ==========================
-    # HERO SECTION
-    # ==========================
+# class CareerPageContent(models.Model):
+#     # ==========================
+#     # HERO SECTION
+#     # ==========================
   
-    hero_title = models.CharField(
-        max_length=255, 
-        default="Build Your Career With AI-Setu 🚀"
-    )
-    hero_description = models.TextField(
-        default="Join a team building the future of AI-powered ERP systems. Work with innovative people and solve real business problems."
-    )
+#     hero_title = models.CharField(
+#         max_length=255, 
+#         default="Build Your Career With AI-Setu 🚀"
+#     )
+#     hero_description = models.TextField(
+#         default="Join a team building the future of AI-powered ERP systems. Work with innovative people and solve real business problems."
+#     )
 
-    # ==========================
-    # OUR CULTURE SECTION
-    # ==========================
-    culture_title = models.CharField(max_length=200, default="Our Culture")
+#     # ==========================
+#     # OUR CULTURE SECTION
+#     # ==========================
+#     culture_title = models.CharField(max_length=200, default="Our Culture")
     
-    # Culture Card 1
-    culture_1_title = models.CharField(max_length=100, default="Collaboration")
-    culture_1_desc = models.TextField(default="We believe teamwork builds better solutions.")
+#     # Culture Card 1
+#     culture_1_title = models.CharField(max_length=100, default="Collaboration")
+#     culture_1_desc = models.TextField(default="We believe teamwork builds better solutions.")
     
-    # Culture Card 2
-    culture_2_title = models.CharField(max_length=100, default="Innovation")
-    culture_2_desc = models.TextField(default="Experiment and create new possibilities.")
+#     # Culture Card 2
+#     culture_2_title = models.CharField(max_length=100, default="Innovation")
+#     culture_2_desc = models.TextField(default="Experiment and create new possibilities.")
     
-    # Culture Card 3
-    culture_3_title = models.CharField(max_length=100, default="Growth")
-    culture_3_desc = models.TextField(default="Continuous learning and career growth.")
+#     # Culture Card 3
+#     culture_3_title = models.CharField(max_length=100, default="Growth")
+#     culture_3_desc = models.TextField(default="Continuous learning and career growth.")
     
-    # Culture Card 4
-    culture_4_title = models.CharField(max_length=100, default="Trust")
-    culture_4_desc = models.TextField(default="Transparency and respect always.")
+#     # Culture Card 4
+#     culture_4_title = models.CharField(max_length=100, default="Trust")
+#     culture_4_desc = models.TextField(default="Transparency and respect always.")
 
-    # ==========================
-    # PERKS & BENEFITS SECTION
-    # ==========================
-    benefits_title = models.CharField(max_length=200, default="Perks & Benefits")
-    benefit_1 = models.CharField(max_length=100, default="Flexible Work Culture")
-    benefit_2 = models.CharField(max_length=100, default="5 Day Work Week")
-    benefit_3 = models.CharField(max_length=100, default="Learning Budget")
-    benefit_4 = models.CharField(max_length=100, default="Team Events")
-    benefit_5 = models.CharField(max_length=100, default="Fast Career Growth")
-    benefit_6 = models.CharField(max_length=100, default="Friendly Work Environment")
+#     # ==========================
+#     # PERKS & BENEFITS SECTION
+#     # ==========================
+#     benefits_title = models.CharField(max_length=200, default="Perks & Benefits")
+#     benefit_1 = models.CharField(max_length=100, default="Flexible Work Culture")
+#     benefit_2 = models.CharField(max_length=100, default="5 Day Work Week")
+#     benefit_3 = models.CharField(max_length=100, default="Learning Budget")
+#     benefit_4 = models.CharField(max_length=100, default="Team Events")
+#     benefit_5 = models.CharField(max_length=100, default="Fast Career Growth")
+#     benefit_6 = models.CharField(max_length=100, default="Friendly Work Environment")
 
-    # ==========================
-    # OPEN POSITIONS SECTION
-    # ==========================
-    positions_title = models.CharField(max_length=200, default="Open Positions")
+#     # ==========================
+#     # OPEN POSITIONS SECTION
+#     # ==========================
+#     positions_title = models.CharField(max_length=200, default="Open Positions")
     
-    # Job 1
-    job_1_role = models.CharField(max_length=200, default="Frontend Developer")
-    job_1_details = models.CharField(max_length=200, default="1-3 Years • Ahmedabad")
+#     # Job 1
+#     job_1_role = models.CharField(max_length=200, default="Frontend Developer")
+#     job_1_details = models.CharField(max_length=200, default="1-3 Years • Ahmedabad")
     
-    # Job 2
-    job_2_role = models.CharField(max_length=200, default="Backend Developer (Python/Django)")
-    job_2_details = models.CharField(max_length=200, default="2-4 Years • Ahmedabad")
+#     # Job 2
+#     job_2_role = models.CharField(max_length=200, default="Backend Developer (Python/Django)")
+#     job_2_details = models.CharField(max_length=200, default="2-4 Years • Ahmedabad")
     
-    # Job 3
-    job_3_role = models.CharField(max_length=200, default="AI Engineer")
-    job_3_details = models.CharField(max_length=200, default="2+ Years • Remote / Ahmedabad")
+#     # Job 3
+#     job_3_role = models.CharField(max_length=200, default="AI Engineer")
+#     job_3_details = models.CharField(max_length=200, default="2+ Years • Remote / Ahmedabad")
 
-    # ==========================
-    # BOTTOM CTA SECTION
-    # ==========================
-    cta_title = models.CharField(max_length=255, default="Ready to Join AI-Setu?")
-    cta_description = models.TextField(default="Explore our current openings and apply today.")
-    cta_button_text = models.CharField(max_length=100, default="View Openings")
+#     # ==========================
+#     # BOTTOM CTA SECTION
+#     # ==========================
+#     cta_title = models.CharField(max_length=255, default="Ready to Join AI-Setu?")
+#     cta_description = models.TextField(default="Explore our current openings and apply today.")
+#     cta_button_text = models.CharField(max_length=100, default="View Openings")
 
-    updated_at = models.DateTimeField(auto_now=True)
+#     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return "Career Page Content"
+#     def __str__(self):
+#         return "Career Page Content"
 
 
 class ContactPageContent(models.Model):
@@ -1147,3 +1148,132 @@ class AllStoreType(models.Model):
     class Meta:
         verbose_name = "Store Type"
         verbose_name_plural = "All Store Types"
+
+class Footer(models.Model):
+
+    # Logo description
+    description = models.TextField(
+        default="Smart ERP for Indian retailers. AI-powered billing & store management."
+    )
+
+    # Contact
+    email = models.EmailField(default="ceo@hkdigiverse.com")
+    address = models.TextField(default="501-502, Silver Trade Center, Mota Varachha, Surat, Gujarat, India - 394101")
+    phone = models.CharField(max_length=20, default="+91 12345 67890")
+
+    # Links
+    quick_links = models.JSONField(default=list)
+    policies = models.JSONField(default=list)
+
+    def __str__(self):
+        return "Footer Content"
+    
+from django.db import models
+
+
+class CareerPage(models.Model):
+    hero_title = models.CharField(max_length=255)
+    hero_subtitle = models.TextField()
+
+    culture_title = models.CharField(max_length=200, default="Our Culture")
+    perks_title = models.CharField(max_length=200, default="Perks & Benefits")
+
+    cta_title = models.CharField(max_length=255)
+    cta_subtitle = models.TextField()
+    cta_button_text = models.CharField(max_length=100)
+
+    def __str__(self):
+        return "Career Page"
+
+
+class Culture(models.Model):
+    career_page = models.ForeignKey(
+        CareerPage,
+        on_delete=models.CASCADE,
+        related_name="cultures"
+    )
+    icon = models.CharField(max_length=100, blank=True)
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.title
+
+
+class Perk(models.Model):
+    career_page = models.ForeignKey(
+        CareerPage,
+        on_delete=models.CASCADE,
+        related_name="perks"
+    )
+    title = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.title
+
+
+class JobPosition(models.Model):
+    career_page = models.ForeignKey(
+        CareerPage,
+        on_delete=models.CASCADE,
+        related_name="jobs"
+    )
+    title = models.CharField(max_length=200)
+    experience = models.CharField(max_length=100)
+    location = models.CharField(max_length=200)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+    
+class ChildJobPosition(models.Model):
+    career_page = models.ForeignKey(
+        CareerPage,
+        on_delete=models.CASCADE,
+        related_name="job"
+    )
+
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+
+    location = models.CharField(max_length=200)
+    experience = models.CharField(max_length=100)
+    
+
+    is_active = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+
+        if not self.slug:
+            self.slug = slugify(self.title)
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+
+class JobDescription(models.Model):
+    job = models.ForeignKey(
+        ChildJobPosition,
+        on_delete=models.CASCADE,
+        related_name="descriptions"
+    )
+
+    text = models.TextField()
+
+    def __str__(self):
+        return self.text[:50]
+
+
+class JobSkill(models.Model):
+    job = models.ForeignKey(
+        ChildJobPosition,
+        on_delete=models.CASCADE,
+        related_name="skills"
+    )
+
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name

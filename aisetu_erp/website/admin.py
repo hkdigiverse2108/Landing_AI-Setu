@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import FAQ, AboutPageContent, AllStoreType, CareerPageContent, ComparisonFeature, ContactPageContent, ContactPageContent, DemoVideo, Feature, HowItWorksStep, LandingPageContent, LoginLink, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .models import FAQ, AboutPageContent, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactPageContent, Culture, DemoVideo, Feature, Footer, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Perk, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
 
 # ... existing code ...
 
@@ -34,15 +34,15 @@ class AboutPageContentAdmin(admin.ModelAdmin):
 
     change_form_template = "admin/live_preview_aboutus_form.html"
 
-@admin.register(CareerPageContent)
-class CareerPageContentAdmin(admin.ModelAdmin):
-    change_form_template = "admin/live_preview_career_form.html"
+# @admin.register(CareerPageContent)
+# class CareerPageContentAdmin(admin.ModelAdmin):
+#     change_form_template = "admin/live_preview_career_form.html"
 
-    # This ensures you always edit the same object
-    def has_add_permission(self, request):
-        if CareerPageContent.objects.exists():
-            return False
-        return True
+#     # This ensures you always edit the same object
+#     def has_add_permission(self, request):
+#         if CareerPageContent.objects.exists():
+#             return False
+#         return True
     
 @admin.register(ContactPageContent)
 class ContactPageContentAdmin(admin.ModelAdmin):
@@ -131,3 +131,51 @@ class AllStoreTypeAdmin(admin.ModelAdmin):
     list_display = ("name", "is_active", "created_at")
     search_fields = ("name",)
     list_filter = ("is_active",)
+
+@admin.register(Footer)
+class FooterAdmin(admin.ModelAdmin):
+    list_display = ("email", "phone")
+
+class CultureInline(admin.TabularInline):
+    model = Culture
+    extra = 1
+
+
+class PerkInline(admin.TabularInline):
+    model = Perk
+    extra = 1
+
+
+class JobPositionInline(admin.TabularInline):
+    model = JobPosition
+    extra = 1
+
+
+@admin.register(CareerPage)
+class CareerPageAdmin(admin.ModelAdmin):
+    inlines = [CultureInline, PerkInline, JobPositionInline]
+
+class JobDescriptionInline(admin.TabularInline):
+    model = JobDescription
+    extra = 1
+
+
+class JobSkillInline(admin.TabularInline):
+    model = JobSkill
+    extra = 1
+
+
+class ChildJobPositionInline(admin.StackedInline):
+
+    model = ChildJobPosition
+    extra = 1
+
+@admin.register(ChildJobPosition)
+class ChildJobPositionAdmin(admin.ModelAdmin):
+
+    prepopulated_fields = {"slug": ("title",)}
+
+    inlines = [
+        JobDescriptionInline,
+        JobSkillInline
+    ]

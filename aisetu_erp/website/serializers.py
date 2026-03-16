@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FAQ, AboutPageContent, AllStoreType, CareerPageContent, ComparisonFeature, ContactPageContent, DemoVideo, LoginLink, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost
+from .models import FAQ, AboutPageContent, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, JobDescription, JobPosition, JobSkill, LoginLink, Perk, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost
 
 # ... rest of file until the end ...
 
@@ -73,13 +73,13 @@ class AboutPageSerializer(serializers.ModelSerializer):
         model = AboutPageContent
         fields = '__all__' # Or list your specific fields
 
-class CareerPageSerializer(serializers.ModelSerializer):
-    # This MUST be CharField to handle MongoDB's string-based IDs
-    id = serializers.CharField(read_only=True)
+# class CareerPageSerializer(serializers.ModelSerializer):
+#     # This MUST be CharField to handle MongoDB's string-based IDs
+#     id = serializers.CharField(read_only=True)
 
-    class Meta:
-        model = CareerPageContent
-        fields = '__all__'
+#     class Meta:
+#         model = CareerPageContent
+#         fields = '__all__'
 
 class ContactPageContentSerializer(serializers.ModelSerializer):
     # This MUST be CharField to handle MongoDB's string-based IDs
@@ -120,3 +120,76 @@ class DemoVideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = DemoVideo
         fields = "__all__"
+
+class ObjectIdField(serializers.Field):
+    def to_representation(self, value):
+        return str(value)
+
+    def to_internal_value(self, data):
+        return ObjectId(data)
+
+
+class CultureSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+
+    class Meta:
+        model = Culture
+        fields = "__all__"
+
+
+class PerkSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+
+    class Meta:
+        model = Perk
+        fields = "__all__"
+
+
+class JobPositionSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+
+    class Meta:
+        model = JobPosition
+        fields = "__all__"
+
+
+class CareerPageSerializer(serializers.ModelSerializer):
+
+    id = ObjectIdField()
+    cultures = CultureSerializer(many=True)
+    perks = PerkSerializer(many=True)
+    jobs = JobPositionSerializer(many=True)
+
+    class Meta:
+        model = CareerPage
+        fields = "__all__"
+
+class JobDescriptionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = JobDescription
+        fields = ["text"]
+
+
+class JobSkillSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = JobSkill
+        fields = ["name"]
+
+
+class ChildJobPositionSerializer(serializers.ModelSerializer):
+
+    descriptions = JobDescriptionSerializer(many=True)
+    skills = JobSkillSerializer(many=True)
+
+    class Meta:
+        model = ChildJobPosition
+        fields = [
+            "title",
+            "slug",
+            "location",
+            "experience",
+            "descriptions",
+            "skills"
+        ]

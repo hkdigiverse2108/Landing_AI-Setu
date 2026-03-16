@@ -1,3 +1,5 @@
+import axios from "axios";
+
 // Use hardcoded backend URL for local development
 export const API_BASE_URL = 'http://127.0.0.1:8000';
 
@@ -218,50 +220,50 @@ export const fetchAboutPageContent = async (): Promise<AboutPageContent | null> 
   }
 };
 
-export interface CareerPageContent {
-    id: string;
-    hero_title: string;
-    hero_description: string;
-    culture_title: string;
-    culture_1_title: string;
-    culture_1_desc: string;
-    culture_2_title: string;
-    culture_2_desc: string;
-    culture_3_title: string;
-    culture_3_desc: string;
-    culture_4_title: string;
-    culture_4_desc: string;
-    benefits_title: string;
-    benefit_1: string;
-    benefit_2: string;
-    benefit_3: string;
-    benefit_4: string;
-    benefit_5: string;
-    benefit_6: string;
-    positions_title: string;
-    job_1_role: string;
-    job_1_details: string;
-    job_2_role: string;
-    job_2_details: string;
-    job_3_role: string;
-    job_3_details: string;
-    cta_title: string;
-    cta_description: string;
-    cta_button_text: string;
+// export interface CareerPageContent {
+//     id: string;
+//     hero_title: string;
+//     hero_description: string;
+//     culture_title: string;
+//     culture_1_title: string;
+//     culture_1_desc: string;
+//     culture_2_title: string;
+//     culture_2_desc: string;
+//     culture_3_title: string;
+//     culture_3_desc: string;
+//     culture_4_title: string;
+//     culture_4_desc: string;
+//     benefits_title: string;
+//     benefit_1: string;
+//     benefit_2: string;
+//     benefit_3: string;
+//     benefit_4: string;
+//     benefit_5: string;
+//     benefit_6: string;
+//     positions_title: string;
+//     job_1_role: string;
+//     job_1_details: string;
+//     job_2_role: string;
+//     job_2_details: string;
+//     job_3_role: string;
+//     job_3_details: string;
+//     cta_title: string;
+//     cta_description: string;
+//     cta_button_text: string;
 
-}
+// }
 
-export const fetchCareerPageContent = async (): Promise<CareerPageContent | null> => {
-  try {
-    // Adding a timestamp here also helps prevent stale data
-    const res = await fetch(`${API_BASE_URL}/api/career-page/?t=${Date.now()}`);
-    if (!res.ok) throw new Error("Failed");
-    return await res.json();
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-};
+// export const fetchCareerPageContent = async (): Promise<CareerPageContent | null> => {
+//   try {
+//     // Adding a timestamp here also helps prevent stale data
+//     const res = await fetch(`${API_BASE_URL}/api/career-page/?t=${Date.now()}`);
+//     if (!res.ok) throw new Error("Failed");
+//     return await res.json();
+//   } catch (error) {
+//     console.error(error);
+//     return null;
+//   }
+// };
 
 
 export interface ContactPageContent {
@@ -399,3 +401,62 @@ export const fetchDemoVideo = async (): Promise<DemoVideo | null> => {
     return null
   }
 }
+
+const API_BASE = "http://127.0.0.1:8000/api";
+
+// ---------------- TYPES ----------------
+
+export interface Culture {
+  title: string;
+  description: string;
+}
+
+export interface Perk {
+  title: string;
+}
+
+export interface Job {
+  title: string;
+  experience: string;
+  location: string;
+  slug: string;
+}
+
+export interface CareerPageContent {
+  hero_title: string;
+  hero_subtitle: string;
+
+  culture_title: string;
+  cultures: Culture[];
+
+  perks_title: string;
+  perks: Perk[];
+
+  positions_title: string;
+  jobs: Job[];
+
+  cta_title: string;
+  cta_subtitle: string;
+  cta_button_text: string;
+}
+
+// ---------------- API CALL ----------------
+
+export const fetchCareerPageContent = async (): Promise<CareerPageContent | null> => {
+  try {
+    const response = await axios.get(`${API_BASE}/career/`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to load career page content:", error);
+    return null;
+  }
+};
+
+export const fetchJobDetails = async (slug: string) => {
+
+  const res = await fetch(
+    `http://127.0.0.1:8000/api/job/${slug}/`
+  );
+
+  return res.json();
+};
