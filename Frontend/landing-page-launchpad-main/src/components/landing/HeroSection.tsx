@@ -13,6 +13,7 @@ import DemoForm from "@/components/DemoForm";
 import heroImg from "@/assets/image.png";
 import aiScanImg from "@/assets/ai-scan.jpg";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
+import { fetchDemoVideo } from "@/services/api";
 
 const defaultHighlights = [
   "GST-Ready Billing",
@@ -24,11 +25,23 @@ const HeroSection = () => {
   const [demoOpen, setDemoOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const [content, setContent] = useState<LandingPageContent | null>(null);
+  const [demoVideoUrl, setDemoVideoUrl] = useState<string | null>(null);
+  
 
   // ✅ LIVE PREVIEW DATA FROM DJANGO ADMIN
   const [livePreview, setLivePreview] = useState<any>(null);
 
-  const demoVideoUrl = "https://www.youtube.com";
+  useEffect(() => {
+  const loadVideo = async () => {
+    const video = await fetchDemoVideo();
+
+    if (video?.video_url) {
+      setDemoVideoUrl(video.video_url);
+    }
+  };
+
+  loadVideo();
+}, []);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -158,19 +171,27 @@ const HeroSection = () => {
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
 
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/25 text-primary-foreground bg-white/5 backdrop-blur-sm
-                  hover:bg-white/15 hover:border-white/40 transition-all duration-200 px-8 py-6 font-semibold"
-                onClick={() => setVideoOpen(true)}
-              >
-                <Play className="mr-2 h-4 w-4 fill-current" />
+              {demoVideoUrl && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/25 text-primary-foreground bg-white/5 backdrop-blur-sm
+                    hover:bg-white/15 hover:border-white/40 transition-all duration-200 px-8 py-6 font-semibold"
+                  onClick={() => setVideoOpen(true)}
+                >
+                  <Play className="mr-2 h-4 w-4 fill-current" />
 
-                {livePreview?.secondary_cta_text ||
-                  content?.secondary_cta_text ||
-                  "Watch Demo"}
-              </Button>
+                  {livePreview?.secondary_cta_text ||
+                    content?.secondary_cta_text ||
+                    "Watch Demo"}
+                </Button>
+              )}
+
+              {/* {demoVideoUrl && (
+                <Button onClick={() => setVideoOpen(true)}>
+                  Watch Demo
+                </Button>
+              )} */}
 
             </div>
 
@@ -312,13 +333,14 @@ const HeroSection = () => {
             <iframe
               width="100%"
               height="450"
-              src={`${demoVideoUrl}?autoplay=1`}
+              src={demoVideoUrl}
               title="Demo Video"
               frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
               className="rounded"
-            ></iframe>
+            />
           </div>
         </div>
       )}

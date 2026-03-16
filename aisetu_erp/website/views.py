@@ -151,33 +151,55 @@ def pricing_signup(request):
     owner_name = request.data.get('owner_name')
     mobile_number = request.data.get('mobile_number')
     referral_code_input = request.data.get('referral_code')
+    check_referral = request.data.get('check_referral')
 
-    # ❌ Prevent duplicate signup
+    price = 14160  # default price
+
+    # ✅ ONLY CHECK REFERRAL (Apply button)
+    if check_referral:
+
+        if referral_code_input:
+            exists = PricingSignup.objects.filter(
+                referral_code=referral_code_input
+            ).exists()
+
+            if exists:
+                return Response({
+                    "valid": True,
+                    "price": 12980
+                })
+
+        return Response({
+            "valid": False,
+            "price": 14160
+        })
+
+
+    # -------------------------------
+    # NORMAL SIGNUP FLOW
+    # -------------------------------
+
     if PricingSignup.objects.filter(mobile_number=mobile_number).exists():
         return Response({
             "error": "This mobile number already registered"
         }, status=400)
 
-    generated_code = None
+    generated_code = ''.join(random.choices(
+        string.ascii_uppercase + string.digits, k=6
+    ))
 
-    # ✔ Check if user came from referral popup
-    referral_user = ReferralUser.objects.filter(
-        mobile_number=mobile_number
-    ).first()
-
-    if referral_user:
-        generated_code = referral_user.referral_code
-    else:
-        generated_code = ''.join(random.choices(
-            string.ascii_uppercase + string.digits, k=6
-        ))
-
-    # ✔ Increase referral count
+    # Referral discount logic
     if referral_code_input:
         try:
-            ref_user = PricingSignup.objects.get(referral_code=referral_code_input)
+            ref_user = PricingSignup.objects.get(
+                referral_code=referral_code_input
+            )
+
             ref_user.total_referrals += 1
             ref_user.save()
+
+            price = 12980
+
         except PricingSignup.DoesNotExist:
             pass
 
@@ -191,8 +213,9 @@ def pricing_signup(request):
     return Response({
         "message": "Signup successful",
         "referral_code": generated_code,
-        "signup_id": str(signup.id)
-    }, status=status.HTTP_201_CREATED)  
+        "signup_id": str(signup.id),
+        "price": price
+    })
 
 from rest_framework import status
 from .models import ContactSubmission, PricingSignup, LandingPageContent

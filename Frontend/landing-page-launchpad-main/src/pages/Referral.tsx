@@ -1,7 +1,9 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReferralSection from "@/components/landing/ReferralSection";
-import FAQSection from "@/components/landing/FAQSection";
+import SolutionSection from "@/components/landing/SolutionSection";
+import USPSection from "@/components/landing/USPSection";
+import ComparisonSection from "@/components/landing/ComparisonSection";
 
 import { useState, useEffect } from "react";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
@@ -83,8 +85,9 @@ const Referral = () => {
         </div>
 
         <ReferralSection />
-        <FAQSection />
-
+        <SolutionSection />
+        <USPSection />
+        <ComparisonSection />
       </main>
 
       <Footer />

@@ -5,9 +5,15 @@ import { ArrowLeft } from "lucide-react";
 import { API_BASE_URL } from "@/services/api";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SolutionSection from "@/components/landing/SolutionSection";
+import USPSection from "@/components/landing/USPSection";
+import ComparisonSection from "@/components/landing/ComparisonSection";
+import { useToast } from "@/components/ui/use-toast";
 
 const PricingSignup = () => {
+
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [formData, setFormData] = useState({
     shopName: "",
@@ -17,10 +23,62 @@ const PricingSignup = () => {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    // If referral code field becomes empty → reset price
+    if (name === "referralCode" && value === "") {
+      setPrice(14160);
+    }
+  };
+
+  const handleApplyReferral = async () => {
+    if (!formData.referralCode) {
+      toast({
+        title: "Enter referral code",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/pricing-signup/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          referral_code: formData.referralCode,
+          check_referral: true
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.valid) {
+        setPrice(12980);
+
+        toast({
+          title: "Referral applied successfully",
+        });
+
+      } else {
+        toast({
+          title: "Invalid referral code",
+          variant: "destructive",
+        });
+      }
+
+    } catch (error) {
+      toast({
+        title: "Unable to verify referral",
+        variant: "destructive",
+      });
+    }
   };
 
   const getCSRFToken = () => {
@@ -33,6 +91,7 @@ const PricingSignup = () => {
   };
 
   const [loading, setLoading] = useState(false);
+  const [price, setPrice] = useState(14160);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +131,7 @@ const PricingSignup = () => {
           },
           credentials: "include",
           body: JSON.stringify({
-            amount: 14160,
+            amount: price,
             phone: formData.mobileNumber,
             signup_id: signupId,
           }),
@@ -245,18 +304,29 @@ const PricingSignup = () => {
 
                 {/* Referral Code */}
                 <div className="space-y-2 pt-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Referral Code <span className="text-muted-foreground font-normal">(Optional)</span>
-                  </label>
+                <label className="text-sm font-medium text-foreground">
+                  Referral Code <span className="text-muted-foreground font-normal">(Optional)</span>
+                </label>
+
+                <div className="flex gap-2">
                   <input
                     type="text"
                     name="referralCode"
                     placeholder="Enter code if you have one"
                     value={formData.referralCode}
                     onChange={handleChange}
-                    className="w-full border-2 border-border/50 rounded-xl p-3.5 bg-background focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                    className="flex-1 border-2 border-border/50 rounded-xl p-3.5 bg-background focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
+
+                  <button
+                    type="button"
+                    onClick={handleApplyReferral}
+                    className="px-4 py-3 rounded-xl bg-accent text-white font-medium hover:opacity-90 transition"
+                  >
+                    Apply
+                  </button>
                 </div>
+              </div>
 
                 {/* Pay Button */}
                 <div className="pt-4">
@@ -264,7 +334,7 @@ const PricingSignup = () => {
                     type="submit"
                     className="w-full bg-gold-gradient text-accent-foreground font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-base py-6 rounded-xl"
                   >
-                    Pay ₹14,160 & Start Using AI-Setu
+                    Pay ₹{price.toLocaleString()} & Start Using AI-Setu
                   </Button>
                   <p className="text-xs text-center text-muted-foreground mt-4 flex items-center justify-center gap-1.5">
                     <svg
@@ -289,6 +359,10 @@ const PricingSignup = () => {
           </div>
         </div>
       </div>
+
+      <SolutionSection />
+      <USPSection />
+      <ComparisonSection />
 
       <Footer />
     </>

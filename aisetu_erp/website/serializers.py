@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FAQ, AboutPageContent, AllStoreType, CareerPageContent, ComparisonFeature, ContactPageContent, LoginLink, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost
+from .models import FAQ, AboutPageContent, AllStoreType, CareerPageContent, ComparisonFeature, ContactPageContent, DemoVideo, LoginLink, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost
 
 # ... rest of file until the end ...
 
@@ -115,3 +115,8 @@ class AllStoreTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AllStoreType
         fields = ["id", "name"]
+
+class DemoVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DemoVideo
+        fields = "__all__"
