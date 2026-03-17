@@ -477,3 +477,57 @@ export const fetchAboutPageContent = async (): Promise<AboutPageContent | null> 
     return null;
   }
 };
+
+const BASE_URL = "http://127.0.0.1:8000/api";
+
+// ==============================
+// TYPES
+// ==============================
+
+export interface PolicySection {
+  id: number;
+  heading: string;
+  content: string;
+  order: number;
+}
+
+export interface Policy {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  sections: PolicySection[];
+}
+
+// ==============================
+// COMMON FETCH FUNCTION
+// ==============================
+
+const fetchAPI = async (endpoint: string) => {
+  try {
+    const res = await fetch(`${BASE_URL}${endpoint}`);
+
+    if (!res.ok) {
+      throw new Error(`Error: ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("API ERROR:", error);
+    return null;
+  }
+};
+
+// ==============================
+// POLICY APIs
+// ==============================
+
+// ✅ Get ALL policies
+export const fetchPolicies = async (): Promise<Policy[] | null> => {
+  return fetchAPI("/policies/");
+};
+
+// ✅ Get SINGLE policy by slug
+export const fetchPolicy = async (slug: string): Promise<Policy | null> => {
+  return fetchAPI(`/policies/${slug}/`);
+};

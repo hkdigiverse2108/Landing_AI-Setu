@@ -903,6 +903,7 @@ class Problem(models.Model):
         return self.title
 
     class Meta:
+        verbose_name_plural = "Challanges"
         ordering = ["order"]
 
 class Feature(models.Model):
@@ -976,6 +977,7 @@ class StoreType(models.Model):
         return self.title
 
     class Meta:
+        verbose_name_plural = "Who Is This For - Store Types"
         ordering = ["order"]
 
 class ReferralPerk(models.Model):
@@ -1071,7 +1073,7 @@ class AllStoreType(models.Model):
 
     class Meta:
         verbose_name = "Store Type"
-        verbose_name_plural = "All Store Types"
+        verbose_name_plural = "Demo Form Store Types"
 
 class Footer(models.Model):
 
@@ -1143,7 +1145,7 @@ class JobPosition(models.Model):
         related_name="jobs"
     )
     title = models.CharField(max_length=200)
-    job_slug = models.SlugField(unique=True,default="")
+    job_slug = models.SlugField(unique=True, blank=True, null=True)
     experience = models.CharField(max_length=100)
     total_positions = models.IntegerField(default=1)
     work_place = models.CharField(max_length=100, default="WFO")
@@ -1236,3 +1238,40 @@ class SectionItem(models.Model):
 
     def __str__(self):
         return self.title or "Item"
+
+class Policy(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, blank=True, null=True)
+    description = models.TextField(blank=True)  # ✅ Intro text
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+
+            while Policy.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+
+class PolicySection(models.Model):
+    policy = models.ForeignKey(
+        Policy, related_name="sections", on_delete=models.CASCADE
+    )
+    heading = models.CharField(max_length=200)
+    content = models.TextField()
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"{self.policy.title} - {self.heading}"

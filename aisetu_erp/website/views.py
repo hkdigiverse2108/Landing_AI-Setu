@@ -8,8 +8,8 @@ from rest_framework.decorators import APIView, api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, Footer, HowItWorksStep, JobPosition, LoginLink, Page, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
-from .serializers import AllStoreTypeSerializer, CareerPageSerializer, ChildJobPositionSerializer, ComparisonFeatureSerializer, FAQSerializer, JobPositionSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer, PageSerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, Footer, HowItWorksStep, JobPosition, LoginLink, Page, Policy, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .serializers import AllStoreTypeSerializer, CareerPageSerializer, ChildJobPositionSerializer, ComparisonFeatureSerializer, FAQSerializer, JobPositionSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer, PageSerializer, PolicySerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer
 
 # ... rest of file until the end ...
 
@@ -815,3 +815,27 @@ def about_page_api(request):
 
     serializer = PageSerializer(page)
     return Response(serializer.data)
+
+class PolicyListAPIView(APIView):
+    def get(self, request):
+        policies = Policy.objects.all()
+        serializer = PolicySerializer(policies, many=True)
+
+        data = convert_objectid(serializer.data)
+
+        return Response(data)
+
+
+class PolicyDetailAPIView(APIView):
+    def get(self, request, slug):
+        try:
+            policy = Policy.objects.get(slug=slug)
+        except Policy.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+        serializer = PolicySerializer(policy)
+
+        # ✅ FIX HERE
+        data = convert_objectid(serializer.data)
+
+        return Response(data)

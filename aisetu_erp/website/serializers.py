@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, JobDescription, JobPosition, JobSkill, LoginLink, Page, Perk, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost, Section, SectionItem
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, JobDescription, JobPosition, JobSkill, LoginLink, Page, Perk, Policy, PolicySection, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost, Section, SectionItem
 
 # ... rest of file until the end ...
 
@@ -109,12 +109,6 @@ class LoginLinkSerializer(serializers.ModelSerializer):
         model = LoginLink
         fields = "__all__"
 
-class AllStoreTypeSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(source="_id", read_only=True)
-    
-    class Meta:
-        model = AllStoreType
-        fields = ["id", "name"]
 
 class DemoVideoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -128,6 +122,12 @@ class ObjectIdField(serializers.Field):
     def to_internal_value(self, data):
         return ObjectId(data)
 
+class AllStoreTypeSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()    
+    
+    class Meta:
+        model = AllStoreType
+        fields = ["id", "name"]
 
 class CultureSerializer(serializers.ModelSerializer):
     id = ObjectIdField()
@@ -225,3 +225,19 @@ class PageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
         fields = "__all__"
+
+class PolicySectionSerializer(serializers.ModelSerializer):
+    id = serializers.CharField() 
+
+    class Meta:
+        model = PolicySection
+        fields = ["id", "heading", "content", "order"]
+
+
+class PolicySerializer(serializers.ModelSerializer):
+    id = serializers.CharField()   
+    sections = PolicySectionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Policy
+        fields = ["id", "title", "slug", "description", "sections"]

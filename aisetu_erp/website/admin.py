@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactPageContent, Culture, DemoVideo, Feature, Footer, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Page, Perk, Problem, ReferralPerk, Section, SectionItem, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactPageContent, Culture, DemoVideo, Feature, Footer, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Page, Perk, Policy, PolicySection, Problem, ReferralPerk, Section, SectionItem, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
 import nested_admin
 
 # ... existing code ...
@@ -200,3 +200,16 @@ class SectionInline(nested_admin.NestedStackedInline):
 class PageAdmin(nested_admin.NestedModelAdmin):
     inlines = [SectionInline]
     prepopulated_fields = {"slug": ("title",)}
+
+class PolicySectionInline(admin.TabularInline):
+    model = PolicySection
+    extra = 1
+
+
+class PolicyAdmin(admin.ModelAdmin):
+    list_display = ["title", "slug"]
+    prepopulated_fields = {"slug": ("title",)}
+    inlines = [PolicySectionInline]
+
+
+admin.site.register(Policy, PolicyAdmin)
