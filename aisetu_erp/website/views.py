@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404, render
+
 from website.models import DemoRequest,UserLogin, ReferralUser
 from django.http import JsonResponse
 import json
@@ -6,8 +8,8 @@ from rest_framework.decorators import APIView, api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, Footer, HowItWorksStep, JobPosition, LoginLink, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
-from .serializers import AboutPageSerializer, AllStoreTypeSerializer, CareerPageSerializer, ChildJobPositionSerializer, ComparisonFeatureSerializer, FAQSerializer, JobPositionSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, Footer, HowItWorksStep, JobPosition, LoginLink, Page, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .serializers import AllStoreTypeSerializer, CareerPageSerializer, ChildJobPositionSerializer, ComparisonFeatureSerializer, FAQSerializer, JobPositionSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer, PageSerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer
 
 # ... rest of file until the end ...
 
@@ -447,17 +449,17 @@ def payment_callback(request):
     except Exception as e:
         return JsonResponse({"error": "Internal server error", "details": str(e)}, status=500)
     
-@api_view(["GET"])
-def about_page_content(request):
-    # Use .first() to get the object, not a queryset
-    content = AboutPageContent.objects.first()
+# @api_view(["GET"])
+# def about_page_content(request):
+#     # Use .first() to get the object, not a queryset
+#     content = AboutPageContent.objects.first()
 
-    if not content:
-        # Create default if it doesn't exist
-        content = AboutPageContent.objects.create()
+#     if not content:
+#         # Create default if it doesn't exist
+#         content = AboutPageContent.objects.create()
 
-    serializer = AboutPageSerializer(content)
-    return Response(serializer.data)
+#     serializer = AboutPageSerializer(content)
+#     return Response(serializer.data)
 
 # @api_view(["GET"])
 # def career_page_content(request):
@@ -753,3 +755,13 @@ class JobDetailAPIView(APIView):
         serializer = ChildJobPositionSerializer(job)
 
         return Response(serializer.data)
+    
+@api_view(['GET'])
+def about_page_api(request):
+    page = Page.objects.filter(slug="about").first()
+
+    if not page:
+        return Response({"error": "Page not found"}, status=404)
+
+    serializer = PageSerializer(page)
+    return Response(serializer.data)
