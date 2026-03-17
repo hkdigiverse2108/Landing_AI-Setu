@@ -481,6 +481,45 @@ class Payment(models.Model):
     def __str__(self):
         return str(self.transaction_id)
 
+# ==========================
+# PROXY MODELS FOR ADMIN CATEGORIZATION
+# ==========================
+
+class DemoRequestProxy(DemoRequest):
+    class Meta:
+        proxy = True
+        verbose_name = "Demo Request"
+        verbose_name_plural = "Demo Requests"
+        app_label = 'forms_data'
+
+class ContactSubmissionProxy(ContactSubmission):
+    class Meta:
+        proxy = True
+        verbose_name = "Contact Submission"
+        verbose_name_plural = "Contact Submissions"
+        app_label = 'forms_data'
+
+class JobApplicationProxy(JobApplication):
+    class Meta:
+        proxy = True
+        verbose_name = "Job Application"
+        verbose_name_plural = "Job Applications"
+        app_label = 'forms_data'
+
+class PricingSignupProxy(PricingSignup):
+    class Meta:
+        proxy = True
+        verbose_name = "Pricing Signup"
+        verbose_name_plural = "Pricing Signups"
+        app_label = 'forms_data'
+
+class PaymentProxy(Payment):
+    class Meta:
+        proxy = True
+        verbose_name = "Payment"
+        verbose_name_plural = "Payments"
+        app_label = 'forms_data'
+
 from django.db import models
 
 

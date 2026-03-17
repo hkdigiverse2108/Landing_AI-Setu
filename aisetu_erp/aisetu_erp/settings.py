@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'nested_admin',
+    'forms_data',
 ]
 
 MIDDLEWARE = [
