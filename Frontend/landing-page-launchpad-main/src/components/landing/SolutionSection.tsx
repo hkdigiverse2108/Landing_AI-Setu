@@ -7,6 +7,7 @@ import {
   Calculator,
   UserCheck,
   BarChart3,
+  Loader2,
 } from "lucide-react";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
@@ -41,6 +42,7 @@ const SolutionSection = () => {
   const [content, setContent] = useState<LandingPageContent | null>(null);
   const [livePreview, setLivePreview] = useState<any>(null);
   const [solutions, setSolutions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Load section heading from LandingPageContent
   useEffect(() => {
@@ -55,11 +57,14 @@ const SolutionSection = () => {
   useEffect(() => {
     const loadSolutions = async () => {
       try {
+        setLoading(true);
         const res = await fetch("http://127.0.0.1:8000/api/features/");
         const data = await res.json();
         setSolutions(data);
       } catch (err) {
         console.error("Failed to load solutions", err);
+      } finally {
+        setLoading(false);
       }
     };
     loadSolutions();
@@ -77,9 +82,12 @@ const SolutionSection = () => {
   }, []);
 
   return (
-    <section className="relative py-16 lg:py-24 bg-gradient-to-br from-background via-secondary to-muted overflow-hidden">
+    <section 
+      id="features" // CRITICAL: This allows the header link to find this section
+      className="relative py-16 lg:py-24 bg-gradient-to-br from-background via-secondary to-muted overflow-hidden min-h-[600px]"
+    >
       <div className="container relative z-10">
-
+        
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -100,35 +108,42 @@ const SolutionSection = () => {
           </h2>
         </motion.div>
 
-        {/* Solution Cards */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {solutions.map((s, i) => {
-            const Icon = iconMap[s.icon];
-            return (
-              <motion.div
-                key={i}
-                variants={cardVariants}
-                className="group bg-card rounded-2xl p-8 shadow-card border border-border hover:shadow-card-hover transition-all"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-900 flex items-center justify-center mb-6">
-                  {Icon && <Icon className="h-8 w-8 text-white" />}
-                </div>
+        {/* Loading State or Solution Cards */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+            <p className="text-muted-foreground animate-pulse">Loading features...</p>
+          </div>
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {solutions.map((s, i) => {
+              const Icon = iconMap[s.icon];
+              return (
+                <motion.div
+                  key={s.id || i}
+                  variants={cardVariants}
+                  className="group bg-card rounded-2xl p-8 shadow-card border border-border hover:shadow-card-hover transition-all"
+                >
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-900 flex items-center justify-center mb-6">
+                    {Icon && <Icon className="h-8 w-8 text-white" />}
+                  </div>
 
-                <h3 className="font-bold text-xl text-foreground mb-3">
-                  {s.title}
-                </h3>
+                  <h3 className="font-bold text-xl text-foreground mb-3">
+                    {s.title}
+                  </h3>
 
-                <p className="text-muted-foreground">{s.description}</p>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+                  <p className="text-muted-foreground">{s.description}</p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
       </div>
     </section>
   );
