@@ -491,11 +491,51 @@ def payment_callback(request):
 @csrf_exempt
 def payment_success(request):
     """
-    Handle the redirect from PhonePe. Renders the frontend index.html
-    so React Router can take over and show the success UI.
+    Handle the redirect from PhonePe. Extract status and redirect/render.
     """
-    from django.shortcuts import render
-    return render(request, "index.html")
+    from django.shortcuts import redirect, render
+    import base64
+    import json
+
+    # 1. If we already have a status parameter, it means we've already 
+    # processed the PG response. Serve the frontend index.html.
+    if request.GET.get('status'):
+        return render(request, "index.html")
+
+    print("--- PAYMENT REDIRECT FROM PG ---")
+    print("Method:", request.method)
+    
+    status_code = "UNKNOWN"
+    transaction_id = "UNKNOWN"
+
+    # PhonePe redirects back with 'response' (encoded) or 'code' (raw status)
+    # Check POST first, then GET
+    encoded_response = request.POST.get('response') or request.GET.get('response')
+    response_code = request.POST.get('code') or request.GET.get('code')
+    
+    if encoded_response:
+        try:
+            decoded_response = base64.b64decode(encoded_response).decode()
+            data = json.loads(decoded_response)
+            status_code = data.get('code', 'UNKNOWN')
+            transaction_id = data.get('data', {}).get('merchantTransactionId', 'UNKNOWN')
+        except Exception as e:
+            print(f"Error parsing redirect response: {e}")
+    elif response_code:
+        status_code = response_code
+
+    # Map to simplified frontend statuses
+    if status_code == "PAYMENT_SUCCESS":
+        frontend_status = "SUCCESS"
+    elif status_code in ["PAYMENT_ERROR", "PAYMENT_DECLINED", "TIMED_OUT"]:
+        frontend_status = "FAILURE"
+    elif status_code == "PAYMENT_PENDING":
+        frontend_status = "PENDING"
+    else:
+        frontend_status = status_code # Likely "UNKNOWN" or raw code
+
+    # Redirect to same URL but with our simplified parameters
+    return redirect(f"/payment-success/?status={frontend_status}&tid={transaction_id}")
     
 @api_view(["GET"])
 def about_page_content(request):
