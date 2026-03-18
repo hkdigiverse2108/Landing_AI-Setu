@@ -7,6 +7,7 @@ import ComparisonSection from "@/components/landing/ComparisonSection";
 
 import { useState, useEffect } from "react";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
+import SEO from "@/components/SEO";
 
 const Referral = () => {
 
@@ -54,6 +55,11 @@ const Referral = () => {
   return (
 
     <>
+      <SEO 
+        title="Referral Program" 
+        description="Join the AI Setu Referral Program and earn rewards for every business you refer. Help local retailers grow with modern AI solutions."
+        keywords="referral program, earn money, business partner, AI Setu rewards"
+      />
       <Header />
 
       <main>

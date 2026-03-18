@@ -16,6 +16,17 @@ class BlogPostAdmin(admin.ModelAdmin):
     search_fields = ["title", "content", "excerpt"]
     prepopulated_fields = {"slug": ("title",)}
     date_hierarchy = "created_at"
+    
+    fieldsets = (
+        ("Content", {
+            "fields": ("title", "slug", "category", "featured_image", "excerpt", "content", "author", "is_published")
+        }),
+        ("SEO Optimization", {
+            "fields": ("seo_title", "seo_description", "seo_keywords"),
+            "classes": ("collapse",),
+            "description": "Customize how this post appears in search engines."
+        }),
+    )
 
 # @admin.register(LandingPageContent)
 # class LandingPageContentAdmin(admin.ModelAdmin):
@@ -29,6 +40,34 @@ class BlogPostAdmin(admin.ModelAdmin):
 class LandingPageContentAdmin(admin.ModelAdmin):
 
     change_form_template = "admin/live_preview_change_form.html"
+
+    fieldsets = (
+        ("Content", {
+            "fields": (
+                "hero_eyebrow", "hero_title", "hero_highlighted_title", "hero_subtitle",
+                "hero_highlights", "primary_cta_text", "secondary_cta_text",
+                "trusted_retailers_count", "hero_stats_label", "hero_stats_value",
+                "trust_item1", "trust_item2", "trust_item3", "trust_item4",
+                "problem_section_label", "problem_section_title", "feature_title", "feature_title2",
+                "solution_section_label", "solution_section_title", "usp_badge_text",
+                "usp_title", "usp_description", "howitworks_label", "howitworks_title",
+                "who_main_title", "who_title", "pricing_main_title", "pricing_main_desc",
+                "pricing_label", "pricing_title", "pricing_plan_name", "pricing_old_price",
+                "pricing_price", "pricing_price_suffix", "referral_main_title",
+                "referral_main_desc", "referral_label", "referral_title", "join_referral",
+                "comparison_title", "comparison_subtitle", "comparison_title1",
+                "comparison_title2", "comparison_title3", "testimonial_label",
+                "testimonial_title", "review_button", "all_reviews_title", "all_reviews_desc",
+                "faq_label", "faq_title", "cta_badge", "cta_title", "cta_description",
+                "cta_button_text", "cta_small_text"
+            )
+        }),
+        ("SEO Optimization", {
+            "fields": ("seo_title", "seo_description", "seo_keywords"),
+            "classes": ("collapse",),
+            "description": "Customize how the Home page appears in search engines."
+        }),
+    )
 
 # @admin.register(AboutPageContent)
 # class AboutPageContentAdmin(admin.ModelAdmin):
@@ -54,6 +93,39 @@ class ContactPageContentAdmin(admin.ModelAdmin):
         if ContactPageContent.objects.exists():
             return False
         return True
+
+    fieldsets = (
+        ("Hero Section", {
+            "fields": ("hero_title", "hero_description")
+        }),
+        ("Contact Details", {
+            "fields": (
+                "call_title", "call_phone", "call_phone_number", "call_subtext",
+                "email_title", "email_address", "email_address_link", "email_subtext",
+                "visit_title", "visit_address", "visit_subtext", "visit_map_url"
+            )
+        }),
+        ("Support & Form", {
+            "fields": (
+                "support_title", "support_time", "support_subtext", "form_title",
+                "name_label", "name_placeholder", "phone_label", "phone_placeholder",
+                "email_label", "email_placeholder", "company_label", "company_placeholder",
+                "message_label", "message_placeholder", "form_button_text"
+            )
+        }),
+        ("Why Us & CTA", {
+            "fields": (
+                "why_title", "why_description", "feature_1_title", "feature_2_title",
+                "feature_3_title", "feature_4_title", "cta_title", "cta_description",
+                "cta_button_text1", "cta_button_text2", "cta_button_text3"
+            )
+        }),
+        ("SEO Optimization", {
+            "fields": ("seo_title", "seo_description", "seo_keywords"),
+            "classes": ("collapse",),
+            "description": "Customize how the Contact page appears in search engines."
+        }),
+    )
 
 @admin.register(Problem)
 class ProblemAdmin(admin.ModelAdmin):
@@ -156,6 +228,23 @@ class JobPositionInline(admin.TabularInline):
 class CareerPageAdmin(admin.ModelAdmin):
     inlines = [CultureInline, PerkInline, JobPositionInline]
 
+    fieldsets = (
+        ("Hero Content", {
+            "fields": ("hero_title", "hero_subtitle")
+        }),
+        ("Section Titles", {
+            "fields": ("culture_title", "perks_title")
+        }),
+        ("CTA Section", {
+            "fields": ("cta_title", "cta_subtitle", "cta_button_text")
+        }),
+        ("SEO Optimization", {
+            "fields": ("seo_title", "seo_description", "seo_keywords"),
+            "classes": ("collapse",),
+            "description": "Customize how the Careers page appears in search engines."
+        }),
+    )
+
 
 class JobDescriptionInline(admin.TabularInline):
     model = JobDescription
@@ -183,6 +272,17 @@ class ChildJobPositionAdmin(admin.ModelAdmin):
         JobSkillInline
     ]
 
+    fieldsets = (
+        ("Job Details", {
+            "fields": ("career_page", "title", "slug", "location", "experience", "is_active")
+        }),
+        ("SEO Optimization", {
+            "fields": ("seo_title", "seo_description", "seo_keywords"),
+            "classes": ("collapse",),
+            "description": "Customize how this specific job listing appears in search engines."
+        }),
+    )
+
 class SectionItemInline(nested_admin.NestedTabularInline):
     model = SectionItem
     extra = 1
@@ -201,6 +301,17 @@ class PageAdmin(nested_admin.NestedModelAdmin):
     inlines = [SectionInline]
     prepopulated_fields = {"slug": ("title",)}
 
+    fieldsets = (
+        ("Basic Info", {
+            "fields": ("title", "slug")
+        }),
+        ("SEO Optimization", {
+            "fields": ("seo_title", "seo_description", "seo_keywords"),
+            "classes": ("collapse",),
+            "description": "Customize how this page appears in search engines."
+        }),
+    )
+
 class PolicySectionInline(admin.TabularInline):
     model = PolicySection
     extra = 1
@@ -210,6 +321,17 @@ class PolicyAdmin(admin.ModelAdmin):
     list_display = ["title", "slug"]
     prepopulated_fields = {"slug": ("title",)}
     inlines = [PolicySectionInline]
+
+    fieldsets = (
+        ("Basic Info", {
+            "fields": ("title", "slug", "description")
+        }),
+        ("SEO Optimization", {
+            "fields": ("seo_title", "seo_description", "seo_keywords"),
+            "classes": ("collapse",),
+            "description": "Customize how this policy page appears in search engines."
+        }),
+    )
 
 
 admin.site.register(Policy, PolicyAdmin)

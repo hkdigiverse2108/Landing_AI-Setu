@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import SEO from "@/components/SEO";
 
 interface Job {
   title: string;
@@ -11,6 +12,9 @@ interface Job {
   experience: string;
   descriptions: { text: string }[];
   skills: { name: string }[];
+  seo_title?: string;
+  seo_description?: string;
+  seo_keywords?: string;
 }
 
 const JobDetails = () => {
@@ -77,6 +81,11 @@ const JobDetails = () => {
 
   return (
     <>
+      <SEO 
+        title={job.seo_title || `${job.title} | Careers`} 
+        description={job.seo_description || `We are hiring for the position of ${job.title} in ${job.location}. Experience required: ${job.experience}. Apply now to join AI Setu!`}
+        keywords={job.seo_keywords || `${job.title}, ${job.location}, career, job opening`}
+      />
       <Header />
 
       <main className="bg-[#F5F6FA] min-h-screen">

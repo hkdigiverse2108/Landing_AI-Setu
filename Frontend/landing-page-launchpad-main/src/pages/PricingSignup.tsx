@@ -9,6 +9,7 @@ import SolutionSection from "@/components/landing/SolutionSection";
 import USPSection from "@/components/landing/USPSection";
 import ComparisonSection from "@/components/landing/ComparisonSection";
 import { useToast } from "@/components/ui/use-toast";
+import SEO from "@/components/SEO";
 
 const PricingSignup = () => {
 
@@ -162,6 +163,11 @@ const PricingSignup = () => {
 
   return (
     <>
+      <SEO 
+        title="Complete Your Purchase" 
+        description="Finalize your subscription to AI Setu and start transforming your business with AI. Secure checkout powered by PhonePe."
+        keywords="checkout, pricing signup, AI Setu subscription, secure payment"
+      />
       <Header />
 
       <div className="min-h-screen pt-24 pb-16 bg-background">

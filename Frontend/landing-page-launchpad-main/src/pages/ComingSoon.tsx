@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import ContactUsPage from "@/components/ContactUs";
 import CareerPage from "@/components/Career";
 import AboutUs from "@/pages/AboutUs"; // import the about page
@@ -25,6 +26,7 @@ const ComingSoon = ({ title }: { title: string }) => {
 
   return (
     <>
+      <SEO title={title} />
       <Header />
 
       <main className="min-h-[60vh] flex items-center justify-center bg-background">

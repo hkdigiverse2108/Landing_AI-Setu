@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Briefcase, Users, Rocket, HeartHandshake } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -42,6 +43,11 @@ const CareerPage = () => {
 
   return (
     <>
+      <SEO 
+        title={content?.seo_title || "Careers"} 
+        description={content?.seo_description || "Join AI Setu and help us build the future of AI-driven retail solutions. Explore our open positions and grow with us."}
+        keywords={content?.seo_keywords || "careers, jobs, AI Setu hiring, retail tech roles"}
+      />
       <Header />
 
       <main className="bg-[#F5F6FA]">

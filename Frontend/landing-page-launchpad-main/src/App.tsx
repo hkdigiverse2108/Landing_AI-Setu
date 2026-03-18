@@ -22,44 +22,48 @@ import AllTestimonials from "./pages/AllTestimonials";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PolicyPage from "./pages/PolicyPages";
 
+import { HelmetProvider } from "react-helmet-async";
+
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/referral" element={<Referral />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/demo" element={<Demo />} />
-          {/* <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<TermsConditions />} />
-          <Route path="/refund" element={<RefundPolicy />} />
-          <Route path="/data-security" element={<DataSecurity />} />
-          <Route path="/support" element={<SupportService />} /> */}
-          <Route path="/about" element={<About />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:postId" element={<BlogPost />} />
-          <Route path="/career" element={<Career />} />
-          <Route path="/career/:jobId" element={<JobDetails />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/pricing-signup" element={<PricingSignup />} />
-          <Route path="/career/apply/:jobId" element={<ApplyJob />} />
-          <Route path="/referral" element={<ReferralPage />} />
-           <Route path="/demo-success" element={<DemoSuccess />} />
-           <Route path="/reviews" element={<AllTestimonials />} />
-           <Route path="/payment-success" element={<PaymentSuccess />} />
-           <Route path="/policy/:slug" element={<PolicyPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter basename="/static/">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/referral" element={<Referral />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/demo" element={<Demo />} />
+            {/* <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsConditions />} />
+            <Route path="/refund" element={<RefundPolicy />} />
+            <Route path="/data-security" element={<DataSecurity />} />
+            <Route path="/support" element={<SupportService />} /> */}
+            <Route path="/about" element={<About />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:postId" element={<BlogPost />} />
+            <Route path="/career" element={<Career />} />
+            <Route path="/career/:jobId" element={<JobDetails />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/pricing-signup" element={<PricingSignup />} />
+            <Route path="/career/apply/:jobId" element={<ApplyJob />} />
+            <Route path="/referral" element={<ReferralPage />} />
+             <Route path="/demo-success" element={<DemoSuccess />} />
+             <Route path="/reviews" element={<AllTestimonials />} />
+             <Route path="/payment-success" element={<PaymentSuccess />} />
+             <Route path="/policy/:slug" element={<PolicyPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;

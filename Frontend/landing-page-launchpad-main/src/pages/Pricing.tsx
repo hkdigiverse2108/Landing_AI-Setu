@@ -5,6 +5,7 @@ import FAQSection from "@/components/landing/FAQSection";
 
 import { useState, useEffect } from "react";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
+import SEO from "@/components/SEO";
 
 const Pricing = () => {
 
@@ -52,6 +53,11 @@ const Pricing = () => {
   return (
 
     <>
+      <SEO 
+        title={content?.seo_title || "Pricing"} 
+        description={content?.seo_description || "Simple and transparent pricing for businesses of all sizes. Choose the plan that fits your needs and start scaling with AI Setu today."}
+        keywords={content?.seo_keywords || "AI Setu pricing, subscription plans, business automation cost"}
+      />
       <Header />
 
       <main>

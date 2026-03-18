@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
+import SEO from "@/components/SEO";
 import { toast } from "sonner";
 import { API_BASE_URL } from "@/services/api";
 
@@ -90,6 +91,10 @@ const ApplyJob = () => {
 
   return (
     <>
+      <SEO 
+        title="Apply for Job" 
+        description="Join the AI Setu team! Submit your application and take the next step in your career with a leading AI-driven ERP provider."
+      />
       <Header />
 
       <main className="bg-[#F5F6FA] min-h-screen">

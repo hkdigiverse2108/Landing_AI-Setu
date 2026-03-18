@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -28,6 +29,11 @@ const Blog = () => {
 
   return (
     <>
+      <SEO 
+        title="Blog" 
+        description="Explore the latest insights, trends, and tips in retail technology and AI-driven business automation on the AI Setu blog."
+        keywords="retail blog, AI business tips, technology trends, AI Setu insights"
+      />
       <Header />
 
       <main className="bg-[#F5F6FA] py-24">

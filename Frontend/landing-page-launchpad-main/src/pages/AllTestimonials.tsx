@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchAllTestimonials } from "@/services/api";
 import { fetchLandingPageContent } from "@/services/api";
+import SEO from "@/components/SEO";
 
 const AllTestimonials = () => {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -43,6 +44,11 @@ const AllTestimonials = () => {
 
   return (
     <>
+      <SEO 
+        title="Customer Reviews" 
+        description="Hear from our satisfied customers! Discover how AI Setu is helping businesses across India achieve greater efficiency and growth."
+        keywords="customer reviews, testimonials, AI Setu success stories, user feedback"
+      />
       <Header />
 
       <main className="bg-[#F5F6FA] min-h-screen">

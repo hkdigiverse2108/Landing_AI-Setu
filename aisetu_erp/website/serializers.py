@@ -191,7 +191,10 @@ class ChildJobPositionSerializer(serializers.ModelSerializer):
             "location",
             "experience",
             "descriptions",
-            "skills"
+            "skills",
+            "seo_title",
+            "seo_description",
+            "seo_keywords"
         ]
 
 # class ObjectIdField(serializers.Field):

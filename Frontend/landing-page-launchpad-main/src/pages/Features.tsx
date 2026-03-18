@@ -6,6 +6,7 @@ import ComparisonSection from "@/components/landing/ComparisonSection";
 
 import { useState, useEffect } from "react";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
+import SEO from "@/components/SEO";
 
 const Features = () => {
 
@@ -53,6 +54,11 @@ const Features = () => {
   return (
 
     <>
+      <SEO 
+        title={content?.seo_title || "Features"} 
+        description={content?.seo_description || "Discover how AI Setu transforms retail with AI scanning, automated billing, and smart inventory management. Explore our cutting-edge features."}
+        keywords={content?.seo_keywords || "AI scanning, automated billing, inventory management, retail tech"}
+      />
       <Header />
 
       <main>

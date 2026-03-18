@@ -74,6 +74,9 @@ export interface LandingPageContent {
     cta_small_text: string;
     feature_title: string;
     feature_title2: string;
+    seo_title?: string;
+    seo_description?: string;
+    seo_keywords?: string;
 
 }
 
@@ -262,6 +265,9 @@ export interface ContactPageContent {
   cta_button_text1: string;
   cta_button_text2: string;
   cta_button_text3: string;
+  seo_title?: string;
+  seo_description?: string;
+  seo_keywords?: string;
 }
 
 export const fetchContactPageContent = async (): Promise<ContactPageContent | null> => {
@@ -293,6 +299,9 @@ export interface BlogPost {
     author: string;
     created_at: string;
     is_published: boolean;
+    seo_title?: string;
+    seo_description?: string;
+    seo_keywords?: string;
 }
 
 export const fetchBlogPosts = async (categorySlug?: string): Promise<BlogPost[]> => {
@@ -378,6 +387,9 @@ export interface Job {
   location: string;
   slug: string;
   job_slug: string;
+  seo_title?: string;
+  seo_description?: string;
+  seo_keywords?: string;
 }
 
 export interface CareerPageContent {
@@ -396,6 +408,9 @@ export interface CareerPageContent {
   cta_title: string;
   cta_subtitle: string;
   cta_button_text: string;
+  seo_title?: string;
+  seo_description?: string;
+  seo_keywords?: string;
 }
 
 // ---------------- API CALL ----------------
@@ -446,6 +461,9 @@ export interface AboutPageContent {
   title: string;
   slug: string;
   sections: Section[];
+  seo_title?: string;
+  seo_description?: string;
+  seo_keywords?: string;
 }
 
 // ================= API =================
@@ -498,6 +516,9 @@ export interface Policy {
   slug: string;
   description: string;
   sections: PolicySection[];
+  seo_title?: string;
+  seo_description?: string;
+  seo_keywords?: string;
 }
 
 // ==============================

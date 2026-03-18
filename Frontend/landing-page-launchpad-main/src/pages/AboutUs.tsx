@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, Variants } from "framer-motion";
@@ -87,6 +88,11 @@ const AboutUs = () => {
 
   return (
     <>
+      <SEO 
+        title={content?.seo_title || "About Us"} 
+        description={content?.seo_description || "Learn more about AI Setu's mission to empower retailers with innovative AI solutions. Meet our team and discover our journey."}
+        keywords={content?.seo_keywords || "about AI Setu, company mission, retail innovation team"}
+      />
       <Header />
 
       <main className="bg-[#F5F6FA]">

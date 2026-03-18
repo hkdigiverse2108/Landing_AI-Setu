@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import { fetchBlogPostDetail, BlogPost as BlogPostType } from "@/services/api";
+import SEO from "@/components/SEO";
 
 const BlogPost = () => {
   const { postId } = useParams<{ postId: string }>(); // This is actually the slug
@@ -62,6 +63,13 @@ const BlogPost = () => {
 
   return (
     <>
+      <SEO 
+        title={post.seo_title || post.title} 
+        description={post.seo_description || post.excerpt}
+        keywords={post.seo_keywords}
+        ogImage={post.featured_image_url}
+        ogType="article"
+      />
       <Header />
       <main className="bg-gradient-to-br from-[#F5F6FA] via-[#F0F2F9] to-[#E8ECF4] min-h-screen overflow-x-hidden">
         <motion.section

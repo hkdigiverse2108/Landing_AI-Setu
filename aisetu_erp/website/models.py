@@ -376,6 +376,11 @@ class LandingPageContent(models.Model):
         
     )
 
+    # SEO Fields
+    seo_title = models.CharField(max_length=255, blank=True, null=True, help_text="Meta title for SEO (max 70 chars recommended)")
+    seo_description = models.TextField(blank=True, null=True, help_text="Meta description for SEO (max 160 chars recommended)")
+    seo_keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated SEO keywords")
+
     def save(self, *args, **kwargs):
         # Ensure only one instance exists
         if LandingPageContent.objects.exists() and not self.pk:
@@ -426,6 +431,11 @@ class BlogPost(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     is_published = models.BooleanField(default=False)
+    
+    # SEO Fields
+    seo_title = models.CharField(max_length=255, blank=True, null=True, help_text="Meta title for SEO (max 70 chars recommended)")
+    seo_description = models.TextField(blank=True, null=True, help_text="Meta description for SEO (max 160 chars recommended)")
+    seo_keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated SEO keywords")
     
     class Meta:
         ordering = ["-created_at"]
@@ -928,6 +938,11 @@ class ContactPageContent(models.Model):
         default="24/7 Support"
     )
 
+    # SEO Fields
+    seo_title = models.CharField(max_length=255, blank=True, null=True, help_text="Meta title for SEO (max 70 chars recommended)")
+    seo_description = models.TextField(blank=True, null=True, help_text="Meta description for SEO (max 160 chars recommended)")
+    seo_keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated SEO keywords")
+
     def __str__(self):
         return "Contact Page Content"
     
@@ -1155,6 +1170,11 @@ class CareerPage(models.Model):
     cta_subtitle = models.TextField()
     cta_button_text = models.CharField(max_length=100)
 
+    # SEO Fields
+    seo_title = models.CharField(max_length=255, blank=True, null=True, help_text="Meta title for SEO (max 70 chars recommended)")
+    seo_description = models.TextField(blank=True, null=True, help_text="Meta description for SEO (max 160 chars recommended)")
+    seo_keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated SEO keywords")
+
     def __str__(self):
         return "Career Page"
 
@@ -1199,6 +1219,11 @@ class JobPosition(models.Model):
     location = models.CharField(max_length=200)
     is_active = models.BooleanField(default=True)
 
+    # SEO Fields
+    seo_title = models.CharField(max_length=255, blank=True, null=True, help_text="Meta title for SEO (max 70 chars recommended)")
+    seo_description = models.TextField(blank=True, null=True, help_text="Meta description for SEO (max 160 chars recommended)")
+    seo_keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated SEO keywords")
+
     def __str__(self):
         return self.title
     
@@ -1217,6 +1242,11 @@ class ChildJobPosition(models.Model):
     
 
     is_active = models.BooleanField(default=True)
+
+    # SEO Fields
+    seo_title = models.CharField(max_length=255, blank=True, null=True, help_text="Meta title for SEO (max 70 chars recommended)")
+    seo_description = models.TextField(blank=True, null=True, help_text="Meta description for SEO (max 160 chars recommended)")
+    seo_keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated SEO keywords")
 
     def save(self, *args, **kwargs):
 
@@ -1262,6 +1292,11 @@ class Page(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
 
+    # SEO Fields
+    seo_title = models.CharField(max_length=255, blank=True, null=True, help_text="Meta title for SEO (max 70 chars recommended)")
+    seo_description = models.TextField(blank=True, null=True, help_text="Meta description for SEO (max 160 chars recommended)")
+    seo_keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated SEO keywords")
+
     def __str__(self):
         return self.title
     
@@ -1298,6 +1333,11 @@ class Policy(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True, null=True)
     description = models.TextField(blank=True)  # ✅ Intro text
+
+    # SEO Fields
+    seo_title = models.CharField(max_length=255, blank=True, null=True, help_text="Meta title for SEO (max 70 chars recommended)")
+    seo_description = models.TextField(blank=True, null=True, help_text="Meta description for SEO (max 160 chars recommended)")
+    seo_keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated SEO keywords")
 
     def save(self, *args, **kwargs):
         if not self.slug:

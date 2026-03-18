@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,6 +125,11 @@ const ContactUsPage = () => {
 
   return (
     <>
+      <SEO 
+        title={content.seo_title || content.hero_title || "Contact Us"} 
+        description={content.seo_description || content.hero_description || "Get in touch with AI Setu for any queries, support, or demo requests. We are here to help your business grow."}
+        keywords={content.seo_keywords}
+      />
       <Header />
 
       {/* HERO SECTION */}

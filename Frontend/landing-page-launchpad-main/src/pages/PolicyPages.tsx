@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useParams } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const PolicyPage = () => {
   const { slug } = useParams();
@@ -17,6 +18,11 @@ const PolicyPage = () => {
 
   return (
     <>
+      <SEO 
+        title={data.seo_title || data.title} 
+        description={data.seo_description || data.description}
+        keywords={data.seo_keywords}
+      />
       <Header />
 
       <main>

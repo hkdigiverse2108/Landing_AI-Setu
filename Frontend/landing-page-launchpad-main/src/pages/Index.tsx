@@ -16,15 +16,33 @@ import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import FAQSection from "@/components/landing/FAQSection";
 import FinalCTA from "@/components/landing/FinalCTA";
 import DemoPopup from "@/components/DemoPopup";
+import SEO from "@/components/SEO";
+
+import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 const Index = () => {
 
-  const [previewData, setPreviewData] = useState<any>(null);
+  const [content, setContent] = useState<LandingPageContent | null>(null);
+
+  useEffect(() => {
+    const loadContent = async () => {
+      const data = await fetchLandingPageContent();
+      if (data) {
+        setContent(data);
+      }
+    };
+    loadContent();
+  }, []);
 
   useEffect(() => {
 
     const handler = (event:any) => {
-      setPreviewData(event.data);
+      if(event.data){
+        setContent((prev:any)=>({
+          ...prev,
+          ...event.data
+        }))
+      }
     };
 
     window.addEventListener("message", handler);
@@ -35,6 +53,11 @@ const Index = () => {
 
   return (
     <>
+      <SEO 
+        title={content?.seo_title || "Home"} 
+        description={content?.seo_description || "AI Setu - Empowering your business with AI-driven solutions and seamless automation. Scale your operations effortlessly."}
+        keywords={content?.seo_keywords || "AI, automation, business solutions, AI Setu"}
+      />
       <DemoPopup />
       <Header />
 
