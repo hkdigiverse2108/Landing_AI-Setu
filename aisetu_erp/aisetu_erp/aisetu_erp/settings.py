@@ -144,7 +144,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5004",
-    "http://127.0.0.1:5004",
+    "http://[IP_ADDRESS]",
 ]
 
 # PhonePe Settings (UAT / Test Environment)
