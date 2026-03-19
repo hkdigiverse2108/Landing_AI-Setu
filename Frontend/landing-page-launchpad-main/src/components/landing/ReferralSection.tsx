@@ -34,18 +34,13 @@ const ReferralSection = () => {
   // Fetch perks (CRUD)
   useEffect(() => {
     const loadPerks = async () => {
-
       try{
-
-        const res = await fetch("http://127.0.0.1:8000/api/referral-perks/");
+        const res = await fetch("/api/referral-perks/");
         const data = await res.json();
-
         setPerks(data);
-
       }catch(err){
         console.error("Referral perks error", err);
       }
-
     };
     loadPerks();
   }, []);
@@ -67,7 +62,7 @@ const ReferralSection = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://127.0.0.1:8000/referral-check/", {
+      const res = await axios.post("/referral-check/", {
         mobile_number: mobile
       });
       const newCode = res.data.referral_code;

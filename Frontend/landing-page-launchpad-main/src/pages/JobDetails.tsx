@@ -35,7 +35,7 @@ const JobDetails = () => {
     const fetchJob = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/api/job/${jobId}/`
+          `/api/job/${jobId}/`
         );
 
         if (!response.ok) {

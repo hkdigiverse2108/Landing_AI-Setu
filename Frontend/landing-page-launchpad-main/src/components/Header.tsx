@@ -33,7 +33,7 @@ const Header = () => {
   useEffect(() => {
     const loadLoginLink = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/login-link/");
+        const res = await fetch("/api/login-link/");
         const data = await res.json();
         setLoginLink(data);
       } catch (err) {

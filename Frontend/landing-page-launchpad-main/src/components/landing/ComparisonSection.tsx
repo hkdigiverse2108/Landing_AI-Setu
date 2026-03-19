@@ -22,7 +22,7 @@ const ComparisonSection = () => {
   const fetchData = async () => {
     try {
       const [resFeatures, resContent] = await Promise.all([
-        fetch("http://127.0.0.1:8000/api/comparison-features/"),
+        fetch("/api/comparison-features/"),
         fetchLandingPageContent(), // static titles/subtitles
       ]);
 

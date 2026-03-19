@@ -16,7 +16,7 @@ const FAQSection = () => {
     try {
 
       const [resFaqs, resContent] = await Promise.all([
-        fetch("http://127.0.0.1:8000/api/faqs/"),
+        fetch("/api/faqs/"),
         fetchLandingPageContent(),
       ]);
 

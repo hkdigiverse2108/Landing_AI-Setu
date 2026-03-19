@@ -39,7 +39,7 @@ const AboutUs = () => {
     if (!path) return "/placeholder.png";
     return path.startsWith("http")
       ? path
-      : `http://127.0.0.1:8000${path}`;
+      : path; // Relative path works on any origin
   };
 
   // ANIMATIONS

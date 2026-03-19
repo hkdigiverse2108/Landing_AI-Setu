@@ -32,7 +32,7 @@ const WhoIsThisFor = () => {
 
       try {
 
-        const res = await fetch("http://127.0.0.1:8000/api/store-types/");
+        const res = await fetch("/api/store-types/");
         const data = await res.json();
 
         setTypes(data);

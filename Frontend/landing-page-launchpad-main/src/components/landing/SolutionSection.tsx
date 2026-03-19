@@ -58,7 +58,7 @@ const SolutionSection = () => {
     const loadSolutions = async () => {
       try {
         setLoading(true);
-        const res = await fetch("http://127.0.0.1:8000/api/features/");
+        const res = await fetch("/api/features/");
         const data = await res.json();
         setSolutions(data);
       } catch (err) {

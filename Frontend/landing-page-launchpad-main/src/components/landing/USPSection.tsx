@@ -29,7 +29,7 @@ const USPSection = () => {
   useEffect(() => {
     const loadFeatures = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/usp-features/");
+        const res = await fetch("/api/usp-features/");
         const data = await res.json();
         setFeatures(data);
       } catch (err) {

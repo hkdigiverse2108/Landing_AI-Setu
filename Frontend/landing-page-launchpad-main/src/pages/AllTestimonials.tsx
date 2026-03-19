@@ -16,7 +16,7 @@ const AllTestimonials = () => {
   // 1. Fetch Content (for Title/Desc) & All Testimonials
   useEffect(() => {
   const interval = setInterval(async () => {
-    const res = await fetch("http://127.0.0.1:8000/api/landing-page/");
+    const res = await fetch("/api/landing-page/");
     const data = await res.json();
     setContent(data);
   }, 5000); // fetch every 5 seconds
