@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Use hardcoded backend URL for local development
-export const API_BASE_URL = 'http://127.0.0.1:8000';
+// Use relative URL so it works on any IP/Port where Django is running
+export const API_BASE_URL = '';
 
 export interface LandingPageContent {
     id: number;
@@ -352,7 +352,7 @@ export const fetchDemoVideo = async (): Promise<DemoVideo | null> => {
 
   try {
 
-    const res = await fetch("http://127.0.0.1:8000/api/demo-video/")
+    const res = await fetch(`${API_BASE_URL}/api/demo-video/`)
 
     const data = await res.json()
 
@@ -366,7 +366,7 @@ export const fetchDemoVideo = async (): Promise<DemoVideo | null> => {
   }
 }
 
-const API_BASE = "http://127.0.0.1:8000/api";
+const API_BASE = `${API_BASE_URL}/api`;
 
 // ---------------- TYPES ----------------
 
@@ -428,7 +428,7 @@ export const fetchCareerPageContent = async (): Promise<CareerPageContent | null
 export const fetchJobDetails = async (slug: string) => {
 
   const res = await fetch(
-    `http://127.0.0.1:8000/api/job/${slug}/`
+    `${API_BASE_URL}/api/job/${slug}/`
   );
 
   return res.json();
@@ -480,12 +480,12 @@ export const fetchAboutPageContent = async (): Promise<AboutPageContent | null> 
     data.sections = data.sections.map((section: Section) => ({
       ...section,
       image: section.image
-        ? `http://127.0.0.1:8000${section.image}`
+        ? `${API_BASE_URL}${section.image}`
         : null,
       items: section.items.map((item: SectionItem) => ({
         ...item,
         image: item.image
-          ? `http://127.0.0.1:8000${item.image}`
+          ? `${API_BASE_URL}${item.image}`
           : null,
       })),
     }));
@@ -497,7 +497,7 @@ export const fetchAboutPageContent = async (): Promise<AboutPageContent | null> 
   }
 };
 
-const BASE_URL = "http://127.0.0.1:8000/api";
+const BASE_URL = `${API_BASE_URL}/api`;
 
 // ==============================
 // TYPES

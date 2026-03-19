@@ -166,12 +166,24 @@ REST_FRAMEWORK = {
     )
 }
 
+import socket
+try:
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+except:
+    local_ip = None
+
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5004",
     "http://127.0.0.1:5004",
-    # Add your server's public IP or domain here for external CSRF verification, e.g.:
-    # "http://<your-server-ip>:5004",
 ]
+
+# Dynamically add the local IP if detected
+if local_ip:
+    CSRF_TRUSTED_ORIGINS.append(f"http://{local_ip}:5004")
+    
+# Instructions for manual override
+# "http://<your-server-ip>:5004", # if you need a specific external IP
 
 PHONEPE_MERCHANT_ID = os.getenv("PHONEPE_MERCHANT_ID", "PGTESTPAYUAT86")
 PHONEPE_SALT_KEY = os.getenv("PHONEPE_SALT_KEY", "96434309-7796-489d-8924-ab56988a6076")
