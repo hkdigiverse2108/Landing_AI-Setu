@@ -56,6 +56,42 @@ const ReferralSection = () => {
     return () => window.removeEventListener("message", handler);
   }, []);
 
+  // Robust copy function with fallback for non-HTTPS/non-secure contexts
+  const copyToClipboard = async (text: string) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        return true;
+      } catch (err) {
+        console.error("Clipboard API failed", err);
+      }
+    }
+
+    // Fallback: Use a temporary hidden textarea
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      textArea.style.top = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      if (successful) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+      return successful;
+    } catch (err) {
+      console.error("Fallback copy failed", err);
+      return false;
+    }
+  };
+
   // Handle mobile number submit
   const submitMobile = async () => {
     if (!mobile) return toast.error("Please enter mobile number");
@@ -69,12 +105,14 @@ const ReferralSection = () => {
       setReferralCode(newCode);
 
       // --- NEW LOGIC: Auto-copy to clipboard ---
-      await navigator.clipboard.writeText(newCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      const wasCopied = await copyToClipboard(newCode);
 
       // --- Updated Toast Message ---
-      toast.success("Referral code generated and copied to clipboard!");
+      if (wasCopied) {
+        toast.success("Referral code generated and copied to clipboard!");
+      } else {
+        toast.success("Referral code generated! (Copy manually if needed)");
+      }
       
     } catch (error: any) {
       if (error.response?.data?.error) {
@@ -88,11 +126,9 @@ const ReferralSection = () => {
     setLoading(false);
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(referralCode);
-    setCopied(true);
+  const handleManualCopy = () => {
+    copyToClipboard(referralCode);
     toast.success("Referral code copied!");
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -177,7 +213,7 @@ const ReferralSection = () => {
               <span className="font-bold">{referralCode}</span>
               <button
                 type="button"
-                onClick={copyToClipboard}
+                onClick={handleManualCopy}
                 className="text-yellow-800 hover:text-yellow-900"
               >
                 Copy
