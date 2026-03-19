@@ -166,5 +166,6 @@ cython_debug/
 node_modules/
 
 # Media and Resumes
-/aisetu_erp/media/
+/aisetu_erp/media/resumes/
+/aisetu_erp/media/invoices/
 /aisetu_erp/payment_debug.log
