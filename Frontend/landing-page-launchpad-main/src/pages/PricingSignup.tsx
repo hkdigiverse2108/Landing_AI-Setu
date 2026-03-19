@@ -321,6 +321,13 @@ const PricingSignup = () => {
                     placeholder="Enter code if you have one"
                     value={formData.referralCode}
                     onChange={handleChange}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleApplyReferral();
+                      }
+                    }}
                     className="flex-1 border-2 border-border/50 rounded-xl p-3.5 bg-background focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
 

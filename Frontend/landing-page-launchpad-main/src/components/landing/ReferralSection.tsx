@@ -145,19 +145,32 @@ const ReferralSection = () => {
         </div>
 
         {/* Mobile Input + Button + Referral Code */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            submitMobile();
+          }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
           <input
-            type="text"
+            type="tel"
             placeholder="Enter Mobile Number"
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                e.stopPropagation();
+                submitMobile();
+              }
+            }}
             className="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3
                        placeholder:text-gray-400 dark:placeholder:text-gray-400
                        text-black dark:text-black
                        focus:ring-2 focus:ring-gold-gradient focus:outline-none dark:bg-gray-100"
           />
           <Button
-            onClick={submitMobile}
+            type="submit"
             disabled={loading}
             className="bg-gold-gradient text-accent-foreground font-semibold hover:opacity-90 px-6 py-3"
           >
@@ -168,6 +181,7 @@ const ReferralSection = () => {
             <div className="flex items-center gap-2 ml-4 bg-yellow-100 text-yellow-700 px-4 py-3 rounded-lg">
               <span className="font-bold">{referralCode}</span>
               <button
+                type="button"
                 onClick={copyToClipboard}
                 className="text-yellow-800 hover:text-yellow-900"
               >
@@ -175,7 +189,7 @@ const ReferralSection = () => {
               </button>
             </div>
           )}
-        </div>
+        </form>
       </div>
     </section>
   );
