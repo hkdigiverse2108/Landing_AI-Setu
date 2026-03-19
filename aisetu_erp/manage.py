@@ -45,6 +45,7 @@ def run_frontend_build():
     Runs the React frontend build command (npm run build).
     """
     import subprocess
+    import sys
     from pathlib import Path
     
     # Define paths
@@ -52,32 +53,46 @@ def run_frontend_build():
     frontend_dir = base_dir.parent / 'Frontend' / 'landing-page-launchpad-main'
     
     if not frontend_dir.exists():
-        print(f"Warning: Frontend directory not found at {frontend_dir}")
+        print(f"DEBUG: Frontend directory not found at {frontend_dir}")
         return
 
-    print(f"Building frontend in {frontend_dir}...")
+    # Detection logic for Windows vs Ubuntu
+    is_windows = sys.platform == 'win32'
+    
+    print(f"--- AUTOMATED FRONTEND BUILD START ({'Windows' if is_windows else 'Linux/Ubuntu'}) ---")
+    print(f"Source: {frontend_dir}")
+    
     try:
-        # Check if node_modules exists, if not run npm install
+        # Use shell=True for Windows and handle npm path automatically
+        # Node/npm on Ubuntu works without shell=True but we use it for consistency.
+        # This handles path expansion and other shell-specific behavior.
+        
+        # 1. Install dependencies if missing
         if not (frontend_dir / 'node_modules').exists():
-            print("node_modules not found. Running 'npm install'...")
-            subprocess.run(['npm', 'install'], cwd=frontend_dir, check=True, shell=True)
+            print("Installing node_modules...")
+            subprocess.run(['npm', 'install'], cwd=frontend_dir, check=True, shell=is_windows)
             
-        # Run build
-        subprocess.run(['npm', 'run', 'build'], cwd=frontend_dir, check=True, shell=True)
-        print("Frontend build successful.")
+        # 2. Run the build
+        print("Running 'npm run build'...")
+        subprocess.run(['npm', 'run', 'build'], cwd=frontend_dir, check=True, shell=is_windows)
+        print("--- FRONTEND BUILD SUCCESSFUL ---")
+        
+    except FileNotFoundError:
+        print("ERROR: 'npm' command not found. Please install Node.js/npm.")
     except subprocess.CalledProcessError as e:
-        print(f"Error: Frontend build failed with exit code {e.returncode}")
+        print(f"ERROR: Build failed (Exit Code: {e.returncode}).")
     except Exception as e:
-        print(f"An unexpected error occurred during frontend build: {e}")
+        print(f"Unexpected error: {e}")
+    print("---------------------------------------")
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'aisetu_erp.settings')
     
     # --- AUTOMATED FRONTEND BUILD ---
-    # Run build for commands that need it (runserver, collectstatic)
+    # Rebuild frontend when running server or collecting static files
     if len(sys.argv) > 1 and sys.argv[1] in ['runserver', 'collectstatic']:
-        # Avoid running build twice when using runserver's auto-reload
+        # Only build on the main process (not on auto-reloads)
         if os.environ.get('RUN_MAIN') != 'true':
             run_frontend_build()
     # --------------------------------
