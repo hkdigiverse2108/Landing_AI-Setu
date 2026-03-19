@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,12 +33,13 @@ SECRET_KEY = 'django-insecure-54*!$s_g01(7+l-h522603rapr+uk*c$#yp9s^btl*dw=#&^r*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] # In production, replace '*' with your actual domain
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'nested_admin',
     'aisetu_erp.apps.MongoAdminConfig',
     'aisetu_erp.apps.MongoAuthConfig',
     'aisetu_erp.apps.MongoContentTypesConfig',
@@ -47,7 +49,6 @@ INSTALLED_APPS = [
     'website.apps.WebsiteConfig',
     'rest_framework',
     'corsheaders',
-    'nested_admin',
     'forms_data',
     'import_export',
 ]
@@ -96,8 +97,8 @@ WSGI_APPLICATION = 'aisetu_erp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django_mongodb_backend',
-        'NAME': '',
-        'HOST': 'mongodb+srv://HK_Digiverse:HK%40Digiverse%40123@cluster0.lcbyqbq.mongodb.net/aisetu_db?retryWrites=true&w=majority&appName=Cluster0',
+        'NAME': os.getenv('DB_NAME', ''),
+        'HOST': os.getenv('DB_HOST', 'mongodb+srv://HK_Digiverse:HK%40Digiverse%40123@cluster0.lcbyqbq.mongodb.net/aisetu_db?retryWrites=true&w=majority&appName=Cluster0'),
     }
 }
 
@@ -137,6 +138,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -158,10 +160,10 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8080",
 ]
 
-PHONEPE_MERCHANT_ID = "PGTESTPAYUAT86"
-PHONEPE_SALT_KEY = "96434309-7796-489d-8924-ab56988a6076"
-PHONEPE_SALT_INDEX = "1"
-PHONEPE_BASE_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox"
+PHONEPE_MERCHANT_ID = os.getenv("PHONEPE_MERCHANT_ID", "PGTESTPAYUAT86")
+PHONEPE_SALT_KEY = os.getenv("PHONEPE_SALT_KEY", "96434309-7796-489d-8924-ab56988a6076")
+PHONEPE_SALT_INDEX = os.getenv("PHONEPE_SALT_INDEX", "1")
+PHONEPE_BASE_URL = os.getenv("PHONEPE_BASE_URL", "https://api-preprod.phonepe.com/apis/pg-sandbox")
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 IMPORT_EXPORT_USE_TRANSACTIONS = True
