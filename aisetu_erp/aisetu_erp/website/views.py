@@ -177,7 +177,7 @@ def phonepe_initiate_payment(request):
             "amount": amount_in_paise,
             "redirectUrl": "http://localhost:5004/payment-success",
             "redirectMode": "POST",
-            "callbackUrl": "http://127.0.0.1:8000/api/phonepe/callback/",
+            "callbackUrl": "http://127.0.0.1:5004/api/phonepe/callback/",
             "mobileNumber": user_phone,
             "paymentInstrument": {
                 "type": "PAY_PAGE"
