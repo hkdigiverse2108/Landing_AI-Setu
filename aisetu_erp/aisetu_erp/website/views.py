@@ -175,7 +175,7 @@ def phonepe_initiate_payment(request):
             "merchantTransactionId": merchant_transaction_id,
             "merchantUserId": f"USER_{user_phone}",
             "amount": amount_in_paise,
-            "redirectUrl": "http://localhost:8080/payment-success",
+            "redirectUrl": "http://localhost:5004/payment-success",
             "redirectMode": "POST",
             "callbackUrl": "http://127.0.0.1:8000/api/phonepe/callback/",
             "mobileNumber": user_phone,
