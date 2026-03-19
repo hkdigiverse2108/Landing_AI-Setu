@@ -132,7 +132,11 @@ const ApplyJob = () => {
 
           <div className="max-w-5xl mx-auto px-6">
 
-            <motion.div
+            <motion.form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-xl shadow-lg p-10 space-y-8"
@@ -267,7 +271,7 @@ const ApplyJob = () => {
               {/* Submit Button */}
 
               <motion.button
-                onClick={handleSubmit}
+                type="submit"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-gradient-to-r from-[#F4B400] to-[#F6C34A] text-black font-bold px-10 py-4 rounded-lg shadow"
@@ -275,7 +279,7 @@ const ApplyJob = () => {
                 Submit Application
               </motion.button>
 
-            </motion.div>
+            </motion.form>
 
           </div>
 
