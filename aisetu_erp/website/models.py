@@ -32,7 +32,7 @@ class AdminUser(models.Model):
 class PricingSignup(models.Model):
     shop_name = models.CharField(max_length=200)
     owner_name = models.CharField(max_length=200)
-    mobile_number = models.CharField(max_length=15, unique=True)
+    mobile_number = models.CharField(max_length=15)
 
     referral_code = models.CharField(max_length=50, null=True)
     total_referrals = models.IntegerField(default=0)

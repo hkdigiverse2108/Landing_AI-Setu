@@ -177,10 +177,10 @@ def pricing_signup(request):
     # --- 2. NORMAL SIGNUP FLOW ---
 
     # Check if this mobile is already registered in PricingSignup
-    if PricingSignup.objects.filter(mobile_number=mobile_number).exists():
-        return Response({
-            "error": "This mobile number is already registered"
-        }, status=400)
+    # if PricingSignup.objects.filter(mobile_number=mobile_number).exists():
+    #     return Response({
+    #         "error": "This mobile number is already registered"
+    #     }, status=400)
 
     # --- CHANGE START: Check for existing code from ReferralUser ---
     existing_referral_user = ReferralUser.objects.filter(mobile_number=mobile_number).first()
