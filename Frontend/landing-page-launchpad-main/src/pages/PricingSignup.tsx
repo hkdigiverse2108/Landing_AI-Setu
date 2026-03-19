@@ -191,7 +191,9 @@ const PricingSignup = () => {
                     ₹29,999
                   </span>
                   <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-5xl font-extrabold text-foreground">₹12,000</span>
+                    <span className="text-5xl font-extrabold text-foreground">
+                      ₹{Math.round(price / 1.18).toLocaleString()}
+                    </span>
                     <span className="text-muted-foreground text-sm">+ GST</span>
                   </div>
                 </div>
@@ -203,15 +205,15 @@ const PricingSignup = () => {
                   </div>
                   <div className="flex justify-between text-sm mb-2 text-foreground font-medium">
                     <span>Offer Price</span>
-                    <span>₹12,000</span>
+                    <span>₹{Math.round(price / 1.18).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm mb-2 text-muted-foreground">
                     <span>GST (18%)</span>
-                    <span>₹2,160</span>
+                    <span>₹{(price - Math.round(price / 1.18)).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between font-bold text-lg text-foreground mt-3 pt-3 border-t border-dashed border-border/70">
                     <span>Total Amount</span>
-                    <span>₹14,160</span>
+                    <span>₹{price.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
