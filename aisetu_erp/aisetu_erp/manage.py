@@ -62,13 +62,20 @@ def run_frontend_build():
         # Check if node_modules exists, if not run npm install
         if not (frontend_dir / 'node_modules').exists():
             print("node_modules not found. Running 'npm install'...")
-            subprocess.run(['npm', 'install'], cwd=frontend_dir, check=True, shell=True)
+            # Capture output to help debug
+            result = subprocess.run(['npm', 'install'], cwd=frontend_dir, check=True, shell=True, capture_output=True, text=True)
+            print(result.stdout)
             
         # Run build
-        subprocess.run(['npm', 'run', 'build'], cwd=frontend_dir, check=True, shell=True)
+        print("Running 'npm run build'...")
+        result = subprocess.run(['npm', 'run', 'build'], cwd=frontend_dir, check=True, shell=True, capture_output=True, text=True)
+        print(result.stdout)
         print("Frontend build successful.")
     except subprocess.CalledProcessError as e:
-        print(f"Error: Frontend build failed with exit code {e.returncode}")
+        print(f"--- ERROR: Frontend build failed (exit code {e.returncode}) ---")
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+        print("------------------------------------------------------")
     except Exception as e:
         print(f"An unexpected error occurred during frontend build: {e}")
 
