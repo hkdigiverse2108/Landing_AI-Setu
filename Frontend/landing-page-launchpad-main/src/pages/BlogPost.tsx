@@ -13,6 +13,20 @@ const BlogPost = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin' && event.data.model === 'BlogPost') {
+        const payload = event.data.payload;
+        setPost((prev: any) => ({
+          ...prev,
+          ...payload
+        }));
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
+  useEffect(() => {
     const loadPost = async () => {
       if (!postId) return;
       setLoading(true);

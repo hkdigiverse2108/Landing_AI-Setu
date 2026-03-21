@@ -48,30 +48,14 @@ const ReferralSection = () => {
   // Live preview listener
   useEffect(() => {
     const handler = (event: any) => {
-      if (event.data?.source === "django-admin") {
-        const payload = event.data.payload;
-        const referral_perks: any[] = [];
-
-        Object.keys(payload).forEach(key => {
-            if (key.includes('TOTAL_FORMS') || key.includes('INITIAL_FORMS') || key.includes('MAX_NUM_FORMS') || key.includes('MIN_NUM_FORMS')) return;
-
-            if (key.startsWith('referral_perks-')) {
-                const parts = key.split('-');
-                if (parts.length >= 3) {
-                    const idx = parseInt(parts[1], 10);
-                    const field = parts.slice(2).join('-');
-                    if (!referral_perks[idx]) referral_perks[idx] = {};
-                    referral_perks[idx][field] = payload[key];
-                }
-            }
-        });
-
-        const parsedPayload = { 
-            ...payload, 
-            ...(referral_perks.length > 0 && { referral_perks: referral_perks.filter(Boolean) })
-        };
-
-        setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
+      if (event.data && event.data.source === 'django-admin') {
+        if (event.data.model === 'LandingPageContent') {
+          setContent((prev: any) => ({ ...prev, ...event.data.payload }));
+        } else if (event.data.model === 'ReferralPerk') {
+          const item = event.data.payload;
+          const pk = event.data.pk;
+          setPerks(prev => prev.map(p => (p.id === parseInt(pk) || p.id === pk) ? { ...p, ...item } : p));
+        }
       }
     };
     window.addEventListener("message", handler);

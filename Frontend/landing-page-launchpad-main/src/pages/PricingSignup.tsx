@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { API_BASE_URL } from "@/services/api";
+import { API_BASE_URL, fetchLandingPageContent } from "@/services/api";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SolutionSection from "@/components/landing/SolutionSection";
@@ -95,21 +95,37 @@ const PricingSignup = () => {
   const [basePrice, setBasePrice] = useState(12000);
   const [price, setPrice] = useState(14160);
   const [content, setContent] = useState<any>(null);
+  const [features, setFeatures] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/landing-content/`)
-      .then(res => res.json())
-      .then(data => {
-        setContent(data);
-        if (data?.pricing_price) {
-          const parsedPrice = parseInt(data.pricing_price.replace(/[^0-9]/g, ''), 10);
-          if (!isNaN(parsedPrice) && parsedPrice > 0) {
-            setBasePrice(parsedPrice);
-            setPrice(parsedPrice * 1.18);
+    const loadData = async () => {
+      try {
+        // 1. Fetch Landing Page Content (Pricing)
+        const data = await fetchLandingPageContent();
+        if (data) {
+          setContent(data);
+          if (data.pricing_price) {
+            const parsedPrice = parseInt(data.pricing_price.replace(/[^0-9]/g, ''), 10);
+            if (!isNaN(parsedPrice) && parsedPrice > 0) {
+              setBasePrice(parsedPrice);
+              setPrice(parsedPrice * 1.18);
+            }
           }
         }
-      })
-      .catch(console.error);
+
+        // 2. Fetch Features (to sync with admin features CRUD)
+        const featuresRes = await fetch(`${API_BASE_URL}/api/features/`);
+        if (featuresRes.ok) {
+          const featuresData = await featuresRes.json();
+          if (featuresData && featuresData.length > 0) {
+            setFeatures(featuresData.map((f: any) => f.title));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load pricing/features:", err);
+      }
+    };
+    loadData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -239,7 +255,7 @@ const PricingSignup = () => {
               <div className="space-y-4">
                 <h3 className="font-semibold text-foreground border-b border-border pb-2">What's Included:</h3>
                 <ul className="space-y-3">
-                  {(content ? [
+                  {(features.length > 0 ? features : (content ? [
                     content.pricing_feature1, content.pricing_feature2, content.pricing_feature3, content.pricing_feature4,
                     content.pricing_feature5, content.pricing_feature6, content.pricing_feature7, content.pricing_feature8
                   ].filter(Boolean) : [
@@ -251,7 +267,7 @@ const PricingSignup = () => {
                     "Setup & Training Support",
                     "24/7 Customer Support",
                     "AI Photo Billing",
-                  ]).map((feature, i) => (
+                  ])).map((feature, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm text-foreground/80">
                       <svg
                         className="w-5 h-5 text-accent shrink-0 mt-0.5"

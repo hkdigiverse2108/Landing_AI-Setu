@@ -38,10 +38,14 @@ const Index = () => {
 
     const handler = (event: MessageEvent) => {
       if (event.data && typeof event.data === 'object' && !Array.isArray(event.data) && event.data.source === 'django-admin') {
-        setContent((prev: any) => ({
-          ...prev,
-          ...event.data.payload
-        }));
+        
+        if (event.data.model === 'LandingPageContent' || event.data.model === 'PricingContent') {
+          setContent((prev: any) => ({
+            ...prev,
+            ...event.data.payload
+          }));
+        }
+
         if (event.data.scrollTarget) {
           setTimeout(() => {
             const el = document.getElementById(event.data.scrollTarget);

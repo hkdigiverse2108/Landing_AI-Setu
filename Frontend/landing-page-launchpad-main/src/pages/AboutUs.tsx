@@ -30,7 +30,8 @@ const AboutUs = () => {
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.data?.source === "django-admin") {
-        
+        if (event.data.model === 'AboutPageContent') {
+          
         const payload = event.data.payload;
         const serve_items: any[] = [];
 
@@ -54,6 +55,7 @@ const AboutUs = () => {
         };
 
         setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
+        }
 
         if (event.data.scrollTarget) {
           const el = document.getElementById(event.data.scrollTarget);

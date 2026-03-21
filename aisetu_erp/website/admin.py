@@ -16,13 +16,36 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 
 # ... existing code ...
 
+class LivePreviewMixin:
+    change_form_template = "admin/live_preview_base.html"
+    preview_base_url = "http://127.0.0.1:5004"
+
+    def get_preview_url(self, obj):
+        return self.preview_base_url + "/"
+
+    def get_scroll_target(self, obj):
+        return ""
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        obj = self.get_object(request, object_id)
+        if obj:
+            extra_context['preview_url'] = self.get_preview_url(obj)
+            extra_context['scroll_target'] = self.get_scroll_target(obj)
+            extra_context['model_name'] = self.model.__name__
+            extra_context['original_pk'] = obj.pk
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
+
 @admin.register(BlogCategory)
 class BlogCategoryAdmin(admin.ModelAdmin):
     list_display = ["name", "slug"]
     prepopulated_fields = {"slug": ("name",)}
 
 @admin.register(BlogPost)
-class BlogPostAdmin(admin.ModelAdmin):
+class BlogPostAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/blog/{obj.slug}"
+
     list_display = ["title", "category", "author", "created_at", "is_published"]
     list_filter = ["is_published", "category", "author"]
     search_fields = ["title", "content", "excerpt"]
@@ -49,9 +72,10 @@ class BlogPostAdmin(admin.ModelAdmin):
 #         return super().has_add_permission(request)
 
 @admin.register(LandingPageContent)
-class LandingPageContentAdmin(admin.ModelAdmin):
+class LandingPageContentAdmin(LivePreviewMixin, admin.ModelAdmin):
 
-    change_form_template = "admin/live_preview_change_form.html"
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/"
 
     fieldsets = (
         ("Content", {
@@ -97,8 +121,9 @@ class LandingPageContentAdmin(admin.ModelAdmin):
 #         return True
     
 @admin.register(ContactPageContent)
-class ContactPageContentAdmin(admin.ModelAdmin):
-    change_form_template = "admin/live_preview_contactus_form.html"
+class ContactPageContentAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/contact"
 
     # This ensures you always edit the same object
     def has_add_permission(self, request):
@@ -140,28 +165,48 @@ class ContactPageContentAdmin(admin.ModelAdmin):
     )
 
 @admin.register(Problem)
-class ProblemAdmin(admin.ModelAdmin):
+class ProblemAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/"
+    
+    def get_scroll_target(self, obj):
+        return "problem"
 
     list_display = ["title", "order", "is_active"]
 
     list_editable = ["order", "is_active"]
 
 @admin.register(Feature)
-class FeatureAdmin(admin.ModelAdmin):
+class FeatureAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/"
+    
+    def get_scroll_target(self, obj):
+        return "solution"
 
     list_display = ["title", "order", "is_active"]
 
     list_editable = ["order", "is_active"]
 
 @admin.register(USPFeature)
-class USPFeatureAdmin(admin.ModelAdmin):
+class USPFeatureAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/"
+    
+    def get_scroll_target(self, obj):
+        return "usp"
 
     list_display = ["title", "order", "is_active"]
 
     list_editable = ["order", "is_active"]
 
 @admin.register(HowItWorksStep)
-class HowItWorksStepAdmin(admin.ModelAdmin):
+class HowItWorksStepAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/"
+    
+    def get_scroll_target(self, obj):
+        return "how-it-works"
 
     list_display = ["step_number", "title", "is_active"]
 
@@ -175,27 +220,49 @@ class StoreTypeAdmin(admin.ModelAdmin):
     list_editable = ["order", "is_active"]
 
 @admin.register(ReferralPerk)
-class ReferralPerkAdmin(admin.ModelAdmin):
+class ReferralPerkAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/"
+    
+    def get_scroll_target(self, obj):
+        return "referral"
 
     list_display = ["value", "text", "order", "is_active"]
 
     list_editable = ["order", "is_active"]
 
 @admin.register(Testimonial)
-class TestimonialAdmin(admin.ModelAdmin):
+class TestimonialAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/"
+    
+    def get_scroll_target(self, obj):
+        return "testimonials"
 
     list_display = ["name", "role", "rating", "is_active", "order"]
 
     list_editable = ["rating", "is_active", "order"]
 
 @admin.register(ComparisonFeature)
-class ComparisonFeatureAdmin(admin.ModelAdmin):
+class ComparisonFeatureAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/"
+    
+    def get_scroll_target(self, obj):
+        return "comparison"
+
     list_display = ["feature_name", "has_ai_setu", "has_traditional", "is_active", "order"]
     list_editable = ["has_ai_setu", "has_traditional", "is_active", "order"]
     ordering = ["order"]  
 
 @admin.register(FAQ)
-class FAQAdmin(admin.ModelAdmin):
+class FAQAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/"
+    
+    def get_scroll_target(self, obj):
+        return "faq"
+
     list_display = ["question", "is_active", "order"]
     list_editable = ["is_active", "order"]
     ordering = ["order"]
@@ -237,7 +304,10 @@ class JobPositionInline(admin.TabularInline):
 
 
 @admin.register(CareerPage)
-class CareerPageAdmin(admin.ModelAdmin):
+class CareerPageAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/career"
+
     inlines = [CultureInline, PerkInline, JobPositionInline]
 
     fieldsets = (
@@ -275,7 +345,9 @@ class ChildJobPositionInline(admin.StackedInline):
     
 
 @admin.register(ChildJobPosition)
-class ChildJobPositionAdmin(admin.ModelAdmin):
+class ChildJobPositionAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/career/{obj.slug}"
 
     prepopulated_fields = {"slug": ("title",)}
 
@@ -309,7 +381,10 @@ class SectionInline(nested_admin.NestedStackedInline):
 
 # PAGE (MAIN)
 @admin.register(Page)
-class PageAdmin(nested_admin.NestedModelAdmin):
+class PageAdmin(LivePreviewMixin, nested_admin.NestedModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/{obj.slug}"
+
     inlines = [SectionInline]
     prepopulated_fields = {"slug": ("title",)}
 
@@ -329,7 +404,10 @@ class PolicySectionInline(admin.TabularInline):
     extra = 1
 
 
-class PolicyAdmin(admin.ModelAdmin):
+class PolicyAdmin(LivePreviewMixin, admin.ModelAdmin):
+    def get_preview_url(self, obj):
+        return f"{self.preview_base_url}/policy/{obj.slug}"
+
     list_display = ["title", "slug"]
     prepopulated_fields = {"slug": ("title",)}
     inlines = [PolicySectionInline]

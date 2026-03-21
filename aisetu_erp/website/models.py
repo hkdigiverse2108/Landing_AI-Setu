@@ -961,6 +961,7 @@ class Problem(models.Model):
 
     order = models.PositiveIntegerField(default=0)
 
+    landing_page = models.ForeignKey(LandingPageContent, related_name='problems', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -983,6 +984,7 @@ class Feature(models.Model):
 
     order = models.PositiveIntegerField(default=0)
 
+    landing_page = models.ForeignKey(LandingPageContent, related_name='features', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -1001,6 +1003,7 @@ class USPFeature(models.Model):
 
     order = models.PositiveIntegerField(default=0)
 
+    landing_page = models.ForeignKey(LandingPageContent, related_name='usp_features', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -1019,6 +1022,7 @@ class HowItWorksStep(models.Model):
 
     step_number = models.PositiveIntegerField(default=1)
 
+    landing_page = models.ForeignKey(LandingPageContent, related_name='howitworks_steps', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -1035,6 +1039,7 @@ class StoreType(models.Model):
 
     order = models.PositiveIntegerField(default=0)
 
+    landing_page = models.ForeignKey(LandingPageContent, related_name='store_types', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -1054,6 +1059,7 @@ class ReferralPerk(models.Model):
 
     order = models.PositiveIntegerField(default=0)
 
+    landing_page = models.ForeignKey(LandingPageContent, related_name='referral_perks', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -1072,6 +1078,7 @@ class Testimonial(models.Model):
 
     rating = models.IntegerField(default=5)
 
+    landing_page = models.ForeignKey(LandingPageContent, related_name='testimonials', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     order = models.PositiveIntegerField(default=0)
@@ -1087,6 +1094,7 @@ class ComparisonFeature(models.Model):
     has_ai_setu = models.BooleanField(default=True)
     has_traditional = models.BooleanField(default=False)
     order = models.IntegerField(default=0)  # display sequence
+    landing_page = models.ForeignKey(LandingPageContent, related_name='comparison_features', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -1099,6 +1107,7 @@ class FAQ(models.Model):
     question = models.CharField(max_length=500)
     answer = models.TextField()
     order = models.IntegerField(default=0)
+    landing_page = models.ForeignKey(LandingPageContent, related_name='faqs', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:

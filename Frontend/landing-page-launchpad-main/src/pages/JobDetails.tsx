@@ -31,7 +31,8 @@ const JobDetails = () => {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin') {
-        const payload = event.data.payload;
+        if (event.data.model === 'ChildJobPosition') {
+          const payload = event.data.payload;
         
         // Deserialize dynamic Inline Formsets into structural React Arrays
         const descriptions: any[] = [];
@@ -66,6 +67,7 @@ const JobDetails = () => {
         };
         
         setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
+        }
 
         if (event.data.scrollTarget) {
             setTimeout(() => {

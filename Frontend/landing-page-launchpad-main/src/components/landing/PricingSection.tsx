@@ -11,6 +11,7 @@ const PricingSection = () => {
 
   const [content, setContent] = useState<any>(null);
   const [livePreview, setLivePreview] = useState<any>(null);
+  const [dbFeatures, setDbFeatures] = useState<string[]>([]);
 
   // Fetch database content
   useEffect(() => {
@@ -19,29 +20,40 @@ const PricingSection = () => {
       if (data) {
         setContent(data);
       }
+
+      // Fetch dynamic features
+      try {
+        const res = await fetch("/api/features/");
+        if (res.ok) {
+          const featuresData = await res.json();
+          if (featuresData && featuresData.length > 0) {
+            setDbFeatures(featuresData.map((f: any) => f.title));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load dynamic features:", err);
+      }
     };
     loadContent();
   }, []);
 
   // Live preview listener
   useEffect(() => {
-
-    const handler = (event:any) => {
-      if(event.data){
-        setLivePreview((prev:any)=>({
+    const handler = (event: any) => {
+      if (event.data && event.data.source === 'django-admin') {
+        const payload = event.data.payload;
+        setLivePreview((prev: any) => ({
           ...prev,
-          ...event.data
-        }))
+          ...payload
+        }));
       }
-    }
+    };
 
-    window.addEventListener("message", handler)
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
-    return () => window.removeEventListener("message", handler)
-
-  },[])
-
-  const features = [
+  const featuresList = dbFeatures.length > 0 ? dbFeatures : [
     livePreview?.pricing_feature1 || content?.pricing_feature1 || "Full Access to All Modules",
     livePreview?.pricing_feature2 || content?.pricing_feature2 || "POS Billing + Inventory",
     livePreview?.pricing_feature3 || content?.pricing_feature3 || "CRM & Loyalty Programs",
@@ -122,7 +134,7 @@ const PricingSection = () => {
           </div>
 
           <div className="space-y-3 mb-8">
-            {features.map((f, index) => (
+            {featuresList.map((f, index) => (
               <div key={index} className="flex items-center gap-3">
                 <Check className="h-4 w-4 text-accent flex-shrink-0" />
                 <span className="text-sm text-foreground">{f}</span>
