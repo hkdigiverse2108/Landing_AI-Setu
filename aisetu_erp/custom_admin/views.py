@@ -29,6 +29,10 @@ PolicySectionFormSet = inlineformset_factory(Policy, PolicySection, fields='__al
 from website.models import AboutPageContent, AboutUsServeItem
 ServeItemFormSet = inlineformset_factory(AboutPageContent, AboutUsServeItem, fields='__all__', extra=1, can_delete=True)
 
+# Referral Formsets
+from website.models import ReferralProgramContent, ReferralPerk
+ReferralPerkFormSet = inlineformset_factory(ReferralProgramContent, ReferralPerk, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
+
 def custom_admin_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
@@ -66,6 +70,15 @@ def dashboard(request):
         'contact_count': ContactSubmission.objects.count(),
     }
     return render(request, 'custom_admin/dashboard.html', context)
+
+@custom_admin_required
+def edit_singleton(request, model_name):
+    # Dynamically grab the first object of a singleton model, or create it if missing, then redirect to its UpdateView.
+    model = apps.get_model('website', model_name)
+    obj = model.objects.first()
+    if not obj:
+        obj = model.objects.create()
+    return redirect(reverse('custom_admin:model_update', kwargs={'app_label': 'website', 'model_name': model_name, 'pk': obj.pk}))
 
 # --- Generic CRUD Views ---
 class AdminRequiredMixin:
@@ -111,6 +124,8 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             fields = ['pricing_main_title', 'pricing_main_desc', 'pricing_label', 'pricing_title', 'pricing_plan_name', 'pricing_old_price', 'pricing_price', 'pricing_price_suffix', 'pricing_feature1', 'pricing_feature2', 'pricing_feature3', 'pricing_feature4', 'pricing_feature5', 'pricing_feature6', 'pricing_feature7', 'pricing_feature8']
         elif model_name == 'landingpagecontent':
             fields = ['hero_eyebrow', 'hero_title', 'hero_highlighted_title', 'hero_subtitle', 'hero_highlights', 'primary_cta_text', 'secondary_cta_text', 'trusted_retailers_count', 'hero_stats_label', 'hero_stats_value', 'trust_item1', 'trust_item2', 'trust_item3', 'trust_item4', 'problem_section_label', 'problem_section_title', 'feature_title', 'feature_title2', 'solution_section_label', 'solution_section_title', 'usp_badge_text', 'usp_title', 'usp_description', 'howitworks_label', 'howitworks_title', 'who_main_title', 'who_title', 'referral_main_title', 'referral_main_desc', 'referral_label', 'referral_title', 'join_referral', 'comparison_title', 'comparison_subtitle', 'comparison_title1', 'comparison_title2', 'comparison_title3', 'testimonial_label', 'testimonial_title', 'review_button', 'all_reviews_title', 'all_reviews_desc', 'faq_label', 'faq_title', 'cta_badge', 'cta_title', 'cta_description', 'cta_button_text', 'cta_small_text', 'seo_title', 'seo_description', 'seo_keywords']
+        elif model_name == 'referralprogramcontent':
+            fields = ['referral_main_title', 'referral_main_desc', 'referral_label', 'referral_title', 'join_referral']
         else:
             fields = '__all__'
         return modelform_factory(model, fields=fields)
@@ -143,6 +158,13 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             else:
                 context['serve_formset'] = ServeItemFormSet()
 
+        elif 'referralprogramcontent' in model_name:
+            context['is_referral_program'] = True
+            if self.request.method == 'POST':
+                context['referral_formset'] = ReferralPerkFormSet(self.request.POST, self.request.FILES)
+            else:
+                context['referral_formset'] = ReferralPerkFormSet()
+
         elif 'policy' == model_name:
             context['is_policy'] = True
             if self.request.method == 'POST':
@@ -158,6 +180,8 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
         if 'aboutpagecontent' in model_name:
             context['preview_url'] = f"{base_url}/about"
         elif 'landingpagecontent' in model_name:
+            context['preview_url'] = f"{base_url}/"
+        elif 'referralprogramcontent' in model_name:
             context['preview_url'] = f"{base_url}/"
         elif 'pricingcontent' in model_name:
             context['preview_url'] = f"{base_url}/pricing"
@@ -220,6 +244,17 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             else:
                 return self.render_to_response(self.get_context_data(form=form))
 
+        elif 'referralprogramcontent' in model_name:
+            referral_formset = context['referral_formset']
+            
+            if referral_formset.is_valid():
+                self.object = form.save()
+                referral_formset.instance = self.object
+                referral_formset.save()
+                return super().form_valid(form)
+            else:
+                return self.render_to_response(self.get_context_data(form=form))
+
         elif 'policy' == model_name:
             section_formset = context['section_formset']
             
@@ -250,6 +285,8 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
             fields = ['pricing_main_title', 'pricing_main_desc', 'pricing_label', 'pricing_title', 'pricing_plan_name', 'pricing_old_price', 'pricing_price', 'pricing_price_suffix', 'pricing_feature1', 'pricing_feature2', 'pricing_feature3', 'pricing_feature4', 'pricing_feature5', 'pricing_feature6', 'pricing_feature7', 'pricing_feature8']
         elif model_name == 'landingpagecontent':
             fields = ['hero_eyebrow', 'hero_title', 'hero_highlighted_title', 'hero_subtitle', 'hero_highlights', 'primary_cta_text', 'secondary_cta_text', 'trusted_retailers_count', 'hero_stats_label', 'hero_stats_value', 'trust_item1', 'trust_item2', 'trust_item3', 'trust_item4', 'problem_section_label', 'problem_section_title', 'feature_title', 'feature_title2', 'solution_section_label', 'solution_section_title', 'usp_badge_text', 'usp_title', 'usp_description', 'howitworks_label', 'howitworks_title', 'who_main_title', 'who_title', 'referral_main_title', 'referral_main_desc', 'referral_label', 'referral_title', 'join_referral', 'comparison_title', 'comparison_subtitle', 'comparison_title1', 'comparison_title2', 'comparison_title3', 'testimonial_label', 'testimonial_title', 'review_button', 'all_reviews_title', 'all_reviews_desc', 'faq_label', 'faq_title', 'cta_badge', 'cta_title', 'cta_description', 'cta_button_text', 'cta_small_text', 'seo_title', 'seo_description', 'seo_keywords']
+        elif model_name == 'referralprogramcontent':
+            fields = ['referral_main_title', 'referral_main_desc', 'referral_label', 'referral_title', 'join_referral']
         else:
             fields = '__all__'
         return modelform_factory(model, fields=fields)
@@ -282,6 +319,13 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
             else:
                 context['serve_formset'] = ServeItemFormSet(instance=self.object)
 
+        elif 'referralprogramcontent' in model_name:
+            context['is_referral_program'] = True
+            if self.request.method == 'POST':
+                context['referral_formset'] = ReferralPerkFormSet(self.request.POST, self.request.FILES, instance=self.object)
+            else:
+                context['referral_formset'] = ReferralPerkFormSet(instance=self.object)
+
         elif 'policy' == model_name:
             context['is_policy'] = True
             if self.request.method == 'POST':
@@ -297,6 +341,8 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         if 'aboutpagecontent' in model_name:
             context['preview_url'] = f"{base_url}/about"
         elif 'landingpagecontent' in model_name:
+            context['preview_url'] = f"{base_url}/"
+        elif 'referralprogramcontent' in model_name:
             context['preview_url'] = f"{base_url}/"
         elif 'pricingcontent' in model_name:
             context['preview_url'] = f"{base_url}/pricing"
@@ -361,6 +407,17 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
                 self.object = form.save()
                 serve_formset.instance = self.object
                 serve_formset.save()
+                return super().form_valid(form)
+            else:
+                return self.render_to_response(self.get_context_data(form=form))
+
+        elif 'referralprogramcontent' in model_name:
+            referral_formset = context['referral_formset']
+            
+            if referral_formset.is_valid():
+                self.object = form.save()
+                referral_formset.instance = self.object
+                referral_formset.save()
                 return super().form_valid(form)
             else:
                 return self.render_to_response(self.get_context_data(form=form))

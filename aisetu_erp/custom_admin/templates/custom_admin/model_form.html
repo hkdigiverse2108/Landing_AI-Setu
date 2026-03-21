@@ -149,6 +149,21 @@
                 </div>
             {% endif %}
 
+            {% if is_referral_program %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Referral Perks</h4>
+                    {{ referral_formset.management_form }}
+                    <div id="referral-formset-container" class="formset-container" data-prefix="referral_perks">
+                        {% for form in referral_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="referral-formset-container">Add Referral Perk</button>
+                </div>
+            {% endif %}
+
             <div class="mt-5 pt-4 border-top text-end">
                 <a href="{% url 'custom_admin:model_list' app_label model_slug %}" class="btn btn-light border px-4 me-2">Cancel</a>
                 <button type="submit" class="btn btn-primary px-4 shadow-sm">Save Changes</button>
@@ -166,12 +181,24 @@
 </div> <!-- end admin-preview-layout -->
 
 <script>
+const fileUrlCache = {};
+
 function sendLivePreview(scrollTarget = null) {
     const data = {};
     document.querySelectorAll("input, textarea").forEach(field => {
         if(field.id) {
             const key = field.id.replace("id_", "");
-            data[key] = field.value;
+            
+            if (field.type === 'file' && field.files && field.files.length > 0) {
+                const file = field.files[0];
+                const cacheKey = file.name + file.size;
+                if (!fileUrlCache[cacheKey]) {
+                    fileUrlCache[cacheKey] = URL.createObjectURL(file);
+                }
+                data[key] = fileUrlCache[cacheKey];
+            } else if (field.type !== 'file') {
+                data[key] = field.value;
+            }
         }
     });
 

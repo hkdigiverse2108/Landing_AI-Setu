@@ -4,7 +4,10 @@ from . import views
 app_name = 'custom_admin'
 
 urlpatterns = [
-    path('', views.dashboard, name='dashboard'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('singleton/<str:model_name>/', views.edit_singleton, name='edit_singleton'),
+    
+    # Generic CRUD paths
     path('login/', views.custom_login, name='login'),
     path('logout/', views.custom_logout, name='logout'),
     path('<str:app_label>/<str:model_name>/', views.CustomAdminListView.as_view(), name='model_list'),

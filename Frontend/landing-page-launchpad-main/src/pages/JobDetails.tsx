@@ -31,7 +31,42 @@ const JobDetails = () => {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin') {
-        setLivePreview((prev: any) => ({ ...prev, ...event.data.payload }));
+        const payload = event.data.payload;
+        
+        // Deserialize dynamic Inline Formsets into structural React Arrays
+        const descriptions: any[] = [];
+        const skills: any[] = [];
+
+        Object.keys(payload).forEach(key => {
+            if (key.includes('TOTAL_FORMS') || key.includes('INITIAL_FORMS') || key.includes('MAX_NUM_FORMS') || key.includes('MIN_NUM_FORMS')) return;
+
+            if (key.startsWith('descriptions-')) {
+                const parts = key.split('-');
+                if (parts.length >= 3) {
+                    const idx = parseInt(parts[1], 10);
+                    const field = parts.slice(2).join('-');
+                    if (!descriptions[idx]) descriptions[idx] = {};
+                    descriptions[idx][field] = payload[key];
+                }
+            } else if (key.startsWith('skills-')) {
+                const parts = key.split('-');
+                if (parts.length >= 3) {
+                    const idx = parseInt(parts[1], 10);
+                    const field = parts.slice(2).join('-');
+                    if (!skills[idx]) skills[idx] = {};
+                    skills[idx][field] = payload[key];
+                }
+            }
+        });
+
+        const parsedPayload = { 
+            ...payload, 
+            descriptions: descriptions.filter(Boolean),
+            skills: skills.filter(Boolean)
+        };
+        
+        setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
+
         if (event.data.scrollTarget) {
             setTimeout(() => {
                 const el = document.getElementById(event.data.scrollTarget);
@@ -161,7 +196,7 @@ const JobDetails = () => {
                 </h2>
 
                 <ul className="space-y-3">
-                  {job.descriptions?.map((item, i) => (
+                  {(livePreview?.descriptions || job.descriptions)?.map((item: any, i: number) => (
                     <motion.li
                       key={i}
                       initial={{ opacity: 0, x: -20 }}
@@ -183,7 +218,7 @@ const JobDetails = () => {
                 </h2>
 
                 <div className="flex flex-wrap gap-3">
-                  {job.skills?.map((skill, i) => (
+                  {(livePreview?.skills || job.skills)?.map((skill: any, i: number) => (
                     <motion.span
                       key={i}
                       whileHover={{ scale: 1.1 }}

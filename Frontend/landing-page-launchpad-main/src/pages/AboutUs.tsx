@@ -30,7 +30,31 @@ const AboutUs = () => {
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.data?.source === "django-admin") {
-        setLivePreview(event.data.payload);
+        
+        const payload = event.data.payload;
+        const serve_items: any[] = [];
+
+        Object.keys(payload).forEach(key => {
+            if (key.includes('TOTAL_FORMS') || key.includes('INITIAL_FORMS') || key.includes('MAX_NUM_FORMS') || key.includes('MIN_NUM_FORMS')) return;
+
+            if (key.startsWith('serve_items-')) {
+                const parts = key.split('-');
+                if (parts.length >= 3) {
+                    const idx = parseInt(parts[1], 10);
+                    const field = parts.slice(2).join('-');
+                    if (!serve_items[idx]) serve_items[idx] = {};
+                    serve_items[idx][field] = payload[key];
+                }
+            }
+        });
+
+        const parsedPayload = { 
+            ...payload, 
+            serve_items: serve_items.filter(Boolean)
+        };
+
+        setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
+
         if (event.data.scrollTarget) {
           const el = document.getElementById(event.data.scrollTarget);
           if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -253,14 +277,18 @@ const AboutUs = () => {
               ref={scrollRef}
               className="flex gap-8 overflow-x-auto px-6 no-scrollbar scroll-smooth"
             >
-              {serve?.items?.map((item) => (
+              {(livePreview?.serve_items || serve?.items)?.map((item: any, idx: number) => {
+                const originalItem = serve?.items?.find(x => x.id == item.id) || serve?.items?.[idx];
+                const finalImage = item.image || originalItem?.image;
+
+                return (
                 <div
-                  key={item.id}
+                  key={item.id || idx}
                   className="min-w-[300px] h-[200px] relative rounded-xl overflow-hidden shadow-lg group"
                 >
-                  {item.image && (
+                  {finalImage && (
                     <img
-                      src={item.image}
+                      src={finalImage}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   )}
@@ -271,7 +299,8 @@ const AboutUs = () => {
                     {item.title}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
           </div>

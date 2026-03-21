@@ -545,6 +545,13 @@ class PricingContent(LandingPageContent):
         verbose_name_plural = "Pricing Content"
         app_label = 'website'
 
+class ReferralProgramContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Referral Program Content"
+        verbose_name_plural = "Referral Program Content"
+        app_label = 'website'
+
 from django.db import models
 
 
@@ -1039,6 +1046,7 @@ class StoreType(models.Model):
 
 class ReferralPerk(models.Model):
 
+    landing_page = models.ForeignKey(LandingPageContent, on_delete=models.CASCADE, related_name='referral_perks', null=True, blank=True)
     value = models.CharField(max_length=100)
     text = models.CharField(max_length=255)
 

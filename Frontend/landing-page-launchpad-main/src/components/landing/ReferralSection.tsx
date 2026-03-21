@@ -48,8 +48,30 @@ const ReferralSection = () => {
   // Live preview listener
   useEffect(() => {
     const handler = (event: any) => {
-      if (event.data) {
-        setLivePreview((prev: any) => ({ ...prev, ...event.data }));
+      if (event.data?.source === "django-admin") {
+        const payload = event.data.payload;
+        const referral_perks: any[] = [];
+
+        Object.keys(payload).forEach(key => {
+            if (key.includes('TOTAL_FORMS') || key.includes('INITIAL_FORMS') || key.includes('MAX_NUM_FORMS') || key.includes('MIN_NUM_FORMS')) return;
+
+            if (key.startsWith('referral_perks-')) {
+                const parts = key.split('-');
+                if (parts.length >= 3) {
+                    const idx = parseInt(parts[1], 10);
+                    const field = parts.slice(2).join('-');
+                    if (!referral_perks[idx]) referral_perks[idx] = {};
+                    referral_perks[idx][field] = payload[key];
+                }
+            }
+        });
+
+        const parsedPayload = { 
+            ...payload, 
+            ...(referral_perks.length > 0 && { referral_perks: referral_perks.filter(Boolean) })
+        };
+
+        setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
       }
     };
     window.addEventListener("message", handler);
@@ -154,7 +176,7 @@ const ReferralSection = () => {
 
         {/* Perks */}
         <div className="grid md:grid-cols-4 gap-8 max-w-4xl mx-auto mb-10">
-          {perks.map((p, i) => {
+          {(livePreview?.referral_perks || perks).map((p: any, i: number) => {
             const Icon = iconMap[p.icon];
             return (
               <motion.div

@@ -30,7 +30,53 @@ const CareerPage = () => {
       if (event.data === "reload_full_data") {
         fetchCareerPageContent().then((data) => data && setContent(data));
       } else if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin') {
-        setLivePreview((prev: any) => ({ ...prev, ...event.data.payload }));
+        
+        const payload = event.data.payload;
+        
+        // Deserialize dynamic Inline Formsets into structural React Arrays
+        const cultures: any[] = [];
+        const perks: any[] = [];
+        const jobs: any[] = [];
+
+        Object.keys(payload).forEach(key => {
+            if (key.includes('TOTAL_FORMS') || key.includes('INITIAL_FORMS') || key.includes('MAX_NUM_FORMS') || key.includes('MIN_NUM_FORMS')) return;
+
+            if (key.startsWith('cultures-')) {
+                const parts = key.split('-');
+                if (parts.length >= 3) {
+                    const idx = parseInt(parts[1], 10);
+                    const field = parts.slice(2).join('-');
+                    if (!cultures[idx]) cultures[idx] = {};
+                    cultures[idx][field] = payload[key];
+                }
+            } else if (key.startsWith('perks-')) {
+                const parts = key.split('-');
+                if (parts.length >= 3) {
+                    const idx = parseInt(parts[1], 10);
+                    const field = parts.slice(2).join('-');
+                    if (!perks[idx]) perks[idx] = {};
+                    perks[idx][field] = payload[key];
+                }
+            } else if (key.startsWith('jobs-')) {
+                const parts = key.split('-');
+                if (parts.length >= 3) {
+                    const idx = parseInt(parts[1], 10);
+                    const field = parts.slice(2).join('-');
+                    if (!jobs[idx]) jobs[idx] = {};
+                    jobs[idx][field] = payload[key];
+                }
+            }
+        });
+
+        const parsedPayload = { 
+            ...payload, 
+            cultures: cultures.filter(Boolean),
+            perks: perks.filter(Boolean),
+            jobs: jobs.filter(Boolean)
+        };
+
+        setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
+
         if (event.data.scrollTarget) {
             setTimeout(() => {
                 const el = document.getElementById(event.data.scrollTarget);
@@ -85,7 +131,7 @@ const CareerPage = () => {
           </h2>
 
           <div className="grid md:grid-cols-4 gap-8">
-            {content?.cultures?.map((item, i) => {
+            {(livePreview?.cultures || content?.cultures)?.map((item: any, i: number) => {
               const Icon = iconMap[i] || Users;
 
               return (
@@ -113,7 +159,7 @@ const CareerPage = () => {
             </h2>
 
             <div className="grid md:grid-cols-3 gap-8">
-              {content?.perks?.map((perk, i) => (
+              {(livePreview?.perks || content?.perks)?.map((perk: any, i: number) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 40 }}
@@ -139,7 +185,7 @@ const CareerPage = () => {
           </h2>
 
           <div className="space-y-6">
-            {content?.jobs?.map((job, index) => (
+            {(livePreview?.jobs || content?.jobs)?.map((job: any, index: number) => (
               <motion.div
                 key={index}
                 whileHover={{ scale: 1.02 }}
