@@ -45,13 +45,14 @@ const FAQSection = () => {
 
     const handler = (event: any) => {
 
-      if (event.data) {
-
-        setLivePreview((prev: any) => ({
-          ...prev,
-          ...event.data
-        }));
-
+      if (event.data && event.data.source === 'django-admin') {
+        if (event.data.model === 'LandingPageContent') {
+          setContent((prev: any) => ({ ...prev, ...event.data.payload }));
+        } else if (event.data.model === 'FAQ') {
+          const item = event.data.payload;
+          const pk = event.data.pk;
+          setFaqs(prev => prev.map(f => (f.id === parseInt(pk) || f.id === pk) ? { ...f, ...item } : f));
+        }
       }
 
     };

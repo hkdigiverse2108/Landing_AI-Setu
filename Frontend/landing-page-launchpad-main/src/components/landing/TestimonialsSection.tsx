@@ -27,8 +27,14 @@ const TestimonialsSection = () => {
   // 2. Live preview listener
   useEffect(() => {
     const handler = (event: any) => {
-      if (event.data) {
-        setLivePreview((prev: any) => ({ ...prev, ...event.data }));
+      if (event.data && event.data.source === 'django-admin') {
+        if (event.data.model === 'LandingPageContent') {
+          setContent((prev: any) => ({ ...prev, ...event.data.payload }));
+        } else if (event.data.model === 'Testimonial') {
+          const item = event.data.payload;
+          const pk = event.data.pk;
+          setTestimonials(prev => prev.map(t => (t.id === parseInt(pk) || t.id === pk) ? { ...t, ...item } : t));
+        }
       }
     };
     window.addEventListener("message", handler);

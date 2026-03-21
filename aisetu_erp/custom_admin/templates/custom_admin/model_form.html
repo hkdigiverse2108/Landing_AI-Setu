@@ -149,6 +149,125 @@
                 </div>
             {% endif %}
 
+            {% if is_landing_page %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Challenges / Problems</h4>
+                    {{ problem_formset.management_form }}
+                    <div id="problem-formset-container" class="formset-container" data-prefix="problems">
+                        {% for form in problem_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="problem-formset-container">Add Problem</button>
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Features / Solutions</h4>
+                    {{ feature_formset.management_form }}
+                    <div id="feature-formset-container" class="formset-container" data-prefix="features">
+                        {% for form in feature_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="feature-formset-container">Add Feature</button>
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">USP Features</h4>
+                    {{ usp_formset.management_form }}
+                    <div id="usp-formset-container" class="formset-container" data-prefix="usp_features">
+                        {% for form in usp_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="usp-formset-container">Add USP Feature</button>
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">How It Works Steps</h4>
+                    {{ howitworks_formset.management_form }}
+                    <div id="howitworks-formset-container" class="formset-container" data-prefix="howitworks_steps">
+                        {% for form in howitworks_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="howitworks-formset-container">Add Step</button>
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Store Types (Who is this for)</h4>
+                    {{ store_type_formset.management_form }}
+                    <div id="store-type-formset-container" class="formset-container" data-prefix="store_types">
+                        {% for form in store_type_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="store-type-formset-container">Add Store Type</button>
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Referral Perks</h4>
+                    {{ referral_perk_formset.management_form }}
+                    <div id="referral-perk-formset-container" class="formset-container" data-prefix="referral_perks">
+                        {% for form in referral_perk_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="referral-perk-formset-container">Add Perk</button>
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Testimonials</h4>
+                    {{ testimonial_formset.management_form }}
+                    <div id="testimonial-formset-container" class="formset-container" data-prefix="testimonials">
+                        {% for form in testimonial_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="testimonial-formset-container">Add Testimonial</button>
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Comparison Features</h4>
+                    {{ comparison_feature_formset.management_form }}
+                    <div id="comparison-feature-formset-container" class="formset-container" data-prefix="comparison_features">
+                        {% for form in comparison_feature_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="comparison-feature-formset-container">Add Comparison Feature</button>
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">FAQs</h4>
+                    {{ faq_formset.management_form }}
+                    <div id="faq-formset-container" class="formset-container" data-prefix="faqs">
+                        {% for form in faq_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="faq-formset-container">Add FAQ</button>
+                </div>
+            {% endif %}
+
             <div class="mt-5 pt-4 border-top text-end">
                 <a href="{% url 'custom_admin:model_list' app_label model_slug %}" class="btn btn-light border px-4 me-2">Cancel</a>
                 <button type="submit" class="btn btn-primary px-4 shadow-sm">Save Changes</button>
@@ -199,6 +318,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 iframe.contentWindow.postMessage({
                     source: 'django-admin-init',
                     target: 'footer'
+                }, "*");
+            }, 500);
+            {% elif scroll_target %}
+            setTimeout(() => {
+                iframe.contentWindow.postMessage({
+                    source: 'django-admin',
+                    scrollTarget: '{{ scroll_target }}'
                 }, "*");
             }, 500);
             {% endif %}

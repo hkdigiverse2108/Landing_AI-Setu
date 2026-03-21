@@ -27,7 +27,7 @@ const PolicyPage = () => {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       // Validate the source if necessary (e.g., check origin)
-      if (event.data && event.data.source === 'django-admin') {
+      if (event.data && event.data.source === 'django-admin' && event.data.model === 'Policy') {
         const payload = event.data.payload;
         
         // Parse the dynamic inline formset into a proper array

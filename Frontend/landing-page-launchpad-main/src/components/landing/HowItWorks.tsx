@@ -38,8 +38,14 @@ const HowItWorks = () => {
   // Live preview listener
   useEffect(() => {
     const handler = (event: any) => {
-      if (event.data) {
-        setLivePreview((prev: any) => ({ ...prev, ...event.data }));
+      if (event.data && event.data.source === 'django-admin') {
+        if (event.data.model === 'LandingPageContent') {
+          setContent((prev: any) => ({ ...prev, ...event.data.payload }));
+        } else if (event.data.model === 'HowItWorksStep') {
+          const item = event.data.payload;
+          const pk = event.data.pk;
+          setSteps(prev => prev.map(s => (s.id === parseInt(pk) || s.id === pk) ? { ...s, ...item } : s));
+        }
       }
     };
     window.addEventListener("message", handler);

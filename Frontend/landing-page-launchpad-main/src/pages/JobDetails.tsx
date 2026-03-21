@@ -31,7 +31,9 @@ const JobDetails = () => {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin') {
-        setLivePreview((prev: any) => ({ ...prev, ...event.data.payload }));
+        if (event.data.model === 'ChildJobPosition') {
+          setLivePreview((prev: any) => ({ ...prev, ...event.data.payload }));
+        }
         if (event.data.scrollTarget) {
             setTimeout(() => {
                 const el = document.getElementById(event.data.scrollTarget);

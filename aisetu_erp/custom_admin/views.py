@@ -11,6 +11,11 @@ from django.forms import inlineformset_factory
 from website.models import AdminUser, DemoRequest, PricingSignup, Payment, ContactSubmission
 from website.models import CareerPage, Culture, Perk, JobPosition
 from website.models import ChildJobPosition, JobDescription, JobSkill
+from website.models import (
+    LandingPageContent, Problem, Feature, USPFeature, 
+    HowItWorksStep, StoreType, ReferralPerk, Testimonial, 
+    ComparisonFeature, FAQ
+)
 
 # Career Formsets
 CultureFormSet = inlineformset_factory(CareerPage, Culture, fields='__all__', extra=1, can_delete=True)
@@ -28,6 +33,17 @@ PolicySectionFormSet = inlineformset_factory(Policy, PolicySection, fields='__al
 # About Page Formsets
 from website.models import AboutPageContent, AboutUsServeItem
 ServeItemFormSet = inlineformset_factory(AboutPageContent, AboutUsServeItem, fields='__all__', extra=1, can_delete=True)
+
+# Landing Page Formsets
+ProblemFormSet = inlineformset_factory(LandingPageContent, Problem, fields='__all__', extra=1, can_delete=True)
+FeatureFormSet = inlineformset_factory(LandingPageContent, Feature, fields='__all__', extra=1, can_delete=True)
+USPFeatureFormSet = inlineformset_factory(LandingPageContent, USPFeature, fields='__all__', extra=1, can_delete=True)
+HowItWorksStepFormSet = inlineformset_factory(LandingPageContent, HowItWorksStep, fields='__all__', extra=1, can_delete=True)
+StoreTypeFormSet = inlineformset_factory(LandingPageContent, StoreType, fields='__all__', extra=1, can_delete=True)
+ReferralPerkFormSet = inlineformset_factory(LandingPageContent, ReferralPerk, fields='__all__', extra=1, can_delete=True)
+TestimonialFormSet = inlineformset_factory(LandingPageContent, Testimonial, fields='__all__', extra=1, can_delete=True)
+ComparisonFeatureFormSet = inlineformset_factory(LandingPageContent, ComparisonFeature, fields='__all__', extra=1, can_delete=True)
+FAQFormSet = inlineformset_factory(LandingPageContent, FAQ, fields='__all__', extra=1, can_delete=True)
 
 def custom_admin_required(view_func):
     @wraps(view_func)
@@ -150,6 +166,29 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             else:
                 context['section_formset'] = PolicySectionFormSet()
 
+        elif 'landingpagecontent' in model_name:
+            context['is_landing_page'] = True
+            if self.request.method == 'POST':
+                context['problem_formset'] = ProblemFormSet(self.request.POST, self.request.FILES)
+                context['feature_formset'] = FeatureFormSet(self.request.POST, self.request.FILES)
+                context['usp_formset'] = USPFeatureFormSet(self.request.POST, self.request.FILES)
+                context['howitworks_formset'] = HowItWorksStepFormSet(self.request.POST, self.request.FILES)
+                context['store_type_formset'] = StoreTypeFormSet(self.request.POST, self.request.FILES)
+                context['referral_perk_formset'] = ReferralPerkFormSet(self.request.POST, self.request.FILES)
+                context['testimonial_formset'] = TestimonialFormSet(self.request.POST, self.request.FILES)
+                context['comparison_feature_formset'] = ComparisonFeatureFormSet(self.request.POST, self.request.FILES)
+                context['faq_formset'] = FAQFormSet(self.request.POST, self.request.FILES)
+            else:
+                context['problem_formset'] = ProblemFormSet()
+                context['feature_formset'] = FeatureFormSet()
+                context['usp_formset'] = USPFeatureFormSet()
+                context['howitworks_formset'] = HowItWorksStepFormSet()
+                context['store_type_formset'] = StoreTypeFormSet()
+                context['referral_perk_formset'] = ReferralPerkFormSet()
+                context['testimonial_formset'] = TestimonialFormSet()
+                context['comparison_feature_formset'] = ComparisonFeatureFormSet()
+                context['faq_formset'] = FAQFormSet()
+
         # Preview URL logic
         scheme = self.request.scheme
         host = self.request.get_host()
@@ -171,6 +210,32 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             context['preview_url'] = f"{base_url}/policy/new-policy"
         elif 'footer' == model_name:
             context['preview_url'] = f"{base_url}/"
+        
+        # New Mappings for Landing Page sub-sections
+        elif 'problem' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "problem"
+        elif 'feature' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "solution"
+        elif 'uspfeature' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "usp"
+        elif 'howitworksstep' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "how-it-works"
+        elif 'referralperk' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "referral"
+        elif 'testimonial' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "testimonials"
+        elif 'comparisonfeature' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "comparison"
+        elif 'faq' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "faq"
             
         return context
 
@@ -227,6 +292,23 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
                 self.object = form.save()
                 section_formset.instance = self.object
                 section_formset.save()
+                return super().form_valid(form)
+            else:
+                return self.render_to_response(self.get_context_data(form=form))
+
+        elif 'landingpagecontent' in model_name:
+            formsets = [
+                context['problem_formset'], context['feature_formset'], 
+                context['usp_formset'], context['howitworks_formset'],
+                context['store_type_formset'], context['referral_perk_formset'],
+                context['testimonial_formset'], context['comparison_feature_formset'],
+                context['faq_formset']
+            ]
+            if all(fs.is_valid() for fs in formsets):
+                self.object = form.save()
+                for fs in formsets:
+                    fs.instance = self.object
+                    fs.save()
                 return super().form_valid(form)
             else:
                 return self.render_to_response(self.get_context_data(form=form))
@@ -288,6 +370,29 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
                 context['section_formset'] = PolicySectionFormSet(self.request.POST, self.request.FILES, instance=self.object)
             else:
                 context['section_formset'] = PolicySectionFormSet(instance=self.object)
+
+        elif 'landingpagecontent' in model_name:
+            context['is_landing_page'] = True
+            if self.request.method == 'POST':
+                context['problem_formset'] = ProblemFormSet(self.request.POST, self.request.FILES, instance=self.object)
+                context['feature_formset'] = FeatureFormSet(self.request.POST, self.request.FILES, instance=self.object)
+                context['usp_formset'] = USPFeatureFormSet(self.request.POST, self.request.FILES, instance=self.object)
+                context['howitworks_formset'] = HowItWorksStepFormSet(self.request.POST, self.request.FILES, instance=self.object)
+                context['store_type_formset'] = StoreTypeFormSet(self.request.POST, self.request.FILES, instance=self.object)
+                context['referral_perk_formset'] = ReferralPerkFormSet(self.request.POST, self.request.FILES, instance=self.object)
+                context['testimonial_formset'] = TestimonialFormSet(self.request.POST, self.request.FILES, instance=self.object)
+                context['comparison_feature_formset'] = ComparisonFeatureFormSet(self.request.POST, self.request.FILES, instance=self.object)
+                context['faq_formset'] = FAQFormSet(self.request.POST, self.request.FILES, instance=self.object)
+            else:
+                context['problem_formset'] = ProblemFormSet(instance=self.object)
+                context['feature_formset'] = FeatureFormSet(instance=self.object)
+                context['usp_formset'] = USPFeatureFormSet(instance=self.object)
+                context['howitworks_formset'] = HowItWorksStepFormSet(instance=self.object)
+                context['store_type_formset'] = StoreTypeFormSet(instance=self.object)
+                context['referral_perk_formset'] = ReferralPerkFormSet(instance=self.object)
+                context['testimonial_formset'] = TestimonialFormSet(instance=self.object)
+                context['comparison_feature_formset'] = ComparisonFeatureFormSet(instance=self.object)
+                context['faq_formset'] = FAQFormSet(instance=self.object)
                 
         # Preview URL logic
         scheme = self.request.scheme
@@ -316,6 +421,32 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
                 context['preview_url'] = f"{base_url}/policy/new-policy"
         elif 'footer' == model_name:
             context['preview_url'] = f"{base_url}/"
+
+        # New Mappings for Landing Page sub-sections
+        elif 'problem' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "problem"
+        elif 'feature' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "solution"
+        elif 'uspfeature' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "usp"
+        elif 'howitworksstep' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "how-it-works"
+        elif 'referralperk' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "referral"
+        elif 'testimonial' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "testimonials"
+        elif 'comparisonfeature' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "comparison"
+        elif 'faq' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "faq"
             
         return context
 
@@ -372,6 +503,23 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
                 self.object = form.save()
                 section_formset.instance = self.object
                 section_formset.save()
+                return super().form_valid(form)
+            else:
+                return self.render_to_response(self.get_context_data(form=form))
+
+        elif 'landingpagecontent' in model_name:
+            formsets = [
+                context['problem_formset'], context['feature_formset'], 
+                context['usp_formset'], context['howitworks_formset'],
+                context['store_type_formset'], context['referral_perk_formset'],
+                context['testimonial_formset'], context['comparison_feature_formset'],
+                context['faq_formset']
+            ]
+            if all(fs.is_valid() for fs in formsets):
+                self.object = form.save()
+                for fs in formsets:
+                    fs.instance = self.object
+                    fs.save()
                 return super().form_valid(form)
             else:
                 return self.render_to_response(self.get_context_data(form=form))

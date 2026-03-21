@@ -48,8 +48,14 @@ const ReferralSection = () => {
   // Live preview listener
   useEffect(() => {
     const handler = (event: any) => {
-      if (event.data) {
-        setLivePreview((prev: any) => ({ ...prev, ...event.data }));
+      if (event.data && event.data.source === 'django-admin') {
+        if (event.data.model === 'LandingPageContent') {
+          setContent((prev: any) => ({ ...prev, ...event.data.payload }));
+        } else if (event.data.model === 'ReferralPerk') {
+          const item = event.data.payload;
+          const pk = event.data.pk;
+          setPerks(prev => prev.map(p => (p.id === parseInt(pk) || p.id === pk) ? { ...p, ...item } : p));
+        }
       }
     };
     window.addEventListener("message", handler);

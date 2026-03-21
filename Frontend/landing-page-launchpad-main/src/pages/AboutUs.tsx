@@ -30,7 +30,9 @@ const AboutUs = () => {
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.data?.source === "django-admin") {
-        setLivePreview(event.data.payload);
+        if (event.data.model === 'AboutPageContent') {
+          setLivePreview(event.data.payload);
+        }
         if (event.data.scrollTarget) {
           const el = document.getElementById(event.data.scrollTarget);
           if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });

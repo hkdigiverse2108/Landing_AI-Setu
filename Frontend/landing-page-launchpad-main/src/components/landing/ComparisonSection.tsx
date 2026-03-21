@@ -43,8 +43,14 @@ const ComparisonSection = () => {
   // 2️⃣ Live preview listener (for admin changes)
   useEffect(() => {
     const handler = (event: any) => {
-      if (event.data) {
-        setLivePreview((prev: any) => ({ ...prev, ...event.data }));
+      if (event.data && event.data.source === 'django-admin') {
+        if (event.data.model === 'LandingPageContent') {
+          setContent((prev: any) => ({ ...prev, ...event.data.payload }));
+        } else if (event.data.model === 'ComparisonFeature') {
+          const item = event.data.payload;
+          const pk = event.data.pk;
+          setRows(prev => prev.map(r => (r.id === parseInt(pk) || r.id === pk) ? { ...r, ...item } : r));
+        }
       }
     };
     window.addEventListener("message", handler);
