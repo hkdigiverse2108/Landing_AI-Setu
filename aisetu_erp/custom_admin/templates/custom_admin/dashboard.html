@@ -1,38 +1,84 @@
 {% extends 'custom_admin/base.html' %}
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
-    <h1 class="h2 fw-bold text-dark">Dashboard Overview</h1>
+    <h1 class="h2 fw-bold text-dark"><i class="bi bi-speedometer2 text-primary me-2"></i>Dashboard Overview</h1>
 </div>
+
+<style>
+    .dashboard-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .card-icon {
+        font-size: 2.5rem;
+        opacity: 0.5;
+        position: absolute;
+        right: 20px;
+        bottom: 10px;
+    }
+    .card-title {
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+    }
+</style>
+
 <div class="row g-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary bg-gradient shadow-sm border-0 h-100">
-            <div class="card-body">
-                <h6 class="card-title text-uppercase opacity-75">Demo Requests</h6>
-                <h1 class="display-5 fw-bold mb-0">{{ demo_count }}</h1>
+    <!-- Demo Requests -->
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card dashboard-card bg-primary text-white bg-gradient shadow-sm border-0 h-100 position-relative">
+            <div class="card-body p-4">
+                <h6 class="card-title text-uppercase fw-semibold mb-3">Demo Requests</h6>
+                <h1 class="display-4 fw-bold mb-0">{{ demo_count }}</h1>
+                <i class="bi bi-display card-icon"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-success bg-gradient shadow-sm border-0 h-100">
-            <div class="card-body">
-                <h6 class="card-title text-uppercase opacity-75">Pricing Signups</h6>
-                <h1 class="display-5 fw-bold mb-0">{{ signup_count }}</h1>
+
+    <!-- Job Applications -->
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card dashboard-card bg-info text-white bg-gradient shadow-sm border-0 h-100 position-relative">
+            <div class="card-body p-4">
+                <h6 class="card-title text-uppercase fw-semibold mb-3">Job Applications</h6>
+                <h1 class="display-4 fw-bold mb-0">{{ job_application_count }}</h1>
+                <i class="bi bi-briefcase card-icon"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-info bg-gradient shadow-sm border-0 h-100">
-            <div class="card-body">
-                <h6 class="card-title text-uppercase opacity-75">Total Payments</h6>
-                <h1 class="display-5 fw-bold mb-0">{{ payment_count }}</h1>
+
+    <!-- Pricing Signups -->
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card dashboard-card bg-success text-white bg-gradient shadow-sm border-0 h-100 position-relative">
+            <div class="card-body p-4">
+                <h6 class="card-title text-uppercase fw-semibold mb-3">Pricing Signups</h6>
+                <h1 class="display-4 fw-bold mb-0">{{ signup_count }}</h1>
+                <i class="bi bi-bag-check card-icon"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-warning bg-gradient shadow-sm border-0 h-100">
-            <div class="card-body">
-                <h6 class="card-title text-uppercase opacity-75">Contact Messages</h6>
-                <h1 class="display-5 fw-bold mb-0 text-dark">{{ contact_count }}</h1>
+
+    <!-- Total Payments -->
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card dashboard-card bg-danger text-white bg-gradient shadow-sm border-0 h-100 position-relative">
+            <div class="card-body p-4">
+                <h6 class="card-title text-uppercase fw-semibold mb-3">Total Payments</h6>
+                <h1 class="display-4 fw-bold mb-0">{{ payment_count }}</h1>
+                <i class="bi bi-credit-card card-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Messages -->
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card dashboard-card bg-warning text-dark bg-gradient shadow-sm border-0 h-100 position-relative">
+            <div class="card-body p-4">
+                <h6 class="card-title text-uppercase fw-semibold mb-3">Contact Messages</h6>
+                <h1 class="display-4 fw-bold mb-0">{{ contact_count }}</h1>
+                <i class="bi bi-envelope card-icon text-dark opacity-25"></i>
             </div>
         </div>
     </div>
