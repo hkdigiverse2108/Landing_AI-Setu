@@ -79,11 +79,13 @@ def custom_logout(request):
 
 @custom_admin_required
 def dashboard(request):
+    from website.models import JobApplication
     context = {
         'demo_count': DemoRequest.objects.count(),
         'signup_count': PricingSignup.objects.count(),
         'payment_count': Payment.objects.count(),
         'contact_count': ContactSubmission.objects.count(),
+        'job_application_count': JobApplication.objects.count(),
     }
     return render(request, 'custom_admin/dashboard.html', context)
 
