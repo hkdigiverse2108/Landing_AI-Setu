@@ -47,7 +47,7 @@ class PricingSignupSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class LandingPageContentSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(source='_id', read_only=True)
+    id = serializers.CharField(read_only=True)
     
     class Meta:
         model = LandingPageContent
