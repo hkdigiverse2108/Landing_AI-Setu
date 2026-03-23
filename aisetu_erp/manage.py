@@ -1,60 +1,12 @@
 import os
 import sys
-
-def apply_mongodb_patches():
-    """
-    Apply various patches for MongoDB compatibility.
-    """
-    # 1. Patch bulk_create
-    try:
-        from django.db.models.query import QuerySet
-        original_bulk_create = QuerySet.bulk_create
-        
-        def patched_bulk_create(self, objs, batch_size=None, ignore_conflicts=False, update_conflicts=False, update_fields=None, unique_fields=None):
-            returned_objs = original_bulk_create(
-                self, objs, batch_size=batch_size, ignore_conflicts=ignore_conflicts, 
-                update_conflicts=update_conflicts, update_fields=update_fields, unique_fields=unique_fields
-            )
-            
-            from django.conf import settings
-            try:
-                if settings.DATABASES['default']['ENGINE'] == 'django_mongodb_backend':
-                    pk_field = self.model._meta.pk.attname
-                    for obj in returned_objs:
-                        if getattr(obj, pk_field, None) is None:
-                            if self.model.__name__ == 'ContentType':
-                                db_obj = self.model.objects.filter(app_label=obj.app_label, model=obj.model).first()
-                                if db_obj:
-                                    setattr(obj, pk_field, getattr(db_obj, pk_field))
-                            elif self.model.__name__ == 'Permission':
-                                db_obj = self.model.objects.filter(content_type=obj.content_type, codename=obj.codename).first()
-                                if db_obj:
-                                    setattr(obj, pk_field, getattr(db_obj, pk_field))
-            except Exception:
-                pass
-            return returned_objs
-        
-        QuerySet.bulk_create = patched_bulk_create
-    except ImportError:
-        pass
-
-    # 2. Patch Model.__hash__ to avoid 'unhashable TypeError' when PK is None
-    try:
-        from django.db.models import Model
-        def patched_hash(self):
-            if self.pk is None:
-                return id(self)
-            return hash(self.pk)
-        Model.__hash__ = patched_hash
-    except ImportError:
-        pass
+from aisetu_erp.mongodb_patches import disconnect_mongo_migration_signals
 
 def run_frontend_build():
     """
     Runs the React frontend build command (npm run build).
     """
     import subprocess
-    import sys
     from pathlib import Path
     
     # Define paths
@@ -62,91 +14,53 @@ def run_frontend_build():
     frontend_dir = base_dir.parent / 'Frontend' / 'landing-page-launchpad-main'
     
     if not frontend_dir.exists():
-        print(f"DEBUG: Frontend directory not found at {frontend_dir}")
         return
 
-    # Detection logic for Windows vs Ubuntu
     is_windows = sys.platform == 'win32'
     
-    print(f"--- AUTOMATED FRONTEND BUILD START ({'Windows' if is_windows else 'Linux/Ubuntu'}) ---")
-    print(f"Source: {frontend_dir}")
-    
+    print(f"--- AUTOMATED FRONTEND BUILD START ---")
     try:
-        # Use shell=True for Windows and handle npm path automatically
-        # Node/npm on Ubuntu works without shell=True but we use it for consistency.
-        # This handles path expansion and other shell-specific behavior.
-        
-        # 1. Install dependencies if missing
         if not (frontend_dir / 'node_modules').exists():
             print("Installing node_modules...")
             subprocess.run(['npm', 'install'], cwd=frontend_dir, check=True, shell=is_windows)
             
-        # 2. Run the build
         print("Running 'npm run build'...")
         subprocess.run(['npm', 'run', 'build'], cwd=frontend_dir, check=True, shell=is_windows)
         print("--- FRONTEND BUILD SUCCESSFUL ---")
         
-    except FileNotFoundError:
-        print("ERROR: 'npm' command not found. Please install Node.js/npm.")
-    except subprocess.CalledProcessError as e:
-        print(f"ERROR: Build failed (Exit Code: {e.returncode}).")
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        print(f"Unexpected error during frontend build: {e}")
     print("---------------------------------------")
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'aisetu_erp.settings')
     
-    # --- AUTOMATED FRONTEND BUILD ---
     # Rebuild frontend when running server or collecting static files
     if len(sys.argv) > 1 and sys.argv[1] in ['runserver', 'collectstatic']:
         # Only build on the main process (not on auto-reloads)
         if os.environ.get('RUN_MAIN') != 'true':
             run_frontend_build()
-    # --------------------------------
 
-    # --- APPLY MONGODB PATCHES ---
-    apply_mongodb_patches()
+    # Apply migration specific fixes
+    disconnect_mongo_migration_signals()
     
     try:
         from django.core.management import execute_from_command_line
-        
-        # --- MONGO DB MIGRATION FIX ---
-        # Disconnect the auth post_migrate signal which crashes on mongodb 
-        # (due to bulk_create not returning PKs for the Permission models)
-        if len(sys.argv) > 1 and sys.argv[1] == 'migrate':
-            try:
-                import django
-                django.setup()
-                from django.db.models.signals import post_migrate
-                from django.contrib.auth.management import create_permissions
-                post_migrate.disconnect(
-                    receiver=create_permissions,
-                    dispatch_uid="django.contrib.auth.management.create_permissions"
-                )
-                print("Note: Disabled auth.create_permissions post_migrate signal for MongoDB compatibility.")
-            except Exception as e:
-                print(f"Warning: Could not disconnect post_migrate signal: {e}")
-        # ------------------------------
-        
     except ImportError as exc:
         raise ImportError(
             "Couldn't import Django. Are you sure it's installed and "
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-    # Robustly set default port for runserver if not provided
+
+    # Default port for runserver if not provided
     if len(sys.argv) > 1 and sys.argv[1] == 'runserver':
-        # If no arguments follow 'runserver' OR the next argument starts with '--'
-        # it means no port/address was specified.
         if len(sys.argv) == 2 or sys.argv[2].startswith('--'):
-            # Insert at index 2 to allow flags to come after
             sys.argv.insert(2, '0.0.0.0:5004')
             print(f"Note: Automatically using default address 0.0.0.0:5004")
 
     execute_from_command_line(sys.argv)
-
 
 if __name__ == '__main__':
     main()
