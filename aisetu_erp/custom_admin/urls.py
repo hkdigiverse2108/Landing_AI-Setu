@@ -4,6 +4,7 @@ from . import views
 app_name = 'custom_admin'
 
 urlpatterns = [
+    path('', views.dashboard, name='admin_root'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('singleton/<str:model_name>/', views.edit_singleton, name='edit_singleton'),
     

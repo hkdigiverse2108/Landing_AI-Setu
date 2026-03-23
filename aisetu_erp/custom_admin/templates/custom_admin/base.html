@@ -42,7 +42,7 @@
 
                     <h6 class="sidebar-heading px-3 mt-4 mb-2 text-muted text-uppercase">Careers & Jobs</h6>
                     <ul class="nav flex-column mb-3">
-                        <a href="{% url 'custom_admin:model_list' 'website' 'careerpage' %}">Career Page Config</a>
+                        <a href="{% url 'custom_admin:edit_singleton' 'careerpage' %}">Career Page Config</a>
                         <a href="{% url 'custom_admin:model_list' 'website' 'childjobposition' %}">Open Positions</a>
                     </ul>
 
@@ -54,6 +54,7 @@
                     <h6 class="sidebar-heading px-3 mt-4 mb-2 text-muted text-uppercase">Modules & Content</h6>
                     <ul class="nav flex-column mb-3">
                         <a href="{% url 'custom_admin:model_list' 'website' 'blogpost' %}">Blog Posts</a>
+                        <a href="{% url 'custom_admin:edit_singleton' 'demovideo' %}">Demo Videos</a>
                         <a href="{% url 'custom_admin:model_list' 'website' 'allstoretype' %}">Demo Form Store Types</a>
                     </ul>
 
