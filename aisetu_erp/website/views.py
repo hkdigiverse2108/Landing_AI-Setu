@@ -848,9 +848,9 @@ def get_home_testimonials(request):
             "id": str(t.id),
             "name": t.name,
             "role": t.role,
-            "text": t.review,
-            "rating": t.rating,
-            "image": request.build_absolute_uri(t.image.url) if t.image else None
+                "review": t.review,
+                "rating": t.rating,
+                "image": request.build_absolute_uri(t.image.url) if t.image else None
         })
     return Response(data)
 
@@ -864,9 +864,9 @@ def get_all_testimonials(request):
             "id": str(t.id),
             "name": t.name,
             "role": t.role,
-            "text": t.review,
-            "rating": t.rating,
-            "image": request.build_absolute_uri(t.image.url) if t.image else None
+                "review": t.review,
+                "rating": t.rating,
+                "image": request.build_absolute_uri(t.image.url) if t.image else None
         })
     return Response(data)
 
