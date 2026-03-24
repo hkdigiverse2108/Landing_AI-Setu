@@ -87,12 +87,15 @@ const TestimonialsSection = () => {
 
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: 5 }).map((_, j) => (
-                    <Star key={j} className="h-4 w-4 fill-[#F4B400] text-[#F4B400]" />
+                    <Star 
+                      key={j} 
+                      className={`h-4 w-4 ${j < t.rating ? "fill-[#F4B400] text-[#F4B400]" : "text-gray-200"}`} 
+                    />
                   ))}
                 </div>
 
                 <p className="text-gray-600 leading-relaxed italic">
-                  "{t.text}"
+                  "{t.review}"
                 </p>
               </div>
             ))}

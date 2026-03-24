@@ -126,7 +126,7 @@ const AllTestimonials = () => {
 
                     {/* Review Text */}
                     <p className="text-gray-600 leading-relaxed italic mb-4">
-                      "{review.text}"
+                      "{review.review}"
                     </p>
                   </div>
                 </motion.div>
