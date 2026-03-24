@@ -6,6 +6,12 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
+    align-items: start;
+}
+@media (max-width: 991.98px) {
+    .admin-preview-layout {
+        grid-template-columns: 1fr;
+    }
 }
 .admin-list-section {
     min-width: 0;
@@ -15,6 +21,20 @@
     padding-left: 20px;
     display: flex;
     flex-direction: column;
+    position: sticky;
+    top: 20px;
+    height: calc(100vh - 40px);
+    align-self: start;
+}
+@media (max-width: 991.98px) {
+    .preview-section {
+        border-left: none;
+        border-top: 1px solid #ddd;
+        padding-left: 0;
+        padding-top: 20px;
+        position: static;
+        height: auto;
+    }
 }
 .preview-header {
     font-size: 18px;
@@ -24,10 +44,15 @@
 .preview-section iframe {
     width: 100%;
     flex: 1;
-    min-height: 85vh;
+    min-height: 0;
     border: 1px solid #ddd;
     border-radius: 6px;
     background: #fff;
+}
+@media (max-width: 991.98px) {
+    .preview-section iframe {
+        min-height: 600px;
+    }
 }
 </style>
 <div class="admin-preview-layout">

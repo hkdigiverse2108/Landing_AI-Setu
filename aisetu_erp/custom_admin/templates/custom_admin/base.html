@@ -47,10 +47,22 @@
     </style>
 </head>
 <body>
+    {% if request.session.is_admin %}
+    <!-- Mobile Header -->
+    <nav class="navbar navbar-dark bg-dark d-md-none p-3 shadow-sm sticky-top">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1 fw-bold"><i class="bi bi-box-fill text-primary me-2"></i>AI-Setu Admin</span>
+            <button class="navbar-toggler py-1 px-2" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon" style="width: 1.25rem; height: 1.25rem;"></span>
+            </button>
+        </div>
+    </nav>
+    {% endif %}
+
     <div class="container-fluid">
         <div class="row">
             {% if request.session.is_admin %}
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse shadow">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse shadow">
                 <div class="position-sticky">
                     <div class="px-3 mb-4 d-flex align-items-center">
                         <i class="bi bi-box-fill text-primary fs-4 me-2"></i>
@@ -137,7 +149,7 @@
                             </a>
                             <div class="collapse" id="careerCollapse">
                                 <div class="sub-nav">
-                                    <a href="{% url 'custom_admin:edit_singleton' 'careerpage' %}">Page Config</a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'careerpage' %}">Career Page</a>
                                     <a href="{% url 'custom_admin:model_list' 'website' 'childjobposition' %}">Open Positions</a>
                                 </div>
                             </div>
