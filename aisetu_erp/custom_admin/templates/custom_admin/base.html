@@ -317,6 +317,26 @@
                             </div>
                         </li>
 
+                        <!-- Policies -->
+                        <li class="nav-item">
+                            <a class="nav-link d-flex justify-content-between align-items-center collapsed" 
+                               data-bs-toggle="collapse" href="#policyCollapse" role="button" 
+                               aria-expanded="false" aria-controls="policyCollapse">
+                                <span><i class="bi bi-shield-lock-fill"></i> Policies</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </a>
+                            <div class="collapse" id="policyCollapse" data-bs-parent="#sidebarAccordion">
+                                <div class="sub-nav">
+                                    <a href="{% url 'custom_admin:model_list' 'website' 'policy' %}">
+                                        <i class="bi bi-card-list"></i> All Policies
+                                    </a>
+                                    <a href="{% url 'custom_admin:model_create' 'website' 'policy' %}">
+                                        <i class="bi bi-plus-circle"></i> Add Policy
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
                         <!-- Other Pages -->
                         <li class="nav-item">
                             <a class="nav-link d-flex justify-content-between align-items-center collapsed" 

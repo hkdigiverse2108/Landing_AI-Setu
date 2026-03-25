@@ -174,6 +174,7 @@ def dashboard(request):
         'payment_count': Payment.objects.count(),
         'contact_count': ContactSubmission.objects.count(),
         'job_application_count': JobApplication.objects.count(),
+        'policy_count': Policy.objects.count(),
     }
     return render(request, 'custom_admin/dashboard.html', context)
 
