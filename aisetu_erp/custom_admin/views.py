@@ -42,7 +42,7 @@ PricingFeatureFormSet = inlineformset_factory(PricingContent, PricingFeature, fk
 # Career & Job Formsets
 CultureFormSet = inlineformset_factory(CareerPage, Culture, fk_name='career_page', fields='__all__', extra=1, can_delete=True)
 PerkFormSet = inlineformset_factory(CareerPage, Perk, fk_name='career_page', fields='__all__', extra=1, can_delete=True)
-OpenPositionFormSet = inlineformset_factory(CareerPage, JobPosition, fk_name='career_page', fields='__all__', extra=1, can_delete=True)
+OpenPositionFormSet = inlineformset_factory(CareerPage, ChildJobPosition, fk_name='career_page', fields=['title', 'slug', 'location', 'experience', 'total_positions', 'work_place'], extra=1, can_delete=True)
 JobDescriptionFormSet = inlineformset_factory(ChildJobPosition, JobDescription, fk_name='job', fields='__all__', extra=1, can_delete=True)
 JobSkillFormSet = inlineformset_factory(ChildJobPosition, JobSkill, fk_name='job', fields='__all__', extra=1, can_delete=True)
 
@@ -395,7 +395,7 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
                 context['preview_url'] += f"?is_preview=1&section={section}"
                 context['scroll_target'] = 'open_positions' if section == 'jobs' else section
         elif 'contactpagecontent' in model_name: context['preview_url'] = f"{base_url}/contact"
-        elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career/?is_preview=1&section=jobs", 'scroll_target': 'open_positions'})
+        elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career?is_preview=1&section=jobs", 'scroll_target': 'open_positions'})
         elif 'policy' == model_name: 
             # For create view, we might not have a slug yet, use placeholder
             context['preview_url'] = f"{base_url}/policy/new-policy"
@@ -635,7 +635,7 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         elif model_name in ['careerpage', 'careerherocontent', 'careerculturecontent', 'careerperkscontent', 'careerjobscontent', 'careerctacontent']:
             context['preview_url'] = f"{base_url}/career?is_preview=1"
             if section and section != 'all': context['preview_url'] += f"&section={section}"
-        elif 'childjobposition' in model_name: context['preview_url'] = f"{base_url}/career/{self.object.slug}"
+        elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career?is_preview=1&section=jobs", 'scroll_target': 'open_positions'})
         elif 'blogpost' in model_name: context['preview_url'] = f"{base_url}/blog/{self.object.slug}?is_preview=1"
         elif 'footer' == model_name: context['preview_url'] = f"{base_url}/"
         

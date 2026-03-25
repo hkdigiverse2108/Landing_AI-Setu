@@ -94,15 +94,16 @@ const CareerPage = () => {
                       const field = parts.slice(2).join('-');
                       if (!jobs[idx]) jobs[idx] = {};
                       jobs[idx][field] = payload[key];
+                      if (field === 'slug') jobs[idx].job_slug = payload[key];
                   }
               }
           });
 
           parsedPayload = { 
               ...payload, 
-              cultures: cultures.filter(Boolean),
-              perks: perks.filter(Boolean),
-              jobs: jobs.filter(Boolean)
+              cultures: cultures.filter((item: any) => item && !item.DELETE),
+              perks: perks.filter((item: any) => item && !item.DELETE),
+              jobs: jobs.filter((item: any) => item && !item.DELETE)
           };
 
           setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
@@ -115,16 +116,33 @@ const CareerPage = () => {
           });
 
         } else if (model === 'ChildJobPosition') {
-          // Handle specific job position update in the list
+          // Handle specific job position update in the list (Upsert/Delete)
           setLivePreview((prev: any) => {
             const currentJobs = prev?.jobs || content?.jobs || [];
-            const updatedJobs = currentJobs.map((j: any) => 
-               (j.slug === payload.slug || j.job_slug === payload.slug) ? { ...j, ...payload } : j
-            );
+            let found = false;
+            let updatedJobs = currentJobs.map((j: any) => {
+               // Match by slug, job_slug, or title (if slug is missing in payload)
+               const isMatch = (payload.slug && (j.slug === payload.slug || j.job_slug === payload.slug)) || 
+                               (!payload.slug && j.title === payload.title);
+               
+               if (isMatch) {
+                   found = true;
+                   return { ...j, ...payload };
+               }
+               return j;
+            });
+
+            if (!found && !payload.DELETE) {
+                // If not found, it's a NEW job being created/previewed.
+                updatedJobs = [...updatedJobs, { ...payload, is_new: true }];
+            }
+
+            // FILTER: Remove jobs that are marked for deletion
+            updatedJobs = updatedJobs.filter((j: any) => !j.DELETE);
             
             const newPreview = { ...prev, jobs: updatedJobs };
             
-            // Broadcast the update
+            // Broadcast the update for other components
             previewChannel.postMessage({
               type: 'LIVE_PREVIEW_UPDATE',
               model: 'ChildJobPosition',

@@ -79,8 +79,8 @@ const AboutUs = () => {
             }
           });
 
-          if (serve_items.length > 0) parsedPayload.serve_items = serve_items.filter(Boolean);
-          if (why_choose_items.length > 0) parsedPayload.why_choose_items = why_choose_items.filter(Boolean);
+          if (serve_items.length > 0) parsedPayload.serve_items = serve_items.filter((item: any) => item && !item.DELETE);
+          if (why_choose_items.length > 0) parsedPayload.why_choose_items = why_choose_items.filter((item: any) => item && !item.DELETE);
 
           setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
         }

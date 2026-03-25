@@ -244,6 +244,8 @@ class ChildJobPositionSerializer(serializers.ModelSerializer):
             "job_slug",
             "location",
             "experience",
+            "total_positions",
+            "work_place",
             "descriptions",
             "skills",
             "seo_title",

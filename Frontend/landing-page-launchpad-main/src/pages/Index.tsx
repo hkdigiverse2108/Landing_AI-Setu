@@ -56,9 +56,18 @@ const Index = () => {
             event.data.model === 'ReferralProgramContent') {
           
           const payload = event.data.payload;
+          const cleanedPayload = { ...payload };
+          
+          // Global Filter: Remove items marked for deletion in any array (formsets)
+          Object.keys(cleanedPayload).forEach(key => {
+            if (Array.isArray(cleanedPayload[key])) {
+                cleanedPayload[key] = cleanedPayload[key].filter((item: any) => !item.DELETE);
+            }
+          });
+
           setContent((prev: any) => ({
             ...prev,
-            ...payload
+            ...cleanedPayload
           }));
 
           // Broadcast to other tabs

@@ -1494,6 +1494,8 @@ class ChildJobPosition(models.Model):
 
     location = models.CharField(max_length=200)
     experience = models.CharField(max_length=100)
+    total_positions = models.IntegerField(default=1)
+    work_place = models.CharField(max_length=100, default="WFO")
     
 
     is_active = models.BooleanField(default=True)

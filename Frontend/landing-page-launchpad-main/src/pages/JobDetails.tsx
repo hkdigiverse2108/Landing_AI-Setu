@@ -12,6 +12,8 @@ interface Job {
   experience: string;
   descriptions: { text: string }[];
   skills: { name: string }[];
+  work_place: string;
+  total_positions: number;
   seo_title?: string;
   seo_description?: string;
   seo_keywords?: string;
@@ -122,6 +124,8 @@ const JobDetails = () => {
         slug: "new-job",
         location: "Location",
         experience: "Experience Level",
+        work_place: "WFO",
+        total_positions: 1,
         descriptions: [],
         skills: [],
       });
@@ -201,7 +205,7 @@ const JobDetails = () => {
             </motion.h1>
 
             <p className="opacity-80 text-lg">
-              {livePreview?.experience || job.experience} • {livePreview?.location || job.location}
+              {livePreview?.experience || job.experience} • {livePreview?.work_place || job.work_place} • {livePreview?.location || job.location}
             </p>
 
           </div>
