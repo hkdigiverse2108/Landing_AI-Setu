@@ -44,6 +44,14 @@ const Header = () => {
     loadLoginLink();
   }, []);
 
+  // ✅ Auto-open demo modal if requested strictly via URL param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("show_demo") === "1") {
+      setDemoOpen(true);
+    }
+  }, []);
+
   const navItems = [
     { label: "Features", href: "/features" },
     { label: "Pricing", href: "/pricing-signup" },

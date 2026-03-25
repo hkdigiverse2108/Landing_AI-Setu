@@ -16,6 +16,7 @@ urlpatterns = [
     path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('reset-password/', views.reset_password, name='reset_password'),
+    path('website/allstoretype/manage/', views.ManageAllStoreTypesView.as_view(), name='manage_allstoretype'),
     path('<str:app_label>/<str:model_name>/', views.CustomAdminListView.as_view(), name='model_list'),
     path('<str:app_label>/<str:model_name>/add/', views.CustomAdminCreateView.as_view(), name='model_create'),
     path('<str:app_label>/<str:model_name>/<slug:pk>/change/', views.CustomAdminUpdateView.as_view(), name='model_update'),

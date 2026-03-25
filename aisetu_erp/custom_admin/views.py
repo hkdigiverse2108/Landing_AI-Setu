@@ -7,11 +7,11 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from datetime import timedelta
 from django.apps import apps
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
 from django.utils.decorators import method_decorator
 from functools import wraps
 
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, modelformset_factory
 from website.models import AdminUser, DemoRequest, PricingSignup, Payment, ContactSubmission
 from website.models import CareerPage, Culture, Perk, JobPosition
 from website.models import (
@@ -23,7 +23,7 @@ from website.models import (
     ChallengeContent, SolutionContent, USPContent,
     HowItWorksContent, WhoIsThisForContent, TestimonialContent,
     ComparisonContent, FAQContent, CTAContent, ContactPageContent, 
-    HeroContent, AboutPageContent, AboutUsServeItem, Policy, PolicySection
+    HeroContent, AboutPageContent, AboutUsServeItem, Policy, PolicySection, AllStoreType
 )
 ReferralPerkFormSet = inlineformset_factory(ReferralProgramContent, ReferralPerk, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
 
@@ -49,6 +49,8 @@ JobSkillFormSet = inlineformset_factory(ChildJobPosition, JobSkill, fk_name='job
 # About & Policy Formsets
 ServeItemFormSet = inlineformset_factory(AboutPageContent, AboutUsServeItem, fk_name='about_page', fields='__all__', extra=1, can_delete=True)
 PolicySectionFormSet = inlineformset_factory(Policy, PolicySection, fk_name='policy', fields='__all__', extra=1, can_delete=True)
+
+AllStoreTypeFormSet = modelformset_factory(AllStoreType, fields=('name', 'is_active'), extra=1, can_delete=True)
 
 def custom_admin_required(view_func):
     @wraps(view_func)
@@ -661,6 +663,32 @@ class CustomAdminDeleteView(AdminRequiredMixin, DynamicModelMixin, DeleteView):
     template_name = 'custom_admin/model_confirm_delete.html'
     def get_success_url(self):
         return reverse('custom_admin:model_list', kwargs={'app_label': self.kwargs.get('app_label', 'website'), 'model_name': self.kwargs.get('model_slug')})
+
+class ManageAllStoreTypesView(AdminRequiredMixin, TemplateView):
+    template_name = 'custom_admin/model_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['model_name'] = 'Demo Form Store Types'
+        context['model_name_plural'] = 'Store Types'
+        context['app_label'] = 'website'
+        context['model_slug'] = 'allstoretype'
+        context['model_class_name'] = 'AllStoreType'
+        context['is_allstoretype_section'] = True
+        context['allstoretype_formset'] = AllStoreTypeFormSet(
+            self.request.POST or None, 
+            queryset=AllStoreType.objects.all().order_by('id')
+        )
+        context['cancel_url'] = reverse('custom_admin:dashboard')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        formset = context['allstoretype_formset']
+        if formset.is_valid():
+            formset.save()
+            return redirect('custom_admin:manage_allstoretype')
+        return self.render_to_response(context)
 
 @custom_admin_required
 def page_sections(request, page_type='landing'):

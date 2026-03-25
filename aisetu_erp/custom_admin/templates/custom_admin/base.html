@@ -334,6 +334,15 @@
                                     <a href="{% url 'custom_admin:edit_singleton' 'footer' %}">
                                         <i class="bi bi-window-sidebar"></i> Footer
                                     </a>
+                                    <a href="{% url 'custom_admin:model_list' 'website' 'loginlink' %}">
+                                        <i class="bi bi-box-arrow-in-right"></i> Login Links
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'demovideo' %}">
+                                        <i class="bi bi-play-circle-fill"></i> Demo Videos
+                                    </a>
+                                    <a href="{% url 'custom_admin:manage_allstoretype' %}">
+                                        <i class="bi bi-shop-window"></i> Store Types
+                                    </a>
                                 </div>
                             </div>
                         </li>
@@ -361,15 +370,6 @@
                         </li>
                     </ul>
 
-                    <h6 class="sidebar-heading">Modules</h6>
-                    <ul class="nav flex-column mb-1">
-                        <li class="nav-item">
-                            <a href="{% url 'custom_admin:edit_singleton' 'demovideo' %}"><i class="bi bi-play-circle-fill"></i> Demo Videos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'custom_admin:model_list' 'website' 'allstoretype' %}"><i class="bi bi-shop-window"></i> Store Types</a>
-                        </li>
-                    </ul>
 
                     <h6 class="sidebar-heading">Data Management</h6>
                     <ul class="nav flex-column mb-1">

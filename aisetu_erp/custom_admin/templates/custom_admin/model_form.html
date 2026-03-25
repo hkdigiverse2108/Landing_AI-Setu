@@ -174,9 +174,10 @@
                             {% elif about_section == 'cta' %}<i class="bi bi-megaphone me-2 text-primary"></i> Final CTA
                             {% else %}<i class="bi bi-info-square me-2 text-primary"></i> About Us Content{% endif %}
                         </h4>
-                        {{ form|crispy }}
+                        {% if form %}{{ form|crispy }}{% endif %}
                     </div>
                     {% else %}
+                    {% if form %}
                     <div class="mb-4">
                         {% if section_title %}
                             <h4 class="section-title" id="section_{{ section_param }}">{{ section_title }}</h4>
@@ -185,6 +186,7 @@
                         {% endif %}
                         {{ form|crispy }}
                     </div>
+                    {% endif %}
                     {% endif %}
             
             {% if is_career_page and not career_section or career_section == 'all' or career_section == 'culture' %}
@@ -503,8 +505,26 @@
                 </div>
             {% endif %}
 
+            {% if is_allstoretype_section %}
+                <div class="mt-5 pt-2" id="section_allstoretype">
+                    <h4 class="section-title">Store Types (Demo Form Dropdown)</h4>
+                    {{ allstoretype_formset.management_form }}
+                    <div id="allstoretype-formset-container" class="formset-container" data-prefix="form">
+                        {% for form in allstoretype_formset %}
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="allstoretype-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Store Type
+                    </button>
+                </div>
+            {% endif %}
+
             <div class="mt-5 pt-4 border-top d-flex gap-2 justify-content-end">
-                <a href="{% url 'custom_admin:model_list' app_label model_slug %}" class="btn btn-light border px-4 rounded-pill fw-bold text-muted">
+                <a href="{% if cancel_url %}{{ cancel_url }}{% else %}{% url 'custom_admin:model_list' app_label model_slug %}{% endif %}" class="btn btn-light border px-4 rounded-pill fw-bold text-muted">
                     Cancel
                 </a>
                 <button type="submit" class="btn btn-primary px-5 rounded-pill fw-bold shadow-sm">

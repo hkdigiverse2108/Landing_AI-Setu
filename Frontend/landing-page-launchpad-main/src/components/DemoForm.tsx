@@ -29,6 +29,29 @@ const DemoForm = () => {
     fetchTypes();
   }, []);
 
+  // ✅ Listen for live preview updates from django-admin to update the dropdown dynamically
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.data?.source === "django-admin" && event.data?.model === "AllStoreType") {
+        const payload = event.data.payload;
+        setStoreTypes((prev) => {
+          // If editing an existing one, map and update name; else append it.
+          // Since we don't have the real ID from payload immediately, we replace if the name exists.
+          const existing = prev.find((st) => st.name === payload.name);
+          if (existing) {
+            return prev.map((st) => (st.name === payload.name ? { ...st, name: payload.name } : st));
+          }
+          // If it's totally new or name changed, append to dropdown.
+          return [...prev, { id: 99999 + prev.length, name: payload.name }];
+        });
+        // ✅ Auto-select it so the admin sees it clearly in the preview without clicking
+        setForm((f) => ({ ...f, storeType: payload.name }));
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.mobile || !form.storeType || !form.city) {
