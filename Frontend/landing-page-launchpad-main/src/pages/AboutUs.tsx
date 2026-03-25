@@ -41,7 +41,7 @@ const AboutUs = () => {
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.data?.source === "django-admin") {
-        if (event.data.model === 'AboutPageContent') {
+        if (event.data.model === 'AboutPageContent' || event.data.model?.toLowerCase().includes('about')) {
           const payload = event.data.payload;
           setLivePreview((prev: any) => ({ ...prev, ...payload }));
         }
@@ -154,7 +154,6 @@ const AboutUs = () => {
           </motion.p>
         </motion.section>
         )}
-        )}
 
         {/* ABOUT */}
         {shouldShowSection('story') && (
@@ -201,7 +200,6 @@ const AboutUs = () => {
           </motion.div>
         </motion.section>
         )}
-        )}
 
         {/* MISSION + WHY */}
         {(shouldShowSection('mission') || shouldShowSection('why')) && (
@@ -242,7 +240,6 @@ const AboutUs = () => {
             </motion.div>
           </motion.div>
         </motion.section>
-        )}
         )}
 
         {/* SERVE */}
@@ -313,7 +310,6 @@ const AboutUs = () => {
           </div>
         </motion.section>
         )}
-        )}
 
         {/* CTA */}
         {shouldShowSection('cta') && (
@@ -338,7 +334,6 @@ const AboutUs = () => {
             </Button>
           </motion.div>
         </motion.section>
-        )}
         )}
 
       </main>

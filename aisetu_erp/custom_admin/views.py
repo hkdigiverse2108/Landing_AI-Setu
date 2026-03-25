@@ -575,6 +575,14 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
             context['preview_url'] = f"{base_url}/about?is_preview=1"
             if section and section != 'all':
                 context['preview_url'] += f"&section={section}"
+                
+                # Adding scroll_target bindings for About Us
+                if section == 'hero': context['scroll_target'] = 'hero'
+                elif section == 'story': context['scroll_target'] = 'about'
+                elif section == 'mission': context['scroll_target'] = 'mission'
+                elif section == 'why_choose': context['scroll_target'] = 'why_choose'
+                elif section == 'serve': context['scroll_target'] = 'serve'
+                elif section == 'cta': context['scroll_target'] = 'cta'
         elif 'landingpagecontent' in model_name: 
             context['preview_url'] = f"{base_url}/?is_preview=1"
             if context['section_param']:
