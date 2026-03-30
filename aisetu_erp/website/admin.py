@@ -399,9 +399,7 @@ class PageAdmin(LivePreviewMixin, nested_admin.NestedModelAdmin):
         }),
     )
 
-class PolicySectionInline(admin.TabularInline):
-    model = PolicySection
-    extra = 1
+
 
 
 class PolicyAdmin(LivePreviewMixin, admin.ModelAdmin):
@@ -410,7 +408,7 @@ class PolicyAdmin(LivePreviewMixin, admin.ModelAdmin):
 
     list_display = ["title", "slug"]
     prepopulated_fields = {"slug": ("title",)}
-    inlines = [PolicySectionInline]
+    inlines = []
 
     fieldsets = (
         ("Basic Info", {

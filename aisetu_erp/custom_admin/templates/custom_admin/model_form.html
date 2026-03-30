@@ -326,22 +326,6 @@
                 </div>
             {% endif %}
 
-            {% if is_policy %}
-                <div class="mt-5 pt-2">
-                    <h4 class="section-title">Policy Sections (Points)</h4>
-                    {{ section_formset.management_form }}
-                    <div id="section-formset-container" class="formset-container" data-prefix="sections">
-                        {% for form in section_formset %}
-                            <div class="inline-form inline-form-card position-relative">
-                                {{ form|crispy }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="section-formset-container">
-                        <i class="bi bi-plus-lg me-1"></i> Add Policy Section
-                    </button>
-                </div>
-            {% endif %}
 
             {% if is_trust_section %}
                 <div class="mt-5 pt-2">
@@ -743,33 +727,46 @@
 {% endif %}
 {% endblock admin_content %}
 {% block scripts %}
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://cdn.ckeditor.com/4.22.1/standard-all/ckeditor.js"></script>
 <script>
+    CKEDITOR.config.versionCheck = false;
     document.addEventListener('DOMContentLoaded', function () {
-        // 1. Initialize TinyMCE for the content field if it exists
-        const contentField = document.getElementById('id_content');
-        if (contentField) {
-            tinymce.init({
-                selector: '#id_content',
-                height: 400,
-                menubar: false,
-                plugins: [
-                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                    'anchor', 'searchreplace', 'visualblocks', 'fullscreen',
-                    'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                ],
-                toolbar: 'undo redo | blocks | ' +
-                    'bold italic forecolor | alignleft aligncenter ' +
-                    'alignright alignjustify | bullist numlist outdent indent | ' +
-                    'removeformat | help',
-                setup: function (editor) {
-                    editor.on('change', function () {
-                        editor.save();
-                        contentField.dispatchEvent(new Event('input', { bubbles: true }));
-                    });
+        console.log("Form Script Loaded - CKEditor Version");
+
+        function initCKEditor(id) {
+            if (typeof CKEDITOR === 'undefined') return;
+            if (id.includes('management') || id.includes('TOTAL_FORMS')) return; // Guard
+            if (CKEDITOR.instances[id]) CKEDITOR.instances[id].destroy();
+            
+            const height = (id === 'id_description') ? 600 : 300;
+            
+            CKEDITOR.replace(id, {
+                height: height,
+                // Add Font, Size, and Color options
+                extraPlugins: 'font,colorbutton,justify',
+                removeButtons: 'Print,NewPage,ExportPdf,Preview,Save,Templates,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField',
+                on: {
+                    change: function() {
+                        this.updateElement();
+                        const el = document.getElementById(id);
+                        if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
                 }
             });
         }
+
+        function startCKEditors() {
+            document.querySelectorAll('textarea').forEach(textarea => {
+                const id = textarea.id;
+                if (id && (id.includes('description') || id.includes('content'))) {
+                    initCKEditor(id);
+                }
+            });
+        }
+
+        // Try initialization
+        setTimeout(startCKEditors, 100);
+        setTimeout(startCKEditors, 1000);
 
         // 2. Auto slug generation
         const titleField = document.getElementById('id_title');
@@ -834,8 +831,19 @@
 
                 if (!formToClone) return;
 
+                // Remove CKEditor from the form we are cloning if it exists to avoid ID conflicts
+                const textareasToClean = formToClone.querySelectorAll('textarea');
+                textareasToClean.forEach(ta => {
+                    if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances[ta.id]) {
+                        CKEDITOR.instances[ta.id].destroy();
+                    }
+                });
+
                 const newForm = formToClone.cloneNode(true);
                 newForm.classList.remove('d-none');
+
+                // Re-init the cloned form's editor
+                textareasToClean.forEach(ta => initCKEditor(ta.id));
 
                 const formRegex = new RegExp(`${prefix}-(\\d+)-`, 'g');
                 newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${prefix}-${formCount}-`);
@@ -847,18 +855,19 @@
                     } else if (input.type !== 'hidden' || !input.name.endsWith('-id')) {
                         input.value = '';
                     }
-                    // Ensure ID is cleared for new forms
-                    if (input.name.endsWith('-id')) {
-                        input.value = '';
-                    }
-                    // Uncheck DELETE for the new form
-                    if (input.name.endsWith('-DELETE')) {
-                        input.checked = false;
-                    }
+                    if (input.name.endsWith('-id')) input.value = '';
+                    if (input.name.endsWith('-DELETE')) input.checked = false;
                 });
 
                 container.appendChild(newForm);
                 totalFormsInput.value = formCount + 1;
+
+                // Init CKEditor for the textareas in the NEW form
+                newForm.querySelectorAll('textarea').forEach(ta => {
+                    if (ta.id.includes('content') || ta.id.includes('description')) {
+                        initCKEditor(ta.id);
+                    }
+                });
 
                 // Re-trigger live preview
                 if (typeof sendLivePreview === 'function') sendLivePreview();

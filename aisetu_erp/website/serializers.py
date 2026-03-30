@@ -276,21 +276,15 @@ class PageSerializer(serializers.ModelSerializer):
         model = Page
         fields = "__all__"
 
-class PolicySectionSerializer(serializers.ModelSerializer):
-    id = serializers.CharField() 
 
-    class Meta:
-        model = PolicySection
-        fields = ["id", "heading", "content", "order"]
 
 
 class PolicySerializer(serializers.ModelSerializer):
     id = serializers.CharField()   
-    sections = PolicySectionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Policy
-        fields = ["id", "title", "slug", "description", "sections"]
+        fields = ["id", "title", "slug", "description"]
 
 class SocialLinkSerializer(serializers.ModelSerializer):
     id = ObjectIdField()

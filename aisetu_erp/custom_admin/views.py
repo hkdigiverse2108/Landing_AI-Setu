@@ -551,7 +551,6 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
         elif 'faqcontent' in model_name: context.update({'is_faq_section': True, 'faq_formset': FAQContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None))})
         elif 'trustcontent' in model_name: context.update({'is_trust_section': True, 'trust_formset': TrustContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None))})
         elif 'pricingcontent' in model_name: context.update({'is_pricing_section': True, 'pricing_formset': PricingFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None))})
-        elif 'policy' == model_name: context.update({'is_policy': True, 'section_formset': PolicySectionFormSet(self.request.POST or None, self.request.FILES or None)})
         elif 'footer' in model_name: context.update({'is_footer_page': True, 'social_formset': SocialLinkFormSet(self.request.POST or None, self.request.FILES or None)})
         elif 'landingpagecontent' in model_name:
             context.update({'is_landing_page': True})
@@ -628,7 +627,6 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             'trustcontent': ['trust_formset'],
             'pricingcontent': ['pricing_formset'],
             'landingpagecontent': ['challenge_formset', 'solution_formset', 'usp_formset', 'hiw_formset', 'who_formset', 'pricing_formset', 'referral_formset', 'testimonial_formset', 'comparison_formset', 'faq_formset', 'trust_formset'],
-            'policy': ['section_formset'],
             'footer': ['social_formset'],
         }
         if model_name in formset_keys:
@@ -786,8 +784,6 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
                 })
         elif 'policy' in model_name: 
             context.update({
-                'is_policy': True, 
-                'section_formset': PolicySectionFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
                 'is_viewing_policy': True
             })
         elif 'footer' in model_name: context.update({'is_footer_page': True, 'social_formset': SocialLinkFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
@@ -867,7 +863,6 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
             'trustcontent': ['trust_formset'],
             'pricingcontent': ['pricing_formset'],
             'landingpagecontent': ['challenge_formset', 'solution_formset', 'usp_formset', 'hiw_formset', 'who_formset', 'pricing_formset', 'referral_formset', 'testimonial_formset', 'comparison_formset', 'faq_formset', 'trust_formset'],
-            'policy': ['section_formset'],
             'footer': ['social_formset'],
         }
         if model_name in formset_keys:

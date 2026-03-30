@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+cd import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useParams } from "react-router-dom";
@@ -13,8 +13,7 @@ const PolicyPage = () => {
     if (slug === 'new-policy') {
       setData({
         title: "New Policy",
-        description: "Start typing in the admin panel to preview your policy...",
-        sections: []
+        description: "Start typing in the admin panel to preview your policy..."
       });
       return;
     }
@@ -30,38 +29,10 @@ const PolicyPage = () => {
       if (event.data && event.data.source === 'django-admin' && event.data.model === 'Policy') {
         const payload = event.data.payload;
         
-        if (payload.sections && Array.isArray(payload.sections)) {
-            setLivePreview({
-                title: payload.title,
-                description: payload.description,
-                sections: payload.sections.filter((s: any) => !s.DELETE)
-            });
-        } else {
-            // Parse the dynamic inline formset into a proper array
-            const parsedSections: any[] = [];
-            Object.keys(payload).forEach(key => {
-                if (key.startsWith('sections-') && !key.includes('TOTAL_FORMS') && !key.includes('INITIAL_FORMS') && !key.includes('MAX_NUM_FORMS') && !key.includes('MIN_NUM_FORMS')) {
-                    const parts = key.split('-');
-                    if (parts.length >= 3) {
-                        const index = parseInt(parts[1], 10);
-                        const fieldName = parts.slice(2).join('-'); // e.g., 'heading' or 'content'
-                        
-                        if (!parsedSections[index]) {
-                            parsedSections[index] = { id: `live-${index}` };
-                        }
-                        parsedSections[index][fieldName] = payload[key];
-                    }
-                }
-            });
-            
-            const validSections = parsedSections.filter(s => s && !s.DELETE);
-
-            setLivePreview({
-                title: payload.title,
-                description: payload.description,
-                sections: validSections
-            });
-        }
+        setLivePreview({
+            title: payload.title,
+            description: payload.description
+        });
 
         // Optional smooth scrolling
         if (event.data.scrollTarget) {
@@ -97,29 +68,14 @@ const PolicyPage = () => {
         </div>
 
         {/* CONTENT */}
-        <div className="max-w-3xl mx-auto py-12 px-6">
+        <div className="max-w-4xl mx-auto py-12 px-6">
 
-          {/* DESCRIPTION */}
-          <p id="id_description" className="text-gray-600 mb-8 whitespace-pre-wrap">
-            {displayData.description}
-          </p>
-
-          {/* SECTIONS */}
-          <div className="space-y-6">
-            {displayData.sections && displayData.sections.length > 0 ? (
-                displayData.sections.map((sec: any, index: number) => (
-                  <div key={sec.id || index} id={`id_sections-${index}-heading`}>
-                    <h3 className="font-bold text-lg mb-2">
-                      {sec.heading}
-                    </h3>
-                    <p id={`id_sections-${index}-content`} className="text-gray-600 whitespace-pre-wrap">
-                      {sec.content}
-                    </p>
-                  </div>
-                ))
-            ) : null}
-          </div>
-
+          {/* DESCRIPTION / MAIN CONTENT */}
+          <div 
+            id="id_description" 
+            className="text-gray-600 mb-8 prose prose-slate prose-xl max-w-none prose-p:leading-relaxed prose-li:my-1"
+            dangerouslySetInnerHTML={{ __html: displayData.description }}
+          />
         </div>
       </main>
 
