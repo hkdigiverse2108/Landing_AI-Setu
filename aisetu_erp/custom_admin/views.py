@@ -11,7 +11,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, T
 from django.utils.decorators import method_decorator
 from functools import wraps
 
-from django.forms import inlineformset_factory, modelformset_factory
+from django.forms import inlineformset_factory, modelformset_factory, Textarea
 from django.http import FileResponse
 import csv, io
 from reportlab.lib import colors
@@ -50,7 +50,7 @@ PricingFeatureFormSet = inlineformset_factory(PricingContent, PricingFeature, fk
 CultureFormSet = inlineformset_factory(CareerPage, Culture, fk_name='career_page', fields='__all__', extra=1, can_delete=True)
 PerkFormSet = inlineformset_factory(CareerPage, Perk, fk_name='career_page', fields='__all__', extra=1, can_delete=True)
 OpenPositionFormSet = inlineformset_factory(CareerPage, ChildJobPosition, fk_name='career_page', fields=['title', 'slug', 'location', 'experience', 'total_positions', 'work_place'], extra=1, can_delete=True)
-JobDescriptionFormSet = inlineformset_factory(ChildJobPosition, JobDescription, fk_name='job', fields='__all__', extra=1, can_delete=True)
+JobDescriptionFormSet = inlineformset_factory(ChildJobPosition, JobDescription, fk_name='job', fields='__all__', extra=1, can_delete=True, widgets={'text': Textarea(attrs={'rows': 3})})
 JobSkillFormSet = inlineformset_factory(ChildJobPosition, JobSkill, fk_name='job', fields='__all__', extra=1, can_delete=True)
 
 # About & Policy Formsets
