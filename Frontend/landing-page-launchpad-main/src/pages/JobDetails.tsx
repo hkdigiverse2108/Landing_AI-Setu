@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import SEO from "@/components/SEO";
@@ -215,6 +216,14 @@ const JobDetails = () => {
         <section className="py-20">
           <div className="container mx-auto px-6 max-w-4xl">
 
+            <button 
+              onClick={() => navigate("/career")}
+              className="flex items-center gap-2 text-black hover:text-[#1F2E4D] mb-6 transition-colors group"
+            >
+              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+              Back to Careers
+            </button>
+
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
@@ -262,15 +271,17 @@ const JobDetails = () => {
                 </div>
               </div>
 
-              {/* APPLY BUTTON */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate(`/career/apply/${job.slug}`)}
-                className="bg-gradient-to-r from-[#F4B400] to-[#F6C34A] text-black font-bold px-8 py-4 rounded-lg shadow-md hover:shadow-xl transition"
-              >
-                Apply For This Job
-              </motion.button>
+              {/* ACTIONS */}
+              <div className="flex flex-col items-center gap-6 pt-4">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate(`/career/apply/${job.slug}`)}
+                  className="bg-gradient-to-r from-[#F4B400] to-[#F6C34A] text-black font-bold px-12 py-4 rounded-lg shadow-md hover:shadow-xl transition w-full sm:w-auto text-center"
+                >
+                  Apply For This Job
+                </motion.button>
+              </div>
 
             </motion.div>
           </div>

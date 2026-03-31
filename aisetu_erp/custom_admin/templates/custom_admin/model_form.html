@@ -832,6 +832,7 @@
 
         document.querySelectorAll('.add-form-btn').forEach(btn => {
             btn.addEventListener('click', function () {
+                const isChildJobPosition = {% if is_child_job_position %}true{% else %}false{% endif %};
                 const containerId = this.getAttribute('data-target');
                 const container = document.getElementById(containerId);
                 const prefix = container.getAttribute('data-prefix');
@@ -856,7 +857,9 @@
                 newForm.classList.remove('d-none');
 
                 // Re-init the cloned form's editor
-                textareasToClean.forEach(ta => initCKEditor(ta.id));
+                if (!isChildJobPosition) {
+                    textareasToClean.forEach(ta => initCKEditor(ta.id));
+                }
 
                 const formRegex = new RegExp(`${prefix}-(\\d+)-`, 'g');
                 newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${prefix}-${formCount}-`);
@@ -876,11 +879,13 @@
                 totalFormsInput.value = formCount + 1;
 
                 // Init CKEditor for the textareas in the NEW form
-                newForm.querySelectorAll('textarea').forEach(ta => {
-                    if (ta.id.includes('content') || ta.id.includes('description')) {
-                        initCKEditor(ta.id);
-                    }
-                });
+                if (!isChildJobPosition) {
+                    newForm.querySelectorAll('textarea').forEach(ta => {
+                        if (ta.id.includes('content') || ta.id.includes('description')) {
+                            initCKEditor(ta.id);
+                        }
+                    });
+                }
 
                 // Re-trigger live preview
                 if (typeof sendLivePreview === 'function') sendLivePreview();
