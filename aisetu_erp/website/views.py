@@ -437,56 +437,78 @@ def initiate_payment(request):
         access_token = get_phonepe_access_token()
         if not access_token:
             return Response({"error": "Failed to authenticate with PhonePe (V2)"}, status=500)
-            
-        merchant_transaction_id = str(uuid.uuid4())
-        amount_in_paise = int(float(amount_val) * 100)
+        
+        # Generate a hex UUID (no dashes) for better compatibility with QR generators
+        merchant_transaction_id = uuid.uuid4().hex
+        
+        # The frontend already includes 18% GST in the provided amount
+        total_amount = float(amount_val)
+        amount_in_paise = int(total_amount * 100)
         
         # 2. Prepare V2 Payload
-        # Use development localhost for testing if needed
-        # base_domain = "https://aisetu.in" 
+        # Auto-detect Sandbox vs Production
+        is_sandbox = settings.PHONEPE_MERCHANT_ID.startswith("PGTEST")
+        if is_sandbox:
+            pay_url = "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/pay"
+        else:
+            pay_url = "https://api.phonepe.com/apis/pg/checkout/v2/pay"
+
         base_domain = "http://localhost:5004" # Current dev environment
-        
         redirect_url = f"{base_domain}/payment-success/?merchantTransactionId={merchant_transaction_id}"
-        
+        callback_url = f"{base_domain}/payment-callback/"
+
         payload = {
-            "merchantOrderId": merchant_transaction_id,
+            "merchantId": settings.PHONEPE_MERCHANT_ID,
+            "merchantOrderId": merchant_transaction_id.upper(), # Using uppercase for certain PG modules
+            "merchantUserId": f"USER{signup.id}",
             "amount": amount_in_paise,
+            "mobileNumber": signup.mobile_number,
             "expireAfter": 1200, 
             "paymentFlow": {
                 "type": "PG_CHECKOUT",
-                "message": f"Payment for AI Setu Service (ID: {merchant_transaction_id})",
+                "message": "Payment for AI Setu Service",
                 "merchantUrls": {
-                    "redirectUrl": redirect_url
+                    "redirectUrl": redirect_url,
+                    "callbackUrl": callback_url
                 }
-            }
+            },
+            "redirectMode": "REDIRECT"
         }
 
         # 3. Request Pay Page via V2 API
-        pay_url = "https://api.phonepe.com/apis/pg/checkout/v2/pay"
+        # Auto-detect Sandbox vs Production
+        is_sandbox = settings.PHONEPE_MERCHANT_ID.startswith("PGTEST")
+        if is_sandbox:
+            pay_url = "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/pay"
+        else:
+            pay_url = "https://api.phonepe.com/apis/pg/checkout/v2/pay"
+
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"O-Bearer {access_token}"
         }
 
         print(f"--- PHONEPE V2 INITIATION ---")
+        print(f"Environment: {'SANDBOX' if is_sandbox else 'PRODUCTION'}")
         print(f"Transaction ID: {merchant_transaction_id}")
+        print(f"Total Amount: ₹{total_amount}")
         
         response = requests.post(pay_url, json=payload, headers=headers, timeout=15)
         data = response.json()
         print("PhonePe V2 Response:", data)
 
         if response.status_code == 200 and data.get("redirectUrl"):
-            # Create payment record
+            # Create payment record with the final amount
             Payment.objects.create(
                 pricing_signup=signup,
                 transaction_id=merchant_transaction_id,
-                amount=amount_val,
+                amount=total_amount,
                 status="PENDING"
             )
 
             return Response({
                 "success": True,
-                "paymentUrl": data.get("redirectUrl"),
+                "payment_url": data.get("redirectUrl"), # Sync with frontend key
                 "merchantTransactionId": merchant_transaction_id
             })
         else:
