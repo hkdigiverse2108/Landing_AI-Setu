@@ -4,12 +4,14 @@ from website.models import DemoRequest,UserLogin, ReferralUser
 from django.http import JsonResponse, HttpResponse
 import json
 import re
+import os
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import APIView, api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.response import Response
 from rest_framework import status
+from dotenv import dotenv_values, set_key, unset_key
 from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, Footer, HowItWorksStep, JobPosition, LoginLink, Page, Policy, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
 from .serializers import AllStoreTypeSerializer, CareerPageSerializer, ChildJobPositionSerializer, ComparisonFeatureSerializer, FAQSerializer, JobPositionSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer, PageSerializer, PolicySerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer, FooterSerializer
 
@@ -789,31 +791,54 @@ def check_payment_status_api(request, tid):
     except (Payment.DoesNotExist, ValueError):
         return Response({"error": "Payment not found"}, status=404)
     
-# @api_view(["GET"])
-# def about_page_content(request):
-#     # Use .first() to get the object, not a queryset
-#     content = AboutPageContent.objects.first()
-
-#     if not content:
-#         # Create default if it doesn't exist
-#         content = AboutPageContent.objects.create()
-
-#     serializer = AboutPageSerializer(content)
-#     return Response(serializer.data)
-
-# @api_view(["GET"])
-# def career_page_content(request):
-#     # Fetch the ONLY record
-#     content = CareerPageContent.objects.first()
-
-#     if not content:
-#         # Only happens the very first time
-#         content = CareerPageContent.objects.create()
+@api_view(['GET', 'POST', 'DELETE'])
+@admin_required
+def manage_env_api(request):
+    """
+    CRUD for .env file.
+    GET: List all variables.
+    POST: Set a variable (Create/Update).
+    DELETE: Unset a variable.
+    """
+    env_path = settings.BASE_DIR / 'aisetu_erp' / '.env'
     
-#     serializer = CareerPageSerializer(content)
-#     return Response(serializer.data)
-
-
+    if request.method == 'GET':
+        # Read all variables
+        env_vars = dotenv_values(env_path)
+        return Response(env_vars)
+    
+    elif request.method == 'POST':
+        # Create or Update
+        key = request.data.get('key')
+        value = request.data.get('value')
+        
+        if not key or value is None:
+            return Response({"error": "Key and value are required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # PERSIST to file
+        set_key(str(env_path), key, str(value))
+        
+        # Also update os.environ for immediate effect in CURRENT process
+        os.environ[key] = str(value)
+        
+        return Response({"message": f"Variable {key} set successfully"})
+    
+    elif request.method == 'DELETE':
+        # Delete variable
+        key = request.data.get('key')
+        
+        if not key:
+            return Response({"error": "Key is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Try to unset
+        result = unset_key(str(env_path), key)
+        
+        if result[0]: # If something was removed
+            if key in os.environ:
+                del os.environ[key]
+            return Response({"message": f"Variable {key} removed successfully"})
+        else:
+            return Response({"error": f"Variable {key} not found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(["GET"])
 def contactus_page_content(request):

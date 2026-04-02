@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseForbidden, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-import random, string, json
+import random, string, json, os
+from dotenv import dotenv_values, set_key, unset_key
+from django.conf import settings
 from django.core.mail import send_mail
 from django.utils import timezone
 from datetime import timedelta
@@ -455,6 +457,30 @@ def export_model_pdf(request, app_label, model_name):
     doc.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
     buffer.seek(0)
     return FileResponse(buffer, as_attachment=True, filename=f'{model._meta.model_name}_export_{timezone.now().strftime("%Y%m%d")}.pdf')
+
+@custom_admin_required
+def manage_env(request):
+    env_path = settings.BASE_DIR / 'aisetu_erp' / '.env'
+    
+    if request.method == "POST":
+        action = request.POST.get('action')
+        key = request.POST.get('key')
+        value = request.POST.get('value')
+        
+        if action == "add" or action == "update":
+            if key and value is not None:
+                set_key(str(env_path), key, value)
+                os.environ[key] = value
+        elif action == "delete":
+            if key:
+                unset_key(str(env_path), key)
+                if key in os.environ:
+                    del os.environ[key]
+        
+        return redirect('custom_admin:manage_env')
+
+    env_vars = dotenv_values(env_path)
+    return render(request, 'custom_admin/manage_env.html', {'env_vars': env_vars})
 
 class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
     template_name = 'custom_admin/model_form.html'
