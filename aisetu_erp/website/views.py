@@ -281,6 +281,7 @@ def pricing_signup(request):
         shop_name=shop_name,
         owner_name=owner_name,
         mobile_number=mobile_number,
+        state=request.data.get('state', 'Gujarat'),
         referral_code=final_referral_code
     )
 
@@ -772,7 +773,8 @@ def check_payment_status_api(request, tid):
         return Response({
             "status": payment.status,
             "tid": str(payment.transaction_id),
-            "amount": payment.amount
+            "amount": payment.amount,
+            "invoice_url": request.build_absolute_uri(payment.invoice.url) if payment.invoice else None
         })
     except (Payment.DoesNotExist, ValueError):
         return Response({"error": "Payment not found"}, status=404)

@@ -35,6 +35,7 @@ class PricingSignup(models.Model):
     shop_name = models.CharField(max_length=200)
     owner_name = models.CharField(max_length=200)
     mobile_number = models.CharField(max_length=15)
+    state = models.CharField(max_length=100, default="Gujarat")
 
     referral_code = models.CharField(max_length=50, null=True)
     total_referrals = models.IntegerField(default=0)

@@ -15,6 +15,7 @@ const PaymentSuccess = () => {
   const tid = searchParams.get("tid") || "N/A";
 
   const [isPolling, setIsPolling] = useState(status === "PENDING" || status === "UNKNOWN");
+  const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isPolling || tid === "N/A") return;
@@ -26,6 +27,7 @@ const PaymentSuccess = () => {
         
         if (data.status === "SUCCESS" || data.status === "FAILURE") {
           setStatus(data.status);
+          if (data.invoice_url) setInvoiceUrl(data.invoice_url);
           setIsPolling(false);
           clearInterval(pollInterval);
         }
@@ -45,6 +47,17 @@ const PaymentSuccess = () => {
       clearTimeout(timeout);
     };
   }, [isPolling, tid]);
+
+  useEffect(() => {
+    if (status === "SUCCESS" && !invoiceUrl && tid !== "N/A") {
+      fetch(`/api/payment/status/${tid}/`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.invoice_url) setInvoiceUrl(data.invoice_url);
+        })
+        .catch(err => console.error("Error fetching status info:", err));
+    }
+  }, [status, tid, invoiceUrl]);
 
   const renderContent = () => {
     // If we have no status at all in the URL, show a warning or loading
@@ -164,20 +177,27 @@ const PaymentSuccess = () => {
                 </div>
               </motion.div>
 
-              <motion.div
-                whileHover={{ y: -4 }}
-                className="p-5 bg-green-50 rounded-2xl flex items-start gap-3"
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  if (invoiceUrl) {
+                    window.open(invoiceUrl, "_blank");
+                  } else {
+                    // Fallback or alert if URL not ready yet
+                    alert("Invoice is being generated. Please wait a moment.");
+                  }
+                }}
+                className="group flex items-center gap-3 px-5 py-4 bg-green-50 hover:bg-green-100 border border-green-100 rounded-2xl transition-all"
               >
-                <Download className="w-5 h-5 text-green-600 mt-1" />
-                <div>
-                  <h3 className="font-semibold text-[#1F2E4D] text-sm">
-                    Invoice Ready
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Download your receipt from our portal.
-                  </p>
+                <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white shadow-sm group-hover:scale-110 transition-transform">
+                  <Download className="w-5 h-5" />
                 </div>
-              </motion.div>
+                <div className="text-left">
+                  <span className="block text-sm font-bold text-green-800">Download Invoice</span>
+                  <span className="block text-xs text-green-600/80 font-medium tracking-tight">Your receipt is ready</span>
+                </div>
+              </motion.button>
             </div>
           )}
 

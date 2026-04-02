@@ -11,6 +11,10 @@ import ComparisonSection from "@/components/landing/ComparisonSection";
 import { useToast } from "@/components/ui/use-toast";
 import SEO from "@/components/SEO";
 
+const INDIAN_STATES = [
+  "Gujarat", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+];
+
 const PricingSignup = () => {
 
   const navigate = useNavigate();
@@ -20,10 +24,11 @@ const PricingSignup = () => {
     shopName: "",
     ownerName: "",
     mobileNumber: "",
+    state: "Gujarat",
     referralCode: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
     setFormData({
@@ -172,6 +177,7 @@ const PricingSignup = () => {
           shop_name: formData.shopName,
           owner_name: formData.ownerName,
           mobile_number: formData.mobileNumber,
+          state: formData.state,
           referral_code: formData.referralCode,
         }),
       });
@@ -372,6 +378,33 @@ const PricingSignup = () => {
                       required
                       className="w-full border-2 border-border/50 rounded-r-xl p-3.5 bg-background focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                     />
+                  </div>
+                </div>
+
+                {/* State Selection */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Select State <span className="text-destructive">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="state"
+                      value={formData.state}
+                      onChange={handleChange}
+                      required
+                      className="w-full border-2 border-border/50 rounded-xl p-3.5 bg-background focus:border-accent focus:ring-1 focus:ring-accent transition-colors appearance-none cursor-pointer"
+                    >
+                      {INDIAN_STATES.map((st) => (
+                        <option key={st} value={st}>
+                          {st}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-muted-foreground">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
 
