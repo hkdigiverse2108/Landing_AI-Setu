@@ -7,6 +7,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { fetchCareerPageContent, CareerPageContent } from "@/services/api";
 
+import { JobSkeleton } from "@/components/landing/LandingSkeleton";
+
 const CareerPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,6 +17,21 @@ const CareerPage = () => {
   const [targetSection, setTargetSection] = useState<string | null>(null);
   const [content, setContent] = useState<CareerPageContent | null>(null);
   const [livePreview, setLivePreview] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // ... (previous effects)
+
+  if (isLoading && !content && !isPreview) {
+    return (
+      <>
+        <Header />
+        <main className="bg-[#F5F6FA] min-h-screen">
+          <JobSkeleton />
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -41,8 +58,12 @@ const CareerPage = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      const data = await fetchCareerPageContent();
-      if (data) setContent(data);
+      try {
+        const data = await fetchCareerPageContent();
+        if (data) setContent(data);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadData();
   }, []);

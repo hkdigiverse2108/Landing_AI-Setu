@@ -4,10 +4,13 @@ import Footer from "@/components/Footer";
 import { useParams } from "react-router-dom";
 import SEO from "@/components/SEO";
 
+import { PolicySkeleton } from "@/components/landing/LandingSkeleton";
+
 const PolicyPage = () => {
   const { slug } = useParams();
   const [data, setData] = useState<any>(null);
   const [livePreview, setLivePreview] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (slug === 'new-policy') {
@@ -15,12 +18,18 @@ const PolicyPage = () => {
         title: "New Policy",
         description: "Start typing in the admin panel to preview your policy..."
       });
+      setIsLoading(false);
       return;
     }
 
+    setIsLoading(true);
     fetch(`/api/policies/${slug}/`)
       .then(res => res.json())
-      .then(setData);
+      .then(d => {
+        setData(d);
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
   }, [slug]);
 
   useEffect(() => {
@@ -50,7 +59,19 @@ const PolicyPage = () => {
 
   const displayData = livePreview || data;
 
-  if (!displayData) return <div className="text-center py-20">Loading...</div>;
+  if (isLoading && !displayData) {
+    return (
+      <>
+        <Header />
+        <main className="min-h-screen bg-[#F5F6FA]">
+          <PolicySkeleton />
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!displayData) return null;
 
   return (
     <>

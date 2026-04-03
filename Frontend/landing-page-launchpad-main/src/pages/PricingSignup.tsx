@@ -10,6 +10,7 @@ import USPSection from "@/components/landing/USPSection";
 import ComparisonSection from "@/components/landing/ComparisonSection";
 import { useToast } from "@/components/ui/use-toast";
 import SEO from "@/components/SEO";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const INDIAN_STATES = [
   "Gujarat", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
@@ -115,8 +116,9 @@ const PricingSignup = () => {
   };
 
   const [loading, setLoading] = useState(false);
-  const [basePrice, setBasePrice] = useState(12000);
-  const [price, setPrice] = useState(14160);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [basePrice, setBasePrice] = useState(0);
+  const [price, setPrice] = useState(0);
   const [content, setContent] = useState<any>(null);
 
   useEffect(() => {
@@ -136,6 +138,8 @@ const PricingSignup = () => {
         }
       } catch (err) {
         console.error("Failed to load pricing content:", err);
+      } finally {
+        setIsInitialLoading(false);
       }
     };
     loadData();
@@ -269,69 +273,89 @@ const PricingSignup = () => {
             {/* Order Summary Side */}
             <div className="bg-card shadow-lg rounded-2xl p-8 border border-border">
               <h2 className="text-2xl font-bold mb-6 text-foreground">Order Summary</h2>
+              
               <div className="text-center mb-8 bg-muted/30 p-6 rounded-xl border border-border/50">
-                <p className="text-muted-foreground font-medium mb-1">{content?.pricing_plan_name || "All-Inclusive Package"}</p>
+                {isInitialLoading ? (
+                  <div className="space-y-4 py-4">
+                    <Skeleton className="h-4 w-32 mx-auto" />
+                    <Skeleton className="h-12 w-48 mx-auto" />
+                    <Skeleton className="h-4 w-24 mx-auto" />
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-muted-foreground font-medium mb-1">{content?.pricing_plan_name || "All-Inclusive Package"}</p>
 
-                <div className="flex flex-col items-center justify-center gap-1 mb-2">
-                  <div className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full mb-1">
-                    Save 60%
-                  </div>
-                  <span className="text-muted-foreground line-through text-lg font-medium tracking-wide">
-                    {content?.pricing_old_price || "₹29,999"}
-                  </span>
-                  <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-5xl font-extrabold text-foreground">
-                      ₹{Math.round(price / 1.18).toLocaleString()}
-                    </span>
-                    <span className="text-muted-foreground text-sm">{content?.pricing_price_suffix || "+ GST"}</span>
-                  </div>
-                </div>
+                    <div className="flex flex-col items-center justify-center gap-1 mb-2">
+                      <div className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full mb-1">
+                        Save 60%
+                      </div>
+                      <span className="text-muted-foreground line-through text-lg font-medium tracking-wide">
+                        {content?.pricing_old_price || "₹29,999"}
+                      </span>
+                      <div className="flex items-baseline gap-1 mt-1">
+                        <span className="text-5xl font-extrabold text-foreground">
+                          ₹{price > 0 ? Math.round(price / 1.18).toLocaleString() : "..."}
+                        </span>
+                        <span className="text-muted-foreground text-sm">{content?.pricing_price_suffix || "+ GST"}</span>
+                      </div>
+                    </div>
 
-                <div className="mt-4 pt-4 border-t border-border inline-block min-w-[200px]">
-                  <div className="flex justify-between text-sm mb-2 text-muted-foreground line-through opacity-70">
-                    <span>MSRP</span>
-                    <span>{content?.pricing_old_price || "₹29,999"}</span>
-                  </div>
-                  <div className="flex justify-between text-sm mb-2 text-foreground font-medium">
-                    <span>Offer Price</span>
-                    <span>₹{Math.round(price / 1.18).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm mb-2 text-muted-foreground">
-                    <span>GST (18%)</span>
-                    <span>₹{(price - Math.round(price / 1.18)).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg text-foreground mt-3 pt-3 border-t border-dashed border-border/70">
-                    <span>Total Amount</span>
-                    <span>₹{price.toLocaleString()}</span>
-                  </div>
-                </div>
+                    <div className="mt-4 pt-4 border-t border-border inline-block min-w-[200px]">
+                      <div className="flex justify-between text-sm mb-2 text-muted-foreground line-through opacity-70">
+                        <span>MSRP</span>
+                        <span>{content?.pricing_old_price || "₹29,999"}</span>
+                      </div>
+                      <div className="flex justify-between text-sm mb-2 text-foreground font-medium">
+                        <span>Offer Price</span>
+                        <span>₹{price > 0 ? Math.round(price / 1.18).toLocaleString() : "..."}</span>
+                      </div>
+                      <div className="flex justify-between text-sm mb-2 text-muted-foreground">
+                        <span>GST (18%)</span>
+                        <span>₹{price > 0 ? (price - Math.round(price / 1.18)).toLocaleString() : "..."}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-lg text-foreground mt-3 pt-3 border-t border-dashed border-border/70">
+                        <span>Total Amount</span>
+                        <span>₹{price > 0 ? price.toLocaleString() : "..."}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="space-y-4">
                 <h3 className="font-semibold text-foreground border-b border-border pb-2">What's Included:</h3>
                 <ul className="space-y-3">
-                  {(content?.pricing_features && content.pricing_features.length > 0 ? content.pricing_features.map((f: any) => f.title) : [
-                    "Full Access to All Modules",
-                    "POS Billing + Inventory",
-                    "CRM & Loyalty Programs",
-                    "Accounting & Reports",
-                    "Employee Management",
-                    "Setup & Training Support",
-                    "24/7 Customer Support",
-                    "AI Photo Billing",
-                  ]).map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3 text-sm text-foreground/80">
-                      <svg
-                        className="w-5 h-5 text-accent shrink-0 mt-0.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {feature}
-                    </li>
-                  ))}
+                  {isInitialLoading ? (
+                    [1, 2, 3, 4, 5, 6].map((i) => (
+                      <li key={i} className="flex items-center gap-3">
+                        <Skeleton className="h-4 w-5 rounded-full" />
+                        <Skeleton className="h-4 w-full" />
+                      </li>
+                    ))
+                  ) : (
+                    (content?.pricing_features && content.pricing_features.length > 0 ? content.pricing_features.map((f: any) => f.title) : [
+                      "Full Access to All Modules",
+                      "POS Billing + Inventory",
+                      "CRM & Loyalty Programs",
+                      "Accounting & Reports",
+                      "Employee Management",
+                      "Setup & Training Support",
+                      "24/7 Customer Support",
+                      "AI Photo Billing",
+                    ]).map((feature, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm text-foreground/80">
+                        <svg
+                          className="w-5 h-5 text-accent shrink-0 mt-0.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        {feature}
+                      </li>
+                    ))
+                  )}
                 </ul>
               </div>
             </div>
@@ -465,7 +489,7 @@ const PricingSignup = () => {
                     type="submit"
                     className="w-full bg-gold-gradient text-accent-foreground font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-base py-6 rounded-xl"
                   >
-                    Pay ₹{price.toLocaleString()} & Start Using AI-Setu
+                    Pay {price > 0 ? `₹${price.toLocaleString()}` : "..."} & Start Using AI-Setu
                   </Button>
                   <p className="text-xs text-center text-muted-foreground mt-4 flex items-center justify-center gap-1.5">
                     <svg

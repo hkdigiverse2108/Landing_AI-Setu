@@ -6,26 +6,40 @@ import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { fetchLandingPageContent, fetchReferralPerks } from "@/services/api";
 
-const ReferralSection = () => {
-  const [content, setContent] = useState<any>(null);
+interface ReferralSectionProps {
+  content?: any;
+}
+
+const ReferralSection = ({ content: propContent }: ReferralSectionProps) => {
+  const [content, setContent] = useState<any>(propContent || null);
   const [livePreview, setLivePreview] = useState<any>(null);
-  const [perks, setPerks] = useState<any[]>([]);
+  const [perks, setPerks] = useState<any[]>(propContent?.referral_perks || []);
   const [mobile, setMobile] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Fetch DB content (for text + button)
+  // Sync state if prop changes
   useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+      setPerks(propContent.referral_perks || []);
+    }
+  }, [propContent]);
+
+  // Fetch DB content (for text + button) only if not provided as prop
+  useEffect(() => {
+    if (propContent) return;
     const loadContent = async () => {
       const data = await fetchLandingPageContent();
       if (data) setContent(data);
     };
     loadContent();
-  }, []);
+  }, [propContent]);
 
-  // Fetch perks (CRUD)
+  // Fetch perks (CRUD) only if not provided as prop
   useEffect(() => {
+    if (propContent) return;
     const loadPerks = async () => {
       try{
         const res = await fetch("/api/referral-perks/");
@@ -36,7 +50,7 @@ const ReferralSection = () => {
       }
     };
     loadPerks();
-  }, []);
+  }, [propContent]);
 
   // Live preview listener
   useEffect(() => {

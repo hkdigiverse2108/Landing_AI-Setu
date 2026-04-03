@@ -21,9 +21,12 @@ export const submitContactForm = async (data: any) => {
   return response.json();
 };
 
+import { ContactSkeleton } from "@/components/landing/LandingSkeleton";
+
 const ContactUsPage = () => {
   // 1. STATE MANAGEMENT
   const [content, setContent] = useState<ContactPageContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -35,9 +38,13 @@ const ContactUsPage = () => {
   // 2. FETCH DATA ON MOUNT
   useEffect(() => {
     const loadData = async () => {
-      const data = await fetchContactPageContent();
-      if (data) {
-        setContent(data);
+      try {
+        const data = await fetchContactPageContent();
+        if (data) {
+          setContent(data);
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     loadData();
@@ -100,17 +107,22 @@ const ContactUsPage = () => {
     }
   };
 
-  // 4. GUARD: Prevent crash if content is not yet loaded
-  if (!content) {
+  const sectionParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('section') : null;
+  const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
+
+  if (isLoading && !content) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[#1F2E4D] text-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#F4B400]"></div>
-      </div>
+      <>
+        {!isPreview && <Header />}
+        <main className="bg-[#F5F6FA] min-h-screen">
+          <ContactSkeleton />
+        </main>
+        {!isPreview && <Footer />}
+      </>
     );
   }
 
-  const sectionParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('section') : null;
-  const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
+  if (!content) return null;
 
   // Helper to determine if a section should be shown
   const shouldShow = (id: string, toggle?: boolean) => {

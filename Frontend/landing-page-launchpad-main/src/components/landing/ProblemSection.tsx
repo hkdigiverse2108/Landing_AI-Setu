@@ -3,14 +3,27 @@ import { motion } from "framer-motion";
 import DynamicIcon from "@/components/DynamicIcon";
 import { fetchLandingPageContent, LandingPageContent, fetchProblems } from "@/services/api";
 
-const ProblemSection = () => {
+interface ProblemSectionProps {
+  content?: any;
+}
 
-  const [content, setContent] = useState<LandingPageContent | null>(null);
+const ProblemSection = ({ content: propContent }: ProblemSectionProps) => {
+
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
   const [livePreview, setLivePreview] = useState<any>(null);
-  const [problems, setProblems] = useState<any[]>([]);
+  const [problems, setProblems] = useState<any[]>(propContent?.problems || []);
 
-  // Load section heading from LandingPageContent
+  // Sync state if prop changes
   useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+      setProblems(propContent.problems || []);
+    }
+  }, [propContent]);
+
+  // Load section heading from LandingPageContent only if not provided as prop
+  useEffect(() => {
+    if (propContent) return;
 
     const loadContent = async () => {
 
@@ -26,8 +39,9 @@ const ProblemSection = () => {
 
   }, []);
 
-  // Fetch problems from Django API
+  // Fetch problems from Django API only if not provided as prop
   useEffect(() => {
+    if (propContent) return;
 
     const loadProblems = async () => {
 

@@ -22,23 +22,38 @@ const cardVariants: Variants = {
   },
 };
 
-const SolutionSection = () => {
-  const [content, setContent] = useState<LandingPageContent | null>(null);
-  const [livePreview, setLivePreview] = useState<any>(null);
-  const [solutions, setSolutions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+interface SolutionSectionProps {
+  content?: any;
+}
 
-  // Load section heading from LandingPageContent
+const SolutionSection = ({ content: propContent }: SolutionSectionProps) => {
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
+  const [livePreview, setLivePreview] = useState<any>(null);
+  const [solutions, setSolutions] = useState<any[]>(propContent?.features || []);
+  const [loading, setLoading] = useState(!propContent);
+
+  // Sync state if prop changes
   useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+      setSolutions(propContent.features || []);
+      setLoading(false);
+    }
+  }, [propContent]);
+
+  // Load section heading from LandingPageContent only if not provided as prop
+  useEffect(() => {
+    if (propContent) return;
     const loadContent = async () => {
       const data = await fetchLandingPageContent();
       if (data) setContent(data);
     };
     loadContent();
-  }, []);
+  }, [propContent]);
 
-  // Fetch solutions from Django API
+  // Fetch solutions from Django API only if not provided as prop
   useEffect(() => {
+    if (propContent) return;
     const loadSolutions = async () => {
       try {
         setLoading(true);
@@ -52,7 +67,7 @@ const SolutionSection = () => {
       }
     };
     loadSolutions();
-  }, []);
+  }, [propContent]);
 
   // Live preview listener
   useEffect(() => {

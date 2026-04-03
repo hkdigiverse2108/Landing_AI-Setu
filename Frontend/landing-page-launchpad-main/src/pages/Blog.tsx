@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { fetchBlogPosts, BlogPost } from "@/services/api";
+import { BlogSkeleton } from "@/components/landing/LandingSkeleton";
 
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -58,7 +59,7 @@ const Blog = () => {
           </motion.h1>
 
           {loading ? (
-            <div className="text-center py-20 text-gray-500">Loading posts...</div>
+            <BlogSkeleton />
           ) : filtered.length > 0 ? (
             <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
               {filtered.map((post, idx) => (

@@ -12,14 +12,28 @@ const rowVariants: Variants = {
   }),
 };
 
-const ComparisonSection = () => {
-  const [rows, setRows] = useState<any[]>([]);
-  const [content, setContent] = useState<any>(null); // DB static text
-  const [livePreview, setLivePreview] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+interface ComparisonSectionProps {
+  content?: any;
+}
 
-  // 1️⃣ Fetch comparison features and content
+const ComparisonSection = ({ content: propContent }: ComparisonSectionProps) => {
+  const [rows, setRows] = useState<any[]>(propContent?.comparison_features || []);
+  const [content, setContent] = useState<any>(propContent || null); // DB static text
+  const [livePreview, setLivePreview] = useState<any>(null);
+  const [loading, setLoading] = useState(!propContent);
+
+  // Sync state if prop changes
+  useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+      setRows(propContent.comparison_features || []);
+      setLoading(false);
+    }
+  }, [propContent]);
+
+  // 1️⃣ Fetch comparison features and content only if not provided as prop
   const fetchData = async () => {
+    if (propContent) return;
     try {
       const [resFeatures, resContent] = await Promise.all([
         fetch("/api/comparison-features/"),
@@ -38,7 +52,7 @@ const ComparisonSection = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [propContent]);
 
   // 2️⃣ Live preview listener (for admin changes)
   useEffect(() => {

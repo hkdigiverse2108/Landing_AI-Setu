@@ -7,6 +7,8 @@ import { useState, useEffect } from "react";
 import { fetchBlogPostDetail, BlogPost as BlogPostType } from "@/services/api";
 import SEO from "@/components/SEO";
 
+import { BlogDetailSkeleton } from "@/components/landing/LandingSkeleton";
+
 const BlogPost = () => {
   const { postId } = useParams<{ postId: string }>(); // This is actually the slug
   const [post, setPost] = useState<BlogPostType | null>(null);
@@ -32,9 +34,12 @@ const BlogPost = () => {
     const loadPost = async () => {
       if (!postId) return;
       setLoading(true);
-      const data = await fetchBlogPostDetail(postId);
-      setPost(data);
-      setLoading(false);
+      try {
+        const data = await fetchBlogPostDetail(postId);
+        setPost(data);
+      } finally {
+        setLoading(false);
+      }
     };
     loadPost();
   }, [postId]);
@@ -43,8 +48,8 @@ const BlogPost = () => {
     return (
       <>
         {!isPreview && <Header />}
-        <main className="min-h-[60vh] flex items-center justify-center bg-[#F5F6FA]">
-          <div className="text-gray-500">Loading article...</div>
+        <main className="min-h-screen bg-[#F5F6FA]">
+          <BlogDetailSkeleton />
         </main>
         {!isPreview && <Footer />}
       </>

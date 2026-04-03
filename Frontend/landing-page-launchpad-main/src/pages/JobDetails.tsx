@@ -20,6 +20,8 @@ interface Job {
   seo_keywords?: string;
 }
 
+import { JobSkeleton } from "@/components/landing/LandingSkeleton";
+
 const JobDetails = () => {
   const { jobId } = useParams();
   const navigate = useNavigate();
@@ -161,9 +163,9 @@ const JobDetails = () => {
     return (
       <>
         <Header />
-        <div className="text-center py-24 text-xl font-semibold">
-          Loading Job...
-        </div>
+        <main className="min-h-screen bg-[#F5F6FA]">
+          <JobSkeleton />
+        </main>
         <Footer />
       </>
     );

@@ -3,8 +3,9 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { fetchLandingPageContent } from "@/services/api";
 
-const FAQSection = () => {
+import { FAQSkeleton } from "@/components/landing/LandingSkeleton";
 
+const FAQSection = () => {
   const [faqs, setFaqs] = useState<any[]>([]);
   const [content, setContent] = useState<any>(null);
   const [livePreview, setLivePreview] = useState<any>(null);
@@ -12,28 +13,20 @@ const FAQSection = () => {
 
   // 1️⃣ Fetch FAQ list + landing page content
   const fetchData = async () => {
-
     try {
-
       const [resFaqs, resContent] = await Promise.all([
         fetch("/api/faqs/"),
         fetchLandingPageContent(),
       ]);
 
       const faqData = await resFaqs.json();
-
       setFaqs(faqData || []);
       setContent(resContent);
-
-      setLoading(false);
-
     } catch (err) {
-
       console.error("Failed to load FAQ data:", err);
+    } finally {
       setLoading(false);
-
     }
-
   };
 
   useEffect(() => {
@@ -42,9 +35,7 @@ const FAQSection = () => {
 
   // 2️⃣ Live Preview (Admin changes)
   useEffect(() => {
-
     const handler = (event: any) => {
-
       if (event.data && event.data.source === 'django-admin') {
         if (event.data.model === 'LandingPageContent' || event.data.model === 'FAQContent') {
           setContent((prev: any) => ({ ...prev, ...event.data.payload }));
@@ -54,21 +45,15 @@ const FAQSection = () => {
           setFaqs(prev => prev.map(f => (f.id === parseInt(pk) || f.id === pk) ? { ...f, ...item } : f));
         }
       }
-
     };
-
     window.addEventListener("message", handler);
-
     return () => window.removeEventListener("message", handler);
-
   }, []);
 
   if (loading) {
     return (
       <section className="py-16 lg:py-24 bg-secondary">
-        <div className="container max-w-3xl text-center text-gray-500">
-          Loading FAQs...
-        </div>
+        <FAQSkeleton />
       </section>
     );
   }

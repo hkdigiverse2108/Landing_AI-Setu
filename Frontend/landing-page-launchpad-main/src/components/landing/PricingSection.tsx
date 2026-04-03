@@ -5,22 +5,41 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { fetchLandingPageContent } from "@/services/api";
 
-const PricingSection = () => {
+interface PricingSectionProps {
+  content?: any;
+}
+
+const PricingSection = ({ content: propContent }: PricingSectionProps) => {
 
   const navigate = useNavigate();
 
-  const [content, setContent] = useState<any>(null);
+  const [content, setContent] = useState<any>(propContent || null);
+  const [isLoading, setIsLoading] = useState(!propContent);
 
-  // Fetch database content
+  // Sync state if prop changes (e.g. from live preview in parent)
   useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+      setIsLoading(false);
+    }
+  }, [propContent]);
+
+  // Fetch database content only if not provided as prop
+  useEffect(() => {
+    if (propContent) return;
+
     const loadContent = async () => {
-      const data = await fetchLandingPageContent();
-      if (data) {
-        setContent(data);
+      try {
+        const data = await fetchLandingPageContent();
+        if (data) {
+          setContent(data);
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     loadContent();
-  }, []);
+  }, [propContent]);
 
   // Live preview listener
   useEffect(() => {
@@ -107,7 +126,7 @@ const PricingSection = () => {
                 <span className="text-5xl font-extrabold text-foreground">
                   {content?.pricing_price ||
                    content?.pricing_price ||
-                   "₹12,000"}
+                   "..."}
                 </span>
 
                 <span className="text-muted-foreground text-sm">
@@ -123,12 +142,21 @@ const PricingSection = () => {
           </div>
 
           <div className="space-y-3 mb-8">
-            {featuresList.map((f, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <Check className="h-4 w-4 text-accent flex-shrink-0" />
-                <span className="text-sm text-foreground">{f}</span>
-              </div>
-            ))}
+            {isLoading ? (
+              [1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="h-4 w-4 bg-accent/20 rounded-full animate-pulse" />
+                  <div className="h-4 w-full bg-muted animate-pulse rounded" />
+                </div>
+              ))
+            ) : (
+              featuresList.map((f, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <Check className="h-4 w-4 text-accent flex-shrink-0" />
+                  <span className="text-sm text-foreground">{f}</span>
+                </div>
+              ))
+            )}
           </div>
 
           <Button

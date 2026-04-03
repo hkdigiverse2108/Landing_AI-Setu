@@ -6,22 +6,36 @@ import aiScan from "@/assets/ai-scan.jpg";
 import { fetchUSPFeatures } from "@/services/api";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
-const USPSection = () => {
-  const [content, setContent] = useState<LandingPageContent | null>(null);
-  const [livePreview, setLivePreview] = useState<any>(null);
-  const [features, setFeatures] = useState<any[]>([]);
+interface USPSectionProps {
+  content?: any;
+}
 
-  // Load section heading/subheading from LandingPageContent
+const USPSection = ({ content: propContent }: USPSectionProps) => {
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
+  const [livePreview, setLivePreview] = useState<any>(null);
+  const [features, setFeatures] = useState<any[]>(propContent?.usp_features || []);
+
+  // Sync state if prop changes
   useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+      setFeatures(propContent.usp_features || []);
+    }
+  }, [propContent]);
+
+  // Load section heading/subheading from LandingPageContent only if not provided as prop
+  useEffect(() => {
+    if (propContent) return;
     const loadContent = async () => {
       const data = await fetchLandingPageContent();
       if (data) setContent(data);
     };
     loadContent();
-  }, []);
+  }, [propContent]);
 
-  // Fetch features from API
+  // Fetch features from API only if not provided as prop
   useEffect(() => {
+    if (propContent) return;
     const loadFeatures = async () => {
       try {
         const res = await fetch("/api/usp-features/");
@@ -32,7 +46,7 @@ const USPSection = () => {
       }
     };
     loadFeatures();
-  }, []);
+  }, [propContent]);
 
   // Live preview listener
   useEffect(() => {

@@ -6,26 +6,26 @@ import FAQSection from "@/components/landing/FAQSection";
 import { useState, useEffect } from "react";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 import SEO from "@/components/SEO";
+import { PricingSkeleton } from "@/components/landing/LandingSkeleton";
 
 const Pricing = () => {
 
   const [content, setContent] = useState<LandingPageContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [livePreview, setLivePreview] = useState<any>(null);
 
   useEffect(() => {
-
     const loadContent = async () => {
-
-      const data = await fetchLandingPageContent();
-
-      if (data) {
-        setContent(data);
+      try {
+        const data = await fetchLandingPageContent();
+        if (data) {
+          setContent(data);
+        }
+      } finally {
+        setIsLoading(false);
       }
-
     };
-
     loadContent();
-
   }, []);
 
 
@@ -71,32 +71,28 @@ const Pricing = () => {
         {/* HERO */}
 
         <div className="bg-hero text-primary-foreground py-16 text-center">
-
           <div className="container">
-
             <h1 className="text-4xl lg:text-5xl font-extrabold mb-4">
-
               {livePreview?.pricing_title ||
                 content?.pricing_main_title ||
                 "Pricing"}
-
             </h1>
-
             <p className="text-primary-foreground/70 max-w-lg mx-auto">
-
               {livePreview?.pricing_description ||
                 content?.pricing_main_desc ||
                 "Simple, transparent pricing — one package, everything included."}
-
             </p>
-
           </div>
-
         </div>
 
-        <PricingSection />
-        <FAQSection />
-
+        {isLoading ? (
+          <PricingSkeleton />
+        ) : (
+          <>
+            <PricingSection />
+            <FAQSection />
+          </>
+        )}
       </main>
 
       <Footer />

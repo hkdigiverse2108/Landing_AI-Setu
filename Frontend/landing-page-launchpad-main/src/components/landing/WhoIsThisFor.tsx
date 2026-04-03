@@ -4,40 +4,47 @@ import DynamicIcon from "@/components/DynamicIcon";
 import { fetchStoreTypes } from "@/services/api";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
-const WhoIsThisFor = () => {
-  const [content, setContent] = useState<LandingPageContent | null>(null);
-  const [livePreview, setLivePreview] = useState<any>(null);
-  const [types, setTypes] = useState<any[]>([]);
+interface WhoIsThisForProps {
+  content?: any;
+}
 
-  // Load section headings from LandingPageContent
+const WhoIsThisFor = ({ content: propContent }: WhoIsThisForProps) => {
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
+  const [livePreview, setLivePreview] = useState<any>(null);
+  const [types, setTypes] = useState<any[]>(propContent?.store_types || []);
+
+  // Sync state if prop changes
   useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+      setTypes(propContent.store_types || []);
+    }
+  }, [propContent]);
+
+  // Load section headings from LandingPageContent only if not provided as prop
+  useEffect(() => {
+    if (propContent) return;
     const loadContent = async () => {
       const data = await fetchLandingPageContent();
       if (data) setContent(data);
     };
     loadContent();
-  }, []);
+  }, [propContent]);
 
-  // Fetch store types from API
+  // Fetch store types from API only if not provided as prop
   useEffect(() => {
+    if (propContent) return;
     const loadStoreTypes = async () => {
-
       try {
-
         const res = await fetch("/api/store-types/");
         const data = await res.json();
-
         setTypes(data);
-
       } catch (err) {
-
         console.error("Error loading store types", err);
-
       }
-
     };
     loadStoreTypes();
-  }, []);
+  }, [propContent]);
 
   // Live preview listener
   useEffect(() => {

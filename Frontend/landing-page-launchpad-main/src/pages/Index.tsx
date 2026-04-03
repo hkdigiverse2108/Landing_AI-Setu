@@ -17,18 +17,24 @@ import FAQSection from "@/components/landing/FAQSection";
 import FinalCTA from "@/components/landing/FinalCTA";
 import DemoPopup from "@/components/DemoPopup";
 import SEO from "@/components/SEO";
+import { LandingSkeleton } from "@/components/landing/LandingSkeleton";
 
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 const Index = () => {
 
   const [content, setContent] = useState<LandingPageContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadContent = async () => {
-      const data = await fetchLandingPageContent();
-      if (data) {
-        setContent(data);
+      try {
+        const data = await fetchLandingPageContent();
+        if (data) {
+          setContent(data);
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     loadContent();
@@ -143,21 +149,25 @@ const Index = () => {
       {(!isPreview || !sectionParam) && <DemoPopup />}
       {(!isPreview || !sectionParam) && <Header />}
 
-      <main>
-        {shouldShow('hero', content?.show_hero) && <div id="hero"><HeroSection /></div>}
-        {shouldShow('trusted-retailers', content?.show_trust_strip) && <div id="trusted-retailers"><TrustStrip /></div>}
-        {shouldShow('problem', content?.show_problem) && <div id="problem"><ProblemSection /></div>}
-        {shouldShow('solution', content?.show_solution) && <div id="solution"><SolutionSection /></div>}
-        {shouldShow('usp', content?.show_usp) && <div id="usp"><USPSection /></div>}
-        {shouldShow('how-it-works', content?.show_how_it_works) && <div id="how-it-works"><HowItWorks /></div>}
-        {shouldShow('who-is-this-for', content?.show_who_is_this_for) && <div id="who-is-this-for"><WhoIsThisFor /></div>}
-        {shouldShow('pricing', content?.show_pricing) && <div id="pricing"><PricingSection /></div>}
-        {shouldShow('referral', content?.show_referral) && <div id="referral"><ReferralSection /></div>}
-        {shouldShow('comparison', content?.show_comparison) && <div id="comparison"><ComparisonSection /></div>}
-        {shouldShow('testimonials', content?.show_testimonials) && <div id="testimonials"><TestimonialsSection /></div>}
-        {shouldShow('faq', content?.show_faq) && <div id="faq"><FAQSection /></div>}
-        {shouldShow('cta', content?.show_cta) && <div id="cta"><FinalCTA /></div>}
-      </main>
+      {isLoading ? (
+        <LandingSkeleton />
+      ) : (
+        <main>
+          {shouldShow('hero', content?.show_hero) && <div id="hero"><HeroSection /></div>}
+          {shouldShow('trusted-retailers', content?.show_trust_strip) && <div id="trusted-retailers"><TrustStrip /></div>}
+          {shouldShow('problem', content?.show_problem) && <div id="problem"><ProblemSection /></div>}
+          {shouldShow('solution', content?.show_solution) && <div id="solution"><SolutionSection /></div>}
+          {shouldShow('usp', content?.show_usp) && <div id="usp"><USPSection /></div>}
+          {shouldShow('how-it-works', content?.show_how_it_works) && <div id="how-it-works"><HowItWorks /></div>}
+          {shouldShow('who-is-this-for', content?.show_who_is_this_for) && <div id="who-is-this-for"><WhoIsThisFor /></div>}
+          {shouldShow('pricing', content?.show_pricing) && <div id="pricing"><PricingSection content={content} /></div>}
+          {shouldShow('referral', content?.show_referral) && <div id="referral"><ReferralSection /></div>}
+          {shouldShow('comparison', content?.show_comparison) && <div id="comparison"><ComparisonSection /></div>}
+          {shouldShow('testimonials', content?.show_testimonials) && <div id="testimonials"><TestimonialsSection /></div>}
+          {shouldShow('faq', content?.show_faq) && <div id="faq"><FAQSection /></div>}
+          {shouldShow('cta', content?.show_cta) && <div id="cta"><FinalCTA /></div>}
+        </main>
+      )}
 
       {(!isPreview || !sectionParam || sectionParam === 'footer' || sectionParam === 'master-footer') && <Footer />}
     </>

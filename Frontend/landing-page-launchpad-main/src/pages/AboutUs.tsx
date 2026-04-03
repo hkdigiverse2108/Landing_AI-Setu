@@ -4,7 +4,6 @@ import SEO from "@/components/SEO";
 import { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, Variants } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,13 +20,14 @@ import {
   AboutPageContent,
   Section,
 } from "@/services/api";
+import { AboutSkeleton } from "@/components/landing/LandingSkeleton";
 
 const AboutUs = () => {
   const [demoOpen, setDemoOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState<AboutPageContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [livePreview, setLivePreview] = useState<any>(null);
-
   const [targetSection, setTargetSection] = useState<string | null>(null);
 
   useEffect(() => {
@@ -97,8 +97,12 @@ const AboutUs = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      const data = await fetchAboutPageContent();
-      if (data) setContent(data);
+      try {
+        const data = await fetchAboutPageContent();
+        if (data) setContent(data);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadData();
   }, []);
@@ -106,9 +110,7 @@ const AboutUs = () => {
   // ✅ IMAGE FIX (GLOBAL)
   const getImageUrl = (path?: string) => {
     if (!path) return "/placeholder.png";
-    return path.startsWith("http")
-      ? path
-      : path; // Relative path works on any origin
+    return path;
   };
 
   // ANIMATIONS
@@ -155,7 +157,6 @@ const AboutUs = () => {
   const serve = getSection("serve");
   const cta = getSection("cta");
 
-  // Helper to conditionally render active section
   const shouldShowSection = (id: string) => {
     if (!targetSection || targetSection === 'all') return true;
     return targetSection === id;
@@ -165,219 +166,137 @@ const AboutUs = () => {
     <>
       <SEO 
         title={content?.seo_title || "About Us"} 
-        description={content?.seo_description || "Learn more about AI Setu's mission to empower retailers with innovative AI solutions. Meet our team and discover our journey."}
-        keywords={content?.seo_keywords || "about AI Setu, company mission, retail innovation team"}
+        description={content?.seo_description || "Learn more about AI Setu's mission to empower retailers with innovative AI solutions."}
       />
       {!targetSection && <Header />}
 
       <main className="bg-[#F5F6FA]">
+        {isLoading ? (
+          <AboutSkeleton />
+        ) : (
+          <>
+            {/* HERO */}
+            {shouldShowSection('hero') && (
+            <motion.section
+              id="hero"
+              variants={fadeIn}
+              initial="hidden"
+              animate="show"
+              className="bg-[#1F2E4D] text-white py-20 text-center"
+            >
+              <motion.div variants={fadeUp} className="text-[#F4B400] font-bold tracking-wider uppercase mb-4 text-sm">
+                {livePreview?.about_label || (content as any)?.about_label || "ABOUT US"}
+              </motion.div>
+              <motion.h1 variants={fadeUp} className="text-5xl font-bold mb-4">
+                {livePreview?.hero_title || hero?.title || "About AI-Setu ERP"}
+              </motion.h1>
 
-        {/* HERO */}
-        {shouldShowSection('hero') && (
-        <motion.section
-          id="hero"
-          variants={fadeIn}
-          initial="hidden"
-          animate="show"
-          className="bg-[#1F2E4D] text-white py-20 text-center"
-        >
-          <motion.div variants={fadeUp} className="text-[#F4B400] font-bold tracking-wider uppercase mb-4 text-sm">
-            {livePreview?.about_label || (content as any)?.about_label || "ABOUT US"}
-          </motion.div>
-          <motion.h1 variants={fadeUp} className="text-5xl font-bold mb-4">
-            {livePreview?.hero_title || hero?.title || "About AI-Setu ERP"}
-          </motion.h1>
-
-          <motion.p variants={fadeUp} className="max-w-3xl mx-auto text-gray-300">
-            {livePreview?.hero_description || hero?.subtitle || "AI-Setu ERP empowers retailers with modern technology to simplify store management. We help SMEs automate operations, improve efficiency, and grow faster with intelligent ERP solutions."}
-          </motion.p>
-        </motion.section>
-        )}
-
-        {/* ABOUT */}
-        {shouldShowSection('story') && (
-        <motion.section
-          id="about"
-          variants={fadeIn}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          className="py-20 bg-white"
-        >
-          <motion.div
-            variants={stagger}
-            className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 px-6"
-          >
-            <motion.div variants={fadeUp}>
-              <h3 className="text-[#F4B400] font-bold tracking-wider uppercase mb-2 text-sm">
-                ABOUT US
-              </h3>
-              <h2 className="text-3xl font-bold mb-4">{livePreview?.about_heading || about?.title}</h2>
-              <p className="mb-4 text-gray-600">{about?.subtitle}</p>
-
-              {livePreview ? (
-                <>
-                  {livePreview.about_description_1 && <p className="text-gray-600 mb-2">{livePreview.about_description_1}</p>}
-                  {livePreview.about_description_2 && <p className="text-gray-600 mb-2">{livePreview.about_description_2}</p>}
-                  {livePreview.about_description_3 && <p className="text-gray-600 mb-2">{livePreview.about_description_3}</p>}
-                </>
-              ) : (
-                about?.items?.map((item) => (
-                  <p key={item.id} className="text-gray-600 mb-2">
-                    {item.description}
-                  </p>
-                ))
-              )}
-            </motion.div>
-
-            {about?.image && (
-              <img
-                src={about.image}  
-                className="rounded-lg shadow"
-              />
-            )}
-          </motion.div>
-        </motion.section>
-        )}
-
-        {/* MISSION + WHY */}
-        {(shouldShowSection('mission') || shouldShowSection('why')) && (
-        <motion.section
-          id="mission"
-          variants={fadeIn}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          className="py-20"
-        >
-          <motion.div
-            variants={stagger}
-            className={`mx-auto grid ${(shouldShowSection('mission') && shouldShowSection('why')) ? 'max-w-6xl md:grid-cols-2 gap-12' : 'max-w-3xl md:grid-cols-1 gap-6'} px-6`}
-          >
-            {shouldShowSection('mission') && (
-            <motion.div variants={fadeUp} className={(shouldShowSection('mission') && !shouldShowSection('why')) ? 'text-center' : ''}>
-              <h2 className="text-3xl font-bold mb-4">{livePreview?.mission_title || mission?.title}</h2>
-              <p className="text-gray-600">{livePreview?.mission_description || mission?.subtitle}</p>
-            </motion.div>
+              <motion.p variants={fadeUp} className="max-w-3xl mx-auto text-gray-300">
+                {livePreview?.hero_description || hero?.subtitle || "AI-Setu ERP empowers retailers with modern technology to simplify store management."}
+              </motion.p>
+            </motion.section>
             )}
 
-            {shouldShowSection('why') && (
-            <motion.div variants={fadeUp} className="bg-white p-6 rounded-lg shadow" id="why_choose">
-              <h3 className="text-xl font-semibold mb-3">{livePreview?.why_choose_title || why?.title}</h3>
-              <ul className="space-y-2 text-gray-600">
-                {livePreview ? (
-                  <>
-                    {/* Dynamic points only */}
-                    {livePreview.why_choose_items?.map((item: any, idx: number) => (
-                      !item.DELETE && item.title && <li key={`dynamic-${idx}`}>✔ {item.title}</li>
-                    ))}
-                  </>
-                ) : (
-                  why?.items?.map((item) => (
-                    <li key={item.id}>✔ {item.title}</li>
-                  ))
-                )}
-              </ul>
-            </motion.div>
-            )}
-          </motion.div>
-        </motion.section>
-        )}
-
-        {/* SERVE */}
-        {shouldShowSection('serve') && (
-        <motion.section
-          id="serve"
-          variants={fadeIn}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          className="py-20"
-        >
-          <h2 className="text-center text-3xl font-bold mb-4">{livePreview?.serve_title || serve?.title}</h2>
-          <p className="text-center mb-8 text-black-300">{livePreview?.serve_subtitle || serve?.subtitle}</p>
-
-          <div className="relative max-w-7xl mx-auto px-6">
-
-            <button
-              onClick={() => scroll("left")}
-              className="absolute left-6 top-1/2 -translate-y-1/2 z-10 
-              bg-white text-black hover:bg-[#F4B400] hover:text-white
-              p-3 rounded-full shadow-md border border-gray-200
-              transition-all duration-300 hover:scale-110 active:scale-90"
+            {/* ABOUT */}
+            {shouldShowSection('story') && (
+            <motion.section
+              id="about"
+              variants={fadeIn}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+              className="py-20 bg-white"
             >
-              <ChevronLeft size={20} />
-            </button>
-
-            <button
-              onClick={() => scroll("right")}
-              className="absolute right-6 top-1/2 -translate-y-1/2 z-10 
-              bg-white text-black hover:bg-[#F4B400] hover:text-white
-              p-3 rounded-full shadow-md border border-gray-200
-              transition-all duration-300 hover:scale-110 active:scale-90"
-            >
-              <ChevronRight size={20} />
-            </button>
-
-            <div
-              ref={scrollRef}
-              className="flex gap-8 overflow-x-auto px-6 no-scrollbar scroll-smooth"
-            >
-              {(livePreview?.serve_items || serve?.items)?.map((item: any, idx: number) => {
-                const originalItem = serve?.items?.find(x => x.id == item.id) || serve?.items?.[idx];
-                const finalImage = item.image || originalItem?.image;
-
-                return (
-                <div
-                  key={item.id || idx}
-                  className="min-w-[300px] h-[200px] relative rounded-xl overflow-hidden shadow-lg group"
-                >
-                  {finalImage && (
-                    <img
-                      src={finalImage}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
+              <motion.div
+                variants={stagger}
+                className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 px-6"
+              >
+                <motion.div variants={fadeUp}>
+                  <h3 className="text-[#F4B400] font-bold tracking-wider uppercase mb-2 text-sm">
+                    ABOUT US
+                  </h3>
+                  <h2 className="text-3xl font-bold mb-4">{livePreview?.about_heading || about?.title}</h2>
+                  <p className="mb-4 text-gray-600">{about?.subtitle}</p>
+                  {livePreview ? (
+                    <>
+                      {livePreview.about_description_1 && <p className="text-gray-600 mb-2">{livePreview.about_description_1}</p>}
+                      {livePreview.about_description_2 && <p className="text-gray-600 mb-2">{livePreview.about_description_2}</p>}
+                      {livePreview.about_description_3 && <p className="text-gray-600 mb-2">{livePreview.about_description_3}</p>}
+                    </>
+                  ) : (
+                    about?.items?.map((item) => (
+                      <p key={item.id} className="text-gray-600 mb-2">{item.description}</p>
+                    ))
                   )}
+                </motion.div>
+                {about?.image && <img src={about.image} className="rounded-lg shadow" />}
+              </motion.div>
+            </motion.section>
+            )}
 
-                  <div className="absolute inset-0 bg-black/30"></div>
+            {/* MISSION + WHY */}
+            {(shouldShowSection('mission') || shouldShowSection('why')) && (
+            <motion.section id="mission" variants={fadeIn} initial="hidden" whileInView="show" viewport={{ once: true }} className="py-20">
+              <motion.div variants={stagger} className={`mx-auto grid ${(shouldShowSection('mission') && shouldShowSection('why')) ? 'max-w-6xl md:grid-cols-2 gap-12' : 'max-w-3xl md:grid-cols-1 gap-6'} px-6`}>
+                {shouldShowSection('mission') && (
+                <motion.div variants={fadeUp} className={(shouldShowSection('mission') && !shouldShowSection('why')) ? 'text-center' : ''}>
+                  <h2 className="text-3xl font-bold mb-4">{livePreview?.mission_title || mission?.title}</h2>
+                  <p className="text-gray-600">{livePreview?.mission_description || mission?.subtitle}</p>
+                </motion.div>
+                )}
+                {shouldShowSection('why') && (
+                <motion.div variants={fadeUp} className="bg-white p-6 rounded-lg shadow" id="why_choose">
+                  <h3 className="text-xl font-semibold mb-3">{livePreview?.why_choose_title || why?.title}</h3>
+                  <ul className="space-y-2 text-gray-600">
+                    {livePreview ? livePreview.why_choose_items?.map((item: any, idx: number) => (
+                      !item.DELETE && item.title && <li key={`dynamic-${idx}`}>✔ {item.title}</li>
+                    )) : why?.items?.map((item) => <li key={item.id}>✔ {item.title}</li>)}
+                  </ul>
+                </motion.div>
+                )}
+              </motion.div>
+            </motion.section>
+            )}
 
-                  <div className="absolute bottom-4 left-4 text-white font-semibold text-base">
-                    {item.title}
-                  </div>
+            {/* SERVE */}
+            {shouldShowSection('serve') && (
+            <motion.section id="serve" variants={fadeIn} initial="hidden" whileInView="show" viewport={{ once: true }} className="py-20">
+              <h2 className="text-center text-3xl font-bold mb-4">{livePreview?.serve_title || serve?.title}</h2>
+              <p className="text-center mb-8 text-black-300">{livePreview?.serve_subtitle || serve?.subtitle}</p>
+              <div className="relative max-w-7xl mx-auto px-6">
+                <button onClick={() => scroll("left")} className="absolute left-6 top-1/2 -translate-y-1/2 z-10 bg-white text-black hover:bg-[#F4B400] hover:text-white p-3 rounded-full shadow-md border border-gray-200 transition-all duration-300 hover:scale-110 active:scale-90"><ChevronLeft size={20} /></button>
+                <button onClick={() => scroll("right")} className="absolute right-6 top-1/2 -translate-y-1/2 z-10 bg-white text-black hover:bg-[#F4B400] hover:text-white p-3 rounded-full shadow-md border border-gray-200 transition-all duration-300 hover:scale-110 active:scale-90"><ChevronRight size={20} /></button>
+                <div ref={scrollRef} className="flex gap-8 overflow-x-auto px-6 no-scrollbar scroll-smooth">
+                  {(livePreview?.serve_items || serve?.items)?.map((item: any, idx: number) => {
+                    const originalItem = serve?.items?.find(x => x.id == item.id) || serve?.items?.[idx];
+                    const finalImage = item.image || originalItem?.image;
+                    return (
+                      <div key={item.id || idx} className="min-w-[300px] h-[200px] relative rounded-xl overflow-hidden shadow-lg group">
+                        {finalImage && <img src={finalImage} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />}
+                        <div className="absolute inset-0 bg-black/30"></div>
+                        <div className="absolute bottom-4 left-4 text-white font-semibold text-base">{item.title}</div>
+                      </div>
+                    );
+                  })}
                 </div>
-                );
-              })}
-            </div>
+              </div>
+            </motion.section>
+            )}
 
-          </div>
-        </motion.section>
+            {/* CTA */}
+            {shouldShowSection('cta') && (
+            <motion.section id="cta" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} className="py-20 bg-[#1F2E4D] text-white text-center">
+              <h2 className="text-3xl font-bold mb-3">{livePreview?.cta_title || cta?.title}</h2>
+              <p className="mb-4 text-gray-300">{livePreview?.cta_description || cta?.subtitle}</p>
+              <motion.div whileHover={{ scale: 1.1 }}>
+                <Button size="lg" className="bg-gold-gradient text-accent-foreground font-bold text-lg px-10 py-6 shadow-xl" onClick={() => setDemoOpen(true)}>
+                  {livePreview?.cta_button_text || cta?.items?.[0]?.title || "Book Demo"}
+                </Button>
+              </motion.div>
+            </motion.section>
+            )}
+          </>
         )}
-
-        {/* CTA */}
-        {shouldShowSection('cta') && (
-        <motion.section
-          id="cta"
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          className="py-20 bg-[#1F2E4D] text-white text-center"
-        >
-          <h2 className="text-3xl font-bold mb-3">{livePreview?.cta_title || cta?.title}</h2>
-          <p className="mb-4 text-gray-300">{livePreview?.cta_description || cta?.subtitle}</p>
-
-          <motion.div whileHover={{ scale: 1.1 }}>
-            <Button
-              size="lg"
-              className="bg-gold-gradient text-accent-foreground font-bold text-lg px-10 py-6 shadow-xl"
-              onClick={() => setDemoOpen(true)}
-            >
-              {livePreview?.cta_button_text || cta?.items?.[0]?.title || "Book Demo"}
-            </Button>
-          </motion.div>
-        </motion.section>
-        )}
-
       </main>
 
       {!targetSection && <Footer />}
@@ -385,12 +304,8 @@ const AboutUs = () => {
       <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
         <DialogContent className="sm:max-w-sm bg-card border border-border">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
-              Book A Free Demo
-            </DialogTitle>
-            <DialogDescription>
-              Fill the form and our team will contact you shortly.
-            </DialogDescription>
+            <DialogTitle className="text-2xl font-bold">Book A Free Demo</DialogTitle>
+            <DialogDescription>Fill the form and our team will contact you shortly.</DialogDescription>
           </DialogHeader>
           <DemoForm />
         </DialogContent>

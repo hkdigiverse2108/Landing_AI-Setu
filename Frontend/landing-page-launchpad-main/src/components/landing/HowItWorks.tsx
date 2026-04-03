@@ -4,30 +4,42 @@ import DynamicIcon from "@/components/DynamicIcon";
 import { fetchHowItWorks } from "@/services/api";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
-const HowItWorks = () => {
-  const [content, setContent] = useState<LandingPageContent | null>(null);
-  const [livePreview, setLivePreview] = useState<any>(null);
-  const [steps, setSteps] = useState<any[]>([]);
+interface HowItWorksProps {
+  content?: any;
+}
 
-  // Load section headings from LandingPageContent
+const HowItWorks = ({ content: propContent }: HowItWorksProps) => {
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
+  const [livePreview, setLivePreview] = useState<any>(null);
+  const [steps, setSteps] = useState<any[]>(propContent?.howitworks_steps || []);
+
+  // Sync state if prop changes
   useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+      setSteps(propContent.howitworks_steps || []);
+    }
+  }, [propContent]);
+
+  // Load section headings from LandingPageContent only if not provided as prop
+  useEffect(() => {
+    if (propContent) return;
     const loadContent = async () => {
       const data = await fetchLandingPageContent();
       if (data) setContent(data);
     };
     loadContent();
-  }, []);
+  }, [propContent]);
 
-  // Fetch steps from API
+  // Fetch steps from API only if not provided as prop
   useEffect(() => {
+    if (propContent) return;
     const loadSteps = async () => {
-
       const data = await fetchHowItWorks();
       setSteps(data);
-
     };
     loadSteps();
-  }, []);
+  }, [propContent]);
 
   // Live preview listener
   useEffect(() => {

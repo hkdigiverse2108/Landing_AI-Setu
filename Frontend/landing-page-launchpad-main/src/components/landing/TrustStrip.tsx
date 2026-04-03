@@ -10,11 +10,24 @@ const defaultItems = [
   "24/7 Support",
 ];
 
-const TrustStrip = () => {
-  const [content, setContent] = useState<LandingPageContent | null>(null);
+interface TrustStripProps {
+  content?: any;
+}
+
+const TrustStrip = ({ content: propContent }: TrustStripProps) => {
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
   const [livePreview, setLivePreview] = useState<any>(null);
 
+  // Sync state if prop changes
   useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+    }
+  }, [propContent]);
+
+  useEffect(() => {
+    if (propContent) return;
+
     const loadContent = async () => {
       const data = await fetchLandingPageContent();
       if (data) {
@@ -22,7 +35,7 @@ const TrustStrip = () => {
       }
     };
     loadContent();
-  }, []);
+  }, [propContent]);
 
   useEffect(() => {
     const handler = (event: any) => {

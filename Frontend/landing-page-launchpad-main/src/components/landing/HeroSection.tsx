@@ -21,15 +21,23 @@ const defaultHighlights = [
   "AI-Powered Insights",
 ];
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  content?: any;
+}
+
+const HeroSection = ({ content: propContent }: HeroSectionProps) => {
   const [demoOpen, setDemoOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
-  const [content, setContent] = useState<LandingPageContent | null>(null);
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
   const [demoVideoUrl, setDemoVideoUrl] = useState<string | null>(null);
   
 
-  // ✅ LIVE PREVIEW DATA FROM DJANGO ADMIN
-  
+  // Sync state if prop changes
+  useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+    }
+  }, [propContent]);
 
   useEffect(() => {
   const loadVideo = async () => {
@@ -44,6 +52,8 @@ const HeroSection = () => {
 }, []);
 
   useEffect(() => {
+    if (propContent) return;
+
     const loadContent = async () => {
       const data = await fetchLandingPageContent();
       if (data) {
@@ -51,7 +61,7 @@ const HeroSection = () => {
       }
     };
     loadContent();
-  }, []);
+  }, [propContent]);
 
   useEffect(() => {
 
