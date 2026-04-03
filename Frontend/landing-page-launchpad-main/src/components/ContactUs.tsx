@@ -69,11 +69,26 @@ const ContactUsPage = () => {
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "phone") {
+      const numericValue = value.replace(/\D/g, "");
+      if (value !== numericValue) {
+        toast.error("Please enter numbers only");
+      }
+      if (numericValue.length <= 10) {
+        setFormData({ ...formData, [name]: numericValue });
+      }
+      return;
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.phone && formData.phone.length !== 10) {
+      toast.error("Please enter a valid 10-digit phone number");
+      return;
+    }
     try {
       const res = await submitContactForm(formData);
       if (res.message) {
@@ -206,7 +221,16 @@ const ContactUsPage = () => {
                       </div>
                       <div className="space-y-2">
                       <label className="text-sm font-semibold text-[#1F2E4D]">{content.phone_label}</label>
-                      <Input name="phone" placeholder={content.phone_placeholder} value={formData.phone} onChange={handleChange} required />
+                      <Input 
+                        name="phone" 
+                        type="tel"
+                        pattern="[0-9]{10}"
+                        maxLength={10}
+                        placeholder={content.phone_placeholder} 
+                        value={formData.phone} 
+                        onChange={handleChange} 
+                        required 
+                      />
                       </div>
                   </div>
                   <div className="space-y-2">

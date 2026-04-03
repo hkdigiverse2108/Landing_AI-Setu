@@ -59,6 +59,11 @@ const DemoForm = () => {
       return;
     }
 
+    if (form.mobile.length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number");
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/book-demo/`, {
@@ -93,9 +98,19 @@ const DemoForm = () => {
         className="bg-card border-border text-black placeholder-black/70"
       />
       <Input
+        type="tel"
         placeholder="Mobile Number"
         value={form.mobile}
-        onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+        onChange={(e) => {
+          const val = e.target.value;
+          const numericVal = val.replace(/\D/g, "");
+          if (val !== numericVal) {
+            toast.error("Please enter numbers only");
+          }
+          if (numericVal.length <= 10) {
+            setForm({ ...form, mobile: numericVal });
+          }
+        }}
         className="bg-card border-border text-black placeholder-black/70"
       />
       

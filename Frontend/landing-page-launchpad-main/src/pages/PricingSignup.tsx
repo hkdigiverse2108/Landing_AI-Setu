@@ -31,6 +31,24 @@ const PricingSignup = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
+    if (name === "mobileNumber") {
+      const numericValue = value.replace(/\D/g, "");
+      if (value !== numericValue) {
+        toast({
+          title: "Numbers only",
+          description: "Please enter numbers only for the mobile field.",
+          variant: "destructive",
+        });
+      }
+      if (numericValue.length <= 10) {
+        setFormData({
+          ...formData,
+          [name]: numericValue,
+        });
+      }
+      return;
+    }
+
     setFormData({
       ...formData,
       [name]: value,

@@ -123,6 +123,10 @@ const ReferralSection = () => {
   // Handle mobile number submit
   const submitMobile = async () => {
     if (!mobile) return toast.error("Please enter mobile number");
+    if (mobile.length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number");
+      return;
+    }
     setLoading(true);
 
     try {
@@ -211,8 +215,19 @@ const ReferralSection = () => {
           <input
             type="tel"
             placeholder="Enter Mobile Number"
+            maxLength={10}
+            pattern="[0-9]{10}"
             value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              const numericVal = val.replace(/\D/g, "");
+              if (val !== numericVal) {
+                toast.error("Please enter numbers only");
+              }
+              if (numericVal.length <= 10) {
+                setMobile(numericVal);
+              }
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();

@@ -26,9 +26,20 @@ const ApplyJob = () => {
   });
 
   const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    if (name === "phone") {
+      const numericValue = value.replace(/\D/g, "");
+      if (value !== numericValue) {
+        toast.error("Please enter numbers only");
+      }
+      if (numericValue.length <= 10) {
+        setFormData({ ...formData, [name]: numericValue });
+      }
+      return;
+    }
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
   };
 
@@ -40,6 +51,11 @@ const ApplyJob = () => {
 
     if (!formData.first_name || !formData.last_name || !formData.email || !formData.phone || !resume ) {
       toast.error("Please fill required fields");
+      return;
+    }
+
+    if (formData.phone.length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number");
       return;
     }
 
@@ -200,6 +216,10 @@ const ApplyJob = () => {
                   <label className="font-medium">Mobile Phone *</label>
                   <input
                     name="phone"
+                    type="tel"
+                    pattern="[0-9]{10}"
+                    maxLength={10}
+                    value={formData.phone}
                     onChange={handleChange}
                     className="w-full border rounded-lg p-3 mt-2"
                   />
