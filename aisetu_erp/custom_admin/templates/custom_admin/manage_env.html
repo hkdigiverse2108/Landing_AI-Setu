@@ -103,13 +103,19 @@
     }
 
     .save-indicator, .cancel-indicator {
-        display: none;
+        display: none !important;
         margin-left: 0.5rem;
     }
 
     .env-row.is-dirty .save-indicator,
     .env-row.is-dirty .cancel-indicator {
-        display: flex;
+        display: flex !important;
+    }
+
+    /* Highlight the dirty input */
+    .env-row.is-dirty .env-value-input {
+        border-color: #10b981;
+        box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.1);
     }
 
     .btn-save { color: #10b981 !important; }
@@ -132,6 +138,8 @@
         z-index: 1060;
     }
 </style>
+
+{% csrf_token %}
 
 <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4">
     <div>
@@ -222,10 +230,25 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Toast Utility
-    const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
-    const csrfToken = csrfTokenEl ? csrfTokenEl.value : '';
+    // 0. Get the CSRF token from the cookie (Recommended for AJAX)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 
+    const csrfToken = getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+    // 1. Toast Utility
     function showToast(message, type = 'success') {
         const toastId = 'toast-' + Date.now();
         const toastHtml = `
@@ -320,11 +343,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRFToken': csrfToken,
                         'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: new URLSearchParams({
-                        'csrfmiddlewaretoken': csrfToken,
+                        'csrfmiddlewaretoken': csrfToken.trim(),
                         'ajax': '1',
                         'action': 'update',
                         'key': key,
@@ -354,28 +376,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 3. Simple Listeners for Input
+    // 3. Robust Dirty Checking
     function checkDirty(input) {
         const row = input.closest('.env-row');
-        if (input.value !== input.dataset.originalValue) {
+        if (!row) return;
+
+        const val = input.value.trim();
+        const orig = (input.dataset.originalValue || '').trim();
+        
+        if (val !== orig) {
             row.classList.add('is-dirty');
         } else {
             row.classList.remove('is-dirty');
         }
     }
 
-    document.addEventListener('input', (e) => {
-        if (e.target.classList.contains('env-value-input')) checkDirty(e.target);
-    });
-
-    document.addEventListener('keyup', (e) => {
-        if (e.target.classList.contains('env-value-input')) checkDirty(e.target);
-    });
-
-    document.addEventListener('paste', (e) => {
-        if (e.target.classList.contains('env-value-input')) {
-            setTimeout(() => checkDirty(e.target), 0);
-        }
+    // Use event delegation for all input-related events
+    ['input', 'keyup', 'paste', 'change'].forEach(evt => {
+        document.addEventListener(evt, (e) => {
+            if (e.target.classList.contains('env-value-input')) {
+                // Use a short timeout for 'paste' to ensure value is updated
+                if (evt === 'paste') {
+                    setTimeout(() => checkDirty(e.target), 0);
+                } else {
+                    checkDirty(e.target);
+                }
+            }
+        });
     });
 
     document.addEventListener('keypress', function(e) {
