@@ -167,7 +167,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django_mongodb_backend.fields.ObjectIdAutoField'
 
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5004,http://127.0.0.1:5004').split(',')
-CORS_ALLOW_ALL_ORIGINS = False # Better security by default
+CORS_ALLOW_ALL_ORIGINS = True # Enabled at user request to allow access from any domain
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

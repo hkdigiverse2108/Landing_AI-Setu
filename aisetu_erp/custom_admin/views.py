@@ -461,15 +461,18 @@ def export_model_pdf(request, app_label, model_name):
 @custom_admin_required
 def manage_env(request):
     env_path = settings.BASE_DIR / 'aisetu_erp' / '.env'
-    PAYMENT_KEYS = ['RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET']
+    WHITELISTED_KEYS = [
+        'RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET',
+        'EMAIL_HOST_USER', 'EMAIL_HOST_PASSWORD'
+    ]
     
     if request.method == "POST":
         action = request.POST.get('action')
         key = request.POST.get('key')
         value = request.POST.get('value')
         
-        # Security check: only allow updating whitelisted payment keys
-        if key not in PAYMENT_KEYS:
+        # Security check: only allow updating whitelisted keys
+        if key not in WHITELISTED_KEYS:
             return JsonResponse({'status': 'error', 'message': 'Permission Denied.'}, status=403)
         
         try:
@@ -485,6 +488,10 @@ def manage_env(request):
                         gs.razorpay_key_id = value
                     elif key == 'RAZORPAY_KEY_SECRET':
                         gs.razorpay_key_secret = value
+                    elif key == 'EMAIL_HOST_USER':
+                        gs.email_host_user = value
+                    elif key == 'EMAIL_HOST_PASSWORD':
+                        gs.email_host_password = value
                     gs.save()
                     db_status = "and Database"
                 except Exception as db_err:
@@ -503,8 +510,8 @@ def manage_env(request):
 
     # Load only whitelisted keys
     all_vars = dotenv_values(env_path)
-    env_vars = {k: v for k, v in all_vars.items() if k in PAYMENT_KEYS}
-    for k in PAYMENT_KEYS:
+    env_vars = {k: v for k, v in all_vars.items() if k in WHITELISTED_KEYS}
+    for k in WHITELISTED_KEYS:
         if k not in env_vars: env_vars[k] = ""
 
     return render(request, 'custom_admin/manage_env.html', {'env_vars': env_vars})
