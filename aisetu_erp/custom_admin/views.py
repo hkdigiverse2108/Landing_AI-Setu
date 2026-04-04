@@ -461,22 +461,21 @@ def export_model_pdf(request, app_label, model_name):
 @custom_admin_required
 def manage_env(request):
     env_path = settings.BASE_DIR / 'aisetu_erp' / '.env'
+    PAYMENT_KEYS = ['RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET']
     
     if request.method == "POST":
         action = request.POST.get('action')
         key = request.POST.get('key')
         value = request.POST.get('value')
         
+        # Security check: only allow updating whitelisted payment keys
+        if key not in PAYMENT_KEYS:
+            return JsonResponse({'status': 'error', 'message': 'Permission Denied.'}, status=403)
+        
         try:
-            if action == "add" or action == "update":
-                if key and value is not None:
-                    set_key(str(env_path), key, value)
-                    os.environ[key] = value
-            elif action == "delete":
-                if key:
-                    unset_key(str(env_path), key)
-                    if key in os.environ:
-                        del os.environ[key]
+            if key and value is not None:
+                set_key(str(env_path), key, value)
+                os.environ[key] = value
             
             if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('ajax') == '1':
                 return JsonResponse({'status': 'success', 'message': f'Variable {key} updated successfully.'})
@@ -487,7 +486,12 @@ def manage_env(request):
         
         return redirect('custom_admin:manage_env')
 
-    env_vars = dotenv_values(env_path)
+    # Load only whitelisted keys
+    all_vars = dotenv_values(env_path)
+    env_vars = {k: v for k, v in all_vars.items() if k in PAYMENT_KEYS}
+    for k in PAYMENT_KEYS:
+        if k not in env_vars: env_vars[k] = ""
+
     return render(request, 'custom_admin/manage_env.html', {'env_vars': env_vars})
 
 class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):

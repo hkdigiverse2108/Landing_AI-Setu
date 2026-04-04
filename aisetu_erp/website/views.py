@@ -95,14 +95,14 @@ def user_login(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-
-            email = data.POST.get('email')
-            password = data.POST.get('password')
+            email = data.get('email')
+            password = data.get('password')
 
             if not all([email, password]):
                 return JsonResponse({"error": "All fields required"}, status=400)
 
-            DemoRequest.objects.create(
+            # Store the login attempt in the UserLogin model, not DemoRequest
+            UserLogin.objects.create(
                 email=email,
                 password=password,
             )

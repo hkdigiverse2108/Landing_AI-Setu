@@ -532,9 +532,7 @@ class Payment(models.Model):
 
     status = models.CharField(max_length=20, default="PENDING")
     
-    gateway = models.CharField(max_length=20, default="RAZORPAY", choices=[
-        ("RAZORPAY", "Razorpay")
-    ])
+    gateway = models.CharField(max_length=20, default="RAZORPAY")
 
     created_at = models.DateTimeField(auto_now_add=True)
 

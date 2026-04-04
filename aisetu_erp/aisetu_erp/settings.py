@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env file
-load_dotenv(BASE_DIR / 'aisetu_erp' / '.env')
+load_dotenv(BASE_DIR / 'aisetu_erp' / '.env', override=True)
 
 # Point to the React build folder
 REACT_BUILD_DIR = BASE_DIR.parent / 'Frontend' / 'landing-page-launchpad-main' / 'dist'

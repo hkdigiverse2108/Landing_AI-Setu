@@ -131,32 +131,23 @@
 
 <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4">
     <div>
-        <h1 class="h3 fw-bold mb-1 text-slate-800">Environment Variables</h1>
+        <h1 class="h3 fw-bold mb-1 text-slate-800">Razorpay Configuration</h1>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{% url 'custom_admin:dashboard' %}" class="text-decoration-none text-muted small">Admin</a></li>
                 <li class="breadcrumb-item active small" aria-current="page">Settings</li>
-                <li class="breadcrumb-item active small" aria-current="page">Environment</li>
+                <li class="breadcrumb-item active small" aria-current="page">Razorpay</li>
             </ol>
         </nav>
     </div>
-    <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#addVarModal">
-        <i class="bi bi-plus-lg me-1"></i> Add Variable
-    </button>
 </div>
 
 <div class="card card-modern border-0">
     <div class="card-header bg-white py-4 px-4 border-bottom-0">
         <div class="row align-items-center">
             <div class="col">
-                <h5 class="mb-0 fw-bold text-slate-700">Configuration Table</h5>
-                <p class="text-muted small mb-0 mt-1">Click on any value below to edit it inline.</p>
-            </div>
-            <div class="col-auto">
-                <div class="input-group" style="max-width: 300px;">
-                    <span class="input-group-text bg-light border-0 ps-3"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" id="envSearch" class="form-control bg-light border-0" placeholder="Filter variables...">
-                </div>
+                <h5 class="mb-0 fw-bold text-slate-700">Razorpay Credentials</h5>
+                <p class="text-muted small mb-0 mt-1">Update your live or test keys below. Changes take effect on next reload.</p>
             </div>
         </div>
     </div>
@@ -164,9 +155,9 @@
         <table class="table mb-0 align-middle" id="envTable">
             <thead>
                 <tr>
-                    <th class="px-4 py-3">Configuration Key</th>
-                    <th class="px-4 py-3">Variable Value</th>
-                    <th class="text-end px-4 py-3" style="width: 120px;">Actions</th>
+                    <th class="px-4 py-3">Credential Key</th>
+                    <th class="px-4 py-3">Value</th>
+                    <th class="text-end px-4 py-3" style="width: 60px;"></th>
                 </tr>
             </thead>
             <tbody>
@@ -195,6 +186,9 @@
                                    spellcheck="false">
                             
                             <div class="d-flex align-items-center ms-2">
+                                <button class="action-btn copy-btn" title="Copy to Clipboard">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
                                 <button class="action-btn toggle-visibility-btn" title="Toggle Visibility">
                                     <i class="bi bi-eye"></i>
                                 </button>
@@ -208,13 +202,6 @@
                         </div>
                     </td>
                     <td class="text-end px-4 py-3">
-                        <button class="action-btn text-danger delete-var-btn mx-auto" 
-                                data-key="{{ key }}" 
-                                data-bs-toggle="modal" 
-                                data-bs-target="#deleteVarModal"
-                                title="Delete Variable">
-                            <i class="bi bi-trash3"></i>
-                        </button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -223,79 +210,12 @@
     </div>
 </div>
 
-<!-- Modal for ADD-only (to keep table clean) -->
-<div class="modal fade" id="addVarModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header bg-primary text-white border-0 py-3">
-                <h5 class="modal-title fw-bold">New Environment Key</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="add">
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Key Name</label>
-                        <input type="text" name="key" class="form-control form-control-lg border-2" placeholder="e.g. JWT_SECRET" required 
-                               style="text-transform: uppercase; font-family: monospace;" oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '')">
-                    </div>
-                    <div class="mb-0">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Value</label>
-                        <textarea name="value" class="form-control border-2" rows="4" placeholder="Paste value here..." required style="font-family: monospace;"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light border-0 p-3">
-                    <button type="button" class="btn btn-link text-decoration-none text-muted fw-bold" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Create Variable</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+{% endblock %}
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteVarModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="key" id="delete_key">
-                <div class="modal-body text-center p-4">
-                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
-                        <i class="bi bi-trash display-6"></i>
-                    </div>
-                    <h6 class="fw-bold mb-1">Delete Variable?</h6>
-                    <p class="text-muted small mb-4">Confirm removal of <br><code id="delete_key_display" class="text-danger fw-bold"></code></p>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-danger rounded-pill fw-bold">Delete Forever</button>
-                        <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Keep It</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Toast Container -->
-<div id="toast-container"></div>
-
+{% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Search Logic
-    const searchInput = document.getElementById('envSearch');
-    const tableRows = document.querySelectorAll('.env-row');
-    
-    searchInput.addEventListener('input', function() {
-        const query = this.value.toLowerCase();
-        tableRows.forEach(row => {
-            const key = row.querySelector('.env-key').textContent.toLowerCase();
-            row.style.display = key.includes(query) ? '' : 'none';
-        });
-    });
-
-    // 2. Inline Edit Logic
+    // 1. Toast Utility
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
     function showToast(message, type = 'success') {
@@ -311,98 +231,118 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         const container = document.getElementById('toast-container');
-        container.insertAdjacentHTML('beforeend', toastHtml);
-        const toastEl = document.getElementById(toastId);
-        const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
-        toast.show();
-        toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+        if (container) {
+            container.insertAdjacentHTML('beforeend', toastHtml);
+            const toastEl = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+            toast.show();
+            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+        }
     }
 
+    // 2. Inline Edit & Toggle Logic
     document.querySelectorAll('.env-row').forEach(row => {
         const input = row.querySelector('.env-value-input');
         const wrapper = row.querySelector('.env-value-wrapper');
         const saveBtn = row.querySelector('.btn-save');
         const spinner = row.querySelector('.loading-spinner');
         const toggleBtn = row.querySelector('.toggle-visibility-btn');
+        const copyBtn = row.querySelector('.copy-btn');
         const key = row.dataset.key;
 
-        // Detect changes
-        input.addEventListener('input', function() {
-            if (this.value !== this.dataset.originalValue) {
-                wrapper.classList.add('is-dirty');
-            } else {
-                wrapper.classList.remove('is-dirty');
-            }
-        });
-
-        // Visibility toggle
-        toggleBtn.addEventListener('click', () => {
-            const icon = toggleBtn.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'bi bi-eye-slash';
-            } else {
-                input.type = 'password';
-                icon.className = 'bi bi-eye';
-            }
-        });
-
-        // AJAX Save
-        saveBtn.addEventListener('click', async () => {
-            const newValue = input.value;
-            
-            // Show loading
-            saveBtn.classList.add('d-none');
-            spinner.classList.remove('d-none');
-
-            try {
-                const response = await fetch(window.location.href, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRFToken': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: new URLSearchParams({
-                        'ajax': '1',
-                        'action': 'update',
-                        'key': key,
-                        'value': newValue
-                    })
+        if (input) {
+            // Visibility toggle
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const icon = toggleBtn.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.className = 'bi bi-eye-slash';
+                    } else {
+                        input.type = 'password';
+                        icon.className = 'bi bi-eye';
+                    }
                 });
+            }
 
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    input.dataset.originalValue = newValue;
-                    wrapper.classList.remove('is-dirty');
-                    showToast(result.message);
+            // Copy to clipboard
+            if (copyBtn) {
+                copyBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const originalType = input.type;
+                    input.type = 'text';
+                    input.select();
+                    document.execCommand('copy');
+                    input.type = originalType;
+                    
+                    const icon = copyBtn.querySelector('i');
+                    icon.className = 'bi bi-check';
+                    showToast('Copied to clipboard!', 'success');
+                    setTimeout(() => { icon.className = 'bi bi-clipboard'; }, 2000);
+                });
+            }
+
+            // Detect changes
+            input.addEventListener('input', function() {
+                if (this.value !== this.dataset.originalValue) {
+                    wrapper.classList.add('is-dirty');
                 } else {
-                    showToast(result.message, 'error');
+                    wrapper.classList.remove('is-dirty');
                 }
-            } catch (error) {
-                showToast('Network error occurred.', 'error');
-            } finally {
-                spinner.classList.add('d-none');
-                saveBtn.classList.remove('d-none');
-            }
-        });
+            });
 
-        // Handle Enter key for save
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && wrapper.classList.contains('is-dirty')) {
-                saveBtn.click();
-            }
-        });
-    });
+            // AJAX Save
+            if (saveBtn) {
+                saveBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const newValue = input.value;
+                    
+                    saveBtn.classList.add('d-none');
+                    spinner.classList.remove('d-none');
 
-    // 3. Delete Modal Data
-    document.querySelectorAll('.delete-var-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('delete_key').value = this.dataset.key;
-            document.getElementById('delete_key_display').textContent = this.dataset.key;
-        });
+                    try {
+                        const response = await fetch(window.location.href, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-CSRFToken': csrfToken,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: new URLSearchParams({
+                                'ajax': '1',
+                                'action': 'update',
+                                'key': key,
+                                'value': newValue
+                            })
+                        });
+
+                        const result = await response.json();
+                        if (result.status === 'success') {
+                            input.dataset.originalValue = newValue;
+                            wrapper.classList.remove('is-dirty');
+                            showToast(result.message);
+                        } else {
+                            showToast(result.message, 'error');
+                        }
+                    } catch (error) {
+                        showToast('Network error occurred.', 'error');
+                    } finally {
+                        spinner.classList.add('d-none');
+                        saveBtn.classList.remove('d-none');
+                    }
+                });
+            }
+
+            // Enter to save
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && wrapper.classList.contains('is-dirty')) {
+                    saveBtn.click();
+                }
+            });
+        }
     });
 });
 </script>
 {% endblock %}
+
