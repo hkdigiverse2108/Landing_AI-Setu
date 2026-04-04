@@ -35,6 +35,7 @@ class PricingSignup(models.Model):
     shop_name = models.CharField(max_length=200)
     owner_name = models.CharField(max_length=200)
     mobile_number = models.CharField(max_length=15)
+    email = models.EmailField(max_length=255, null=True, blank=True)
     state = models.CharField(max_length=100, default="Gujarat")
 
     referral_code = models.CharField(max_length=50, null=True)
@@ -530,6 +531,10 @@ class Payment(models.Model):
     amount = models.IntegerField()
 
     status = models.CharField(max_length=20, default="PENDING")
+    
+    gateway = models.CharField(max_length=20, default="RAZORPAY", choices=[
+        ("RAZORPAY", "Razorpay")
+    ])
 
     created_at = models.DateTimeField(auto_now_add=True)
 

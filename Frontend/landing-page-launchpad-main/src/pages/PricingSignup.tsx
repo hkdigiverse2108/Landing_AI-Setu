@@ -25,6 +25,7 @@ const PricingSignup = () => {
     shopName: "",
     ownerName: "",
     mobileNumber: "",
+    email: "",
     state: "Gujarat",
     referralCode: "",
   });
@@ -161,28 +162,28 @@ const PricingSignup = () => {
     };
 
     const updateFromPreview = (updatedContent: any) => {
-        setContent((prev: any) => ({
-            ...prev,
-            ...updatedContent
-        }));
-        
-        // Update price if it changed in preview
-        if (updatedContent.pricing_price) {
-          const parsedPrice = parseInt(updatedContent.pricing_price.replace(/[^0-9]/g, ''), 10);
-          if (!isNaN(parsedPrice) && parsedPrice > 0) {
-            setBasePrice(parsedPrice);
-            setPrice(parsedPrice * 1.18);
-          }
+      setContent((prev: any) => ({
+        ...prev,
+        ...updatedContent
+      }));
+
+      // Update price if it changed in preview
+      if (updatedContent.pricing_price) {
+        const parsedPrice = parseInt(updatedContent.pricing_price.replace(/[^0-9]/g, ''), 10);
+        if (!isNaN(parsedPrice) && parsedPrice > 0) {
+          setBasePrice(parsedPrice);
+          setPrice(parsedPrice * 1.18);
         }
+      }
     };
 
     window.addEventListener('message', handleMessage);
     previewChannel.addEventListener('message', handleBroadcast);
 
     return () => {
-        window.removeEventListener('message', handleMessage);
-        previewChannel.removeEventListener('message', handleBroadcast);
-        previewChannel.close();
+      window.removeEventListener('message', handleMessage);
+      previewChannel.removeEventListener('message', handleBroadcast);
+      previewChannel.close();
     };
   }, []);
 
@@ -199,6 +200,7 @@ const PricingSignup = () => {
           shop_name: formData.shopName,
           owner_name: formData.ownerName,
           mobile_number: formData.mobileNumber,
+          email: formData.email,
           state: formData.state,
           referral_code: formData.referralCode,
         }),
@@ -216,7 +218,7 @@ const PricingSignup = () => {
 
       // 2️⃣ Initiate payment via PhonePe
       const paymentResponse = await fetch(
-        `${API_BASE_URL}/phonepe/initiate/`,
+        `${API_BASE_URL}/api/payment/initiate/`,
         {
           method: "POST",
           headers: {
@@ -256,9 +258,9 @@ const PricingSignup = () => {
 
   return (
     <>
-      <SEO 
-        title="Complete Your Purchase" 
-        description="Finalize your subscription to AI Setu and start transforming your business with AI. Secure checkout powered by PhonePe."
+      <SEO
+        title="Complete Your Purchase"
+        description="Finalize your subscription to AI-Setu ERP and start transforming your business with AI. Secure checkout powered by Razorpay."
         keywords="checkout, pricing signup, AI Setu subscription, secure payment"
       />
       <Header />
@@ -273,7 +275,7 @@ const PricingSignup = () => {
             {/* Order Summary Side */}
             <div className="bg-card shadow-lg rounded-2xl p-8 border border-border">
               <h2 className="text-2xl font-bold mb-6 text-foreground">Order Summary</h2>
-              
+
               <div className="text-center mb-8 bg-muted/30 p-6 rounded-xl border border-border/50">
                 {isInitialLoading ? (
                   <div className="space-y-4 py-4">
@@ -384,7 +386,6 @@ const PricingSignup = () => {
                   />
                 </div>
 
-                {/* Owner Name */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
                     Owner Full Name <span className="text-destructive">*</span>
@@ -396,6 +397,21 @@ const PricingSignup = () => {
                     value={formData.ownerName}
                     onChange={handleChange}
                     required
+                    className="w-full border-2 border-border/50 rounded-xl p-3.5 bg-background focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                  />
+                </div>
+
+                {/* Email Address */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground text-opacity-80">
+                    Email Address <span className="text-muted-foreground font-normal">(Optional)</span>
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="e.g. ramesh@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
                     className="w-full border-2 border-border/50 rounded-xl p-3.5 bg-background focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
@@ -452,36 +468,36 @@ const PricingSignup = () => {
 
                 {/* Referral Code */}
                 <div className="space-y-2 pt-2">
-                <label className="text-sm font-medium text-foreground">
-                  Referral Code <span className="text-muted-foreground font-normal">(Optional)</span>
-                </label>
+                  <label className="text-sm font-medium text-foreground">
+                    Referral Code <span className="text-muted-foreground font-normal">(Optional)</span>
+                  </label>
 
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    name="referralCode"
-                    placeholder="Enter code if you have one"
-                    value={formData.referralCode}
-                    onChange={handleChange}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleApplyReferral();
-                      }
-                    }}
-                    className="flex-1 border-2 border-border/50 rounded-xl p-3.5 bg-background focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      name="referralCode"
+                      placeholder="Enter code if you have one"
+                      value={formData.referralCode}
+                      onChange={handleChange}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleApplyReferral();
+                        }
+                      }}
+                      className="flex-1 border-2 border-border/50 rounded-xl p-3.5 bg-background focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                    />
 
-                  <button
-                    type="button"
-                    onClick={handleApplyReferral}
-                    className="px-4 py-3 rounded-xl bg-accent text-white font-medium hover:opacity-90 transition"
-                  >
-                    Apply
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleApplyReferral}
+                      className="px-4 py-3 rounded-xl bg-accent text-white font-medium hover:opacity-90 transition"
+                    >
+                      Apply
+                    </button>
+                  </div>
                 </div>
-              </div>
 
                 {/* Pay Button */}
                 <div className="pt-4">
@@ -505,7 +521,7 @@ const PricingSignup = () => {
                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                       />
                     </svg>
-                    Secured by PhonePe
+                    Secured by Razorpay
                   </p>
                 </div>
               </form>

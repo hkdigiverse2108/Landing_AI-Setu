@@ -24,7 +24,7 @@ const PaymentSuccess = () => {
       try {
         const response = await fetch(`/api/payment/status/${tid}/`);
         const data = await response.json();
-        
+
         if (data.status === "SUCCESS" || data.status === "FAILURE") {
           setStatus(data.status);
           if (data.invoice_url) setInvoiceUrl(data.invoice_url);
@@ -67,7 +67,7 @@ const PaymentSuccess = () => {
         iconBg: "bg-blue-100",
         title: "Verifying Payment",
         color: "text-blue-600",
-        description: "Please wait while we confirm your transaction status with PhonePe.",
+        description: "Please wait while we confirm your transaction status with Razorpay.",
         accent: "bg-blue-400"
       };
     }
@@ -81,7 +81,7 @@ const PaymentSuccess = () => {
           color: "text-green-600",
           description: (
             <>
-              Welcome to <span className="font-bold text-[#F4B400]">AI-Setu ERP</span> family.  
+              Welcome to <span className="font-bold text-[#F4B400]">AI-Setu ERP</span> family.
               Your transaction has been completed successfully. You now have full access to our smart retail solutions.
             </>
           ),
@@ -220,7 +220,7 @@ const PaymentSuccess = () => {
                 <ArrowRight className="w-4 h-4" />
               </Button>
             )}
-            
+
             <Button
               onClick={() => navigate("/")}
               variant="outline"
@@ -233,7 +233,7 @@ const PaymentSuccess = () => {
 
           {/* small note */}
           <p className="text-xs text-gray-400 mt-8">
-            {status === "SUCCESS" 
+            {status === "SUCCESS"
               ? "You will receive a confirmation email with your login details shortly."
               : "If you have any questions, please contact our support team."}
           </p>

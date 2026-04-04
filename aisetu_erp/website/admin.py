@@ -541,7 +541,7 @@ class PricingSignupAdmin(ReadOnlyExportAdmin):
 
 @admin.register(PaymentProxy)
 class PaymentAdmin(ReadOnlyExportAdmin):
-    list_display = ["transaction_id", "pricing_signup", "amount", "status", "created_at"]
+    list_display = ["transaction_id", "pricing_signup", "amount", "status", "gateway", "created_at"]
     export_fields = ["transaction_id", "pricing_signup", "amount", "status"]
     list_filter = ["status"]
     search_fields = ["transaction_id", "pricing_signup__shop_name"]

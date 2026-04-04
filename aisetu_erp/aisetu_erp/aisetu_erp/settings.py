@@ -147,9 +147,3 @@ CSRF_TRUSTED_ORIGINS = [
     "http://[IP_ADDRESS]",
 ]
 
-# PhonePe Settings (UAT / Test Environment)
-PHONEPE_MERCHANT_ID = "M22QDSISBR7LX_2511271619"
-PHONEPE_SALT_KEY = "MTQyYmNmZGItZDFiNC00NzFjLWEzYzgtMWM0YjkxMTNjNmVm"
-PHONEPE_SALT_INDEX = "1"
-# Use https://api.phonepe.com/apis/hermes for PROD
-PHONEPE_ENV_URL = "https://api.phonepe.com/apis/hermes"

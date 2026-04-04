@@ -11,10 +11,17 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.response import Response
 from rest_framework import status
-from dotenv import dotenv_values, set_key, unset_key
-import datetime
-from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, Footer, HowItWorksStep, JobPosition, LoginLink, Page, Policy, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, Footer, GlobalSettings, HowItWorksStep, JobPosition, LoginLink, Page, Policy, PricingSignup, LandingPageContent, Payment, AdminUser, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+import razorpay
+from django.conf import settings
+import requests
+import uuid
+import base64
 from .serializers import AllStoreTypeSerializer, CareerPageSerializer, ChildJobPositionSerializer, ComparisonFeatureSerializer, FAQSerializer, JobPositionSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer, PageSerializer, PolicySerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer, FooterSerializer
+import logging
+from .services.payment_service import PaymentService
+
+logger = logging.getLogger('website')
 
 # ... rest of file until the end ...
 
@@ -219,6 +226,7 @@ def pricing_signup(request):
     shop_name = request.data.get('shop_name')
     owner_name = request.data.get('owner_name')
     mobile_number = request.data.get('mobile_number')
+    email = request.data.get('email')
     referral_code_input = request.data.get('referral_code')
     check_referral = request.data.get('check_referral')
 
@@ -285,6 +293,7 @@ def pricing_signup(request):
         shop_name=shop_name,
         owner_name=owner_name,
         mobile_number=mobile_number,
+        email=email,
         state=request.data.get('state', 'Gujarat'),
         referral_code=final_referral_code
     )
@@ -369,7 +378,7 @@ def apply_job(request):
 @api_view(['POST'])
 def check_referral(request):
 
-    print("Incoming Data:", request.data)
+    logger.info(f"Incoming check_referral data: {request.data}")
 
     mobile = request.data.get("mobile_number")
 
@@ -395,39 +404,17 @@ def check_referral(request):
         "status": "new_user" if created else "existing_referral_user"
     })
 
-def get_phonepe_access_token():
-    """Helper to fetch a V2 OAuth token from PhonePe."""
-    url = "https://api.phonepe.com/apis/identity-manager/v1/oauth/token"
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    data = {
-        "client_id": settings.PHONEPE_MERCHANT_ID,
-        "client_secret": settings.PHONEPE_SALT_KEY, # In V2, Salt Key acts as Client Secret
-        "client_version": str(settings.PHONEPE_SALT_INDEX), # Salt Index acts as Client Version
-        "grant_type": "client_credentials"
-    }
-    
-    try:
-        response = requests.post(url, data=data, headers=headers, timeout=10)
-        response.raise_for_status()
-        token_data = response.json()
-        return token_data.get("access_token")
-    except Exception as e:
-        print(f"Error fetching PhonePe OAuth token: {e}")
-        if hasattr(e, 'response') and e.response:
-            print(f"Token Error Response: {e.response.text}")
-        return None
-
 @csrf_exempt
 @api_view(["POST"])
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([AllowAny])
 def initiate_payment(request):
     """
-    PhonePe PG V2 Payment Initiation (OAuth Based)
+    Unified Payment Initiation (Razorpay Only)
     """
     try:
         signup_id = request.data.get("signup_id")
-        amount_val = request.data.get("amount") # This is in Rupees from frontend
+        amount_val = request.data.get("amount")
 
         if not signup_id or not amount_val:
             return Response({"error": "signup_id or amount is missing"}, status=400)
@@ -436,346 +423,58 @@ def initiate_payment(request):
         if not signup:
             return Response({"error": f"Signup with ID {signup_id} not found"}, status=400)
 
-        # 1. Fetch OAuth Token
-        access_token = get_phonepe_access_token()
-        if not access_token:
-            return Response({"error": "Failed to authenticate with PhonePe (V2)"}, status=500)
-        
-        # Generate a hex UUID (no dashes) for better compatibility with QR generators
-        merchant_transaction_id = uuid.uuid4().hex
-        
-        # The frontend already includes 18% GST in the provided amount
-        total_amount = float(amount_val)
-        amount_in_paise = int(total_amount * 100)
-        
-        # 2. Prepare V2 Payload
-        # Auto-detect Sandbox vs Production
-        is_sandbox = settings.PHONEPE_MERCHANT_ID.startswith("PGTEST")
-        if is_sandbox:
-            pay_url = "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/pay"
-        else:
-            pay_url = "https://api.phonepe.com/apis/pg/checkout/v2/pay"
-
-        # Detect host dynamically (localhost or ai-setu.com)
-        base_domain = request.build_absolute_uri('/').rstrip('/')
-        redirect_url = f"{base_domain}/payment-success/?merchantTransactionId={merchant_transaction_id}"
-        callback_url = f"{base_domain}/payment-callback/"
-
-        # Sanitize Mobile Number (Ensure exactly 10 digits for PhonePe)
-        raw_mobile = str(signup.mobile_number)
-        clean_mobile = re.sub(r'\D', '', raw_mobile) # Only digits
-        if len(clean_mobile) > 10:
-            clean_mobile = clean_mobile[-10:] # Take last 10
-            
-        payload = {
-            "merchantId": settings.PHONEPE_MERCHANT_ID,
-            "merchantTransactionId": merchant_transaction_id.upper(), # PhonePe V2 often uses this key
-            "merchantUserId": f"USER_{signup.id}",
-            "amount": amount_in_paise,
-            "mobileNumber": clean_mobile,
-            "expireAfter": 1200, 
-            "paymentFlow": {
-                "type": "PG_CHECKOUT",
-                "message": "Payment for AI Setu Service",
-                "merchantUrls": {
-                    "redirectUrl": redirect_url,
-                    "callbackUrl": callback_url
-                }
-            },
-            "redirectMode": "REDIRECT"
-        }
-
-        # Log initiation attempt
-        log_file = os.path.join(settings.BASE_DIR, 'payment_init_debug.log')
-        with open(log_file, 'a') as f:
-            f.write(f"\n--- INITIATION {datetime.datetime.now()} ---\n")
-            f.write(f"merchantTransactionId: {merchant_transaction_id}\n")
-            f.write(f"Payload: {json.dumps(payload, indent=2)}\n")
-
-        # 3. Request Pay Page via V2 API
-        # Auto-detect Sandbox vs Production
-        is_sandbox = settings.PHONEPE_MERCHANT_ID.startswith("PGTEST")
-        if is_sandbox:
-            pay_url = "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/pay"
-        else:
-            pay_url = "https://api.phonepe.com/apis/pg/checkout/v2/pay"
-
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"O-Bearer {access_token}"
-        }
-
-        print(f"--- PHONEPE V2 INITIATION ---")
-        print(f"Environment: {'SANDBOX' if is_sandbox else 'PRODUCTION'}")
-        print(f"Transaction ID: {merchant_transaction_id}")
-        print(f"Total Amount: ₹{total_amount}")
-        
-        response = requests.post(pay_url, json=payload, headers=headers, timeout=15)
-        data = response.json()
-        print("PhonePe V2 Response:", data)
-        with open(log_file, 'a') as f:
-            f.write(f"Response Status: {response.status_code}\n")
-            f.write(f"Response Body: {json.dumps(data, indent=2)}\n")
-
-        if response.status_code == 200 and data.get("redirectUrl"):
-            # Create payment record with the final amount
-            Payment.objects.create(
-                pricing_signup=signup,
-                transaction_id=merchant_transaction_id,
-                amount=total_amount,
-                status="PENDING"
-            )
-
-            return Response({
-                "success": True,
-                "payment_url": data.get("redirectUrl"), # Sync with frontend key
-                "merchantTransactionId": merchant_transaction_id
-            })
-        else:
-            return Response({
-                "error": data.get("message", "Payment initiation failed"),
-                "details": data.get("code", "ERROR")
-            }, status=400)
+        payment_data = PaymentService.initiate_payment_link(signup, amount_val)
+        return Response(payment_data)
 
     except Exception as e:
-        print(f"General Initiation Error: {e}")
+        logger.error(f"General Initiation Error: {e}", exc_info=True)
         return Response({"error": str(e)}, status=500)
 
-# -------------------------------
-# PhonePe Status Check Utility (Synchronous)
-# -------------------------------
-def check_phonepe_status_sync(merchant_transaction_id):
-    """
-    Check status using V2 API
-    """
-    try:
-        # 1. Get Token
-        access_token = get_phonepe_access_token()
-        if not access_token:
-            return {"success": False, "message": "Auth failed"}
-
-        # 2. Hit V2 Status Endpoint
-        url = f"https://api.phonepe.com/apis/pg/checkout/v2/order/{merchant_transaction_id}/status"
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"O-Bearer {access_token}"
-        }
-        
-        response = requests.get(url, headers=headers, timeout=10)
-        data = response.json()
-        
-        if response.status_code == 200:
-            # V2 Success check
-            if data.get("state") == "COMPLETED":
-                return {"success": True, "data": data}
-            return {"success": False, "status": data.get("state"), "data": data}
-        
-        return {"success": False, "message": data.get("message", "Status check failed")}
-    except Exception as e:
-        return {"success": False, "message": str(e)}
-
-# -------------------------------
-# PhonePe Callback
-# -------------------------------
 @csrf_exempt
-def payment_callback(request):
-    try:
-        log_file = os.path.join(settings.BASE_DIR, 'payment_debug.log')
-        with open(log_file, 'a') as f:
-            f.write(f"\n--- CALLBACK {uuid.uuid4()} ---\n")
-            f.write(f"Method: {request.method}\n")
-            f.write(f"GET: {json.dumps(request.GET.dict())}\n")
-            f.write(f"POST: {json.dumps(request.POST.dict())}\n")
-            f.write(f"Body: {request.body.decode('utf-8', errors='ignore')[:1000]}\n")
-
-        print("--- PHONEPE CALLBACK RECEIVED ---")
-        
-        # PhonePe can send data as JSON body OR as Form-Encoded data in POST
-        data = {}
-        
-        # 1. Try JSON Body
+def razorpay_callback(request):
+    """
+    Razorpay Webhook/Callback
+    """
+    import json
+    
+    if request.method == "POST":
+        # Handle Webhook from Razorpay
         try:
-            body_data = json.loads(request.body)
-            data = body_data
-            print("Parsed JSON body")
-        except (ValueError, json.JSONDecodeError):
-            print("Not a JSON body or empty")
+            payload = json.loads(request.body)
+            PaymentService.process_webhook(payload)
+            return JsonResponse({"status": "ok"})
+        except Exception as e:
+            logger.error(f"Razorpay Webhook Error: {e}", exc_info=True)
+            return JsonResponse({"error": str(e)}, status=400)
 
-        # 2. Try POST Form Data if body didn't have what we need
-        if not data or "response" not in data:
-            if request.POST:
-                data = request.POST.dict()
-                print("Using POST form data")
-
-        # PhonePe usually sends a base64 encoded 'response'
-        if "response" in data:
-            response_payload = data["response"]
-            decoded_response = base64.b64decode(response_payload).decode()
-            data = json.loads(decoded_response)
-            print("Successfully decoded base64 response")
-        
-        # Log the final data for debugging
-        print(f"Callback Data: {json.dumps(data, indent=2)}")
-
-        # Extract transaction ID and code
-        # Structure is usually: {"success": true, "code": "PAYMENT_SUCCESS", "data": {"merchantTransactionId": "..."}}
-        transaction_id = data.get("data", {}).get("merchantTransactionId")
-        code = data.get("code")
-        
-        if not transaction_id:
-            print("Error: No transaction_id found in callback data")
-            return JsonResponse({"error": "No transaction ID found"}, status=400)
-
-        print(f"Processing callback for Transaction ID: {transaction_id}, Code: {code}")
-
-        from uuid import UUID
-        try:
-            # Explicitly convert to UUID if it's a string
-            if isinstance(transaction_id, str):
-                payment_lookup_id = UUID(transaction_id)
-            else:
-                payment_lookup_id = transaction_id
-                
-            payment = Payment.objects.get(transaction_id=payment_lookup_id)
-            # Store the full response data
-            payment.response_data = data
-        except (ValueError, Payment.DoesNotExist):
-            print(f"Payment not found for ID: {transaction_id}")
-            return JsonResponse({"error": f"Payment record {transaction_id} not found"}, status=404)
-        
-        # Update status
-        if code == "PAYMENT_SUCCESS":
-            payment.status = "SUCCESS"
-            # Optional: Generate invoice here
-            try:
-                from .utils import generate_invoice
-                generate_invoice(payment)
-                print(f"Invoice generated for {transaction_id}")
-            except Exception as invoice_error:
-                print(f"Invoice generation failed for {transaction_id}: {invoice_error}")
-        else:
-            payment.status = code if code else "FAILED"
-            print(f"Status updated to: {payment.status}")
-            
-        # Final log before saving
-        print(f"Saving payment {payment.transaction_id} with status {payment.status} and response_data present: {payment.response_data is not None}")
-        payment.save()
-        return JsonResponse({"message": "Payment processed", "status": payment.status})
-
-    except Exception as e:
-        import traceback
-        print(f"Callback Critical Error: {str(e)}")
-        traceback.print_exc()
-        return JsonResponse({"error": "Failed to process callback", "details": str(e)}, status=500)
+    # 1. Check for GET params from redirect (though payment_success handles this)
+    razorpay_payment_id = request.GET.get('razorpay_payment_id')
+    logger.info(f"Razorpay GET Callback received for payment_id={razorpay_payment_id}")
+    
+    return JsonResponse({"status": "received"})
 
 @csrf_exempt
 def payment_success(request):
     """
-    Handle the redirect from PhonePe. Extract status and redirect/render.
+    Handle the redirect from Payment Gateway. Extract status and redirect/render.
     """
     from django.shortcuts import redirect, render
-    import base64
-    import json
-    import os
-    from django.conf import settings
 
-    log_file = os.path.join(settings.BASE_DIR, 'payment_debug.log')
-    with open(log_file, 'a') as f:
-        f.write(f"\n--- SUCCESS REDIRECT {uuid.uuid4()} ---\n")
-        f.write(f"Method: {request.method}\n")
-        f.write(f"GET: {json.dumps(request.GET.dict())}\n")
-        f.write(f"POST: {json.dumps(request.POST.dict())}\n")
-
-    print("--- PAYMENT REDIRECT FROM PG ---")
+    logger.info(f"--- PAYMENT REDIRECT FROM PG --- Params: {request.GET.dict()}")
 
     # 1. Check if this is an internal redirect (we've already processed it)
-    # We check for tid and status but NO response/code/encoded fields
-    if request.GET.get('status') and not (request.GET.get('response') or request.POST.get('response')):
-        print("Internal redirect detected, serving frontend")
+    if request.GET.get('status'):
         return render(request, "index.html")
     
-    status_code = "UNKNOWN"
-    transaction_id = "UNKNOWN"
+    # Razorpay Success Parameters
+    razorpay_payment_id = request.GET.get('razorpay_payment_id')
+    merchant_transaction_id = request.GET.get('merchantTransactionId') or request.GET.get('tid')
 
-    # PhonePe redirects back with 'response' (encoded) or 'code' (raw status)
-    # Check POST first, then GET
-    encoded_response = request.POST.get('response') or request.GET.get('response')
-    response_code = request.POST.get('code') or request.GET.get('code')
-    # Sometimes transactionId is sent directly in query params or we can get it from 'mt' or similar if custom
-    transaction_id_param = request.GET.get('transactionId') or request.GET.get('mt') or \
-                          request.POST.get('transactionId') or request.GET.get('merchantTransactionId') or \
-                          request.POST.get('merchantTransactionId') or request.GET.get('transaction_id')
-    
-    if encoded_response:
-        try:
-            decoded_response = base64.b64decode(encoded_response).decode()
-            data = json.loads(decoded_response)
-            print(f"Decoded redirect response: {json.dumps(data, indent=2)}")
-            status_code = data.get('code', 'UNKNOWN')
-            transaction_id = data.get('data', {}).get('merchantTransactionId', 'UNKNOWN')
-        except Exception as e:
-            print(f"Error parsing redirect response: {e}")
-    
-    # Fallback for status and ID if base64 failed or was missing
-    if status_code == "UNKNOWN" and response_code:
-        status_code = response_code
-    
-    if transaction_id == "UNKNOWN" and transaction_id_param:
-        transaction_id = transaction_id_param    # Map to simplified frontend statuses
-    if status_code == "PAYMENT_SUCCESS":
-        frontend_status = "SUCCESS"
-    elif status_code in ["PAYMENT_ERROR", "PAYMENT_DECLINED", "TIMED_OUT"]:
-        frontend_status = "FAILURE"
-    elif status_code == "PAYMENT_PENDING":
-        frontend_status = "PENDING"
-    else:
-        # -------------------------------
-        # DB Lookup Fallback
-        # -------------------------------
-        # If redirect parameters are missing/unclear, check the database status
-        # which might have been updated by the callback already
-        if transaction_id != "UNKNOWN":
-            try:
-                from uuid import UUID
-                payment = Payment.objects.get(transaction_id=UUID(transaction_id))
-                if payment.status in ["SUCCESS", "FAILURE", "PENDING"]:
-                    frontend_status = payment.status
-                    print(f"Status resolved from DB for {transaction_id}: {frontend_status}")
-                else:
-                    frontend_status = status_code
-            except Exception as db_err:
-                print(f"Fallback DB lookup failed: {db_err}")
-                frontend_status = status_code
-        else:
-            frontend_status = status_code # Still likely "UNKNOWN"
+    tid = merchant_transaction_id or "UNKNOWN"
 
-    # Final check: if we are redirecting to index.html anyway, 
-    # make sure we have the most accurate status
-    if (frontend_status == "UNKNOWN" or frontend_status == "PENDING") and transaction_id != "UNKNOWN":
-        print(f"Status still {frontend_status}, attempting synchronous Status API check...")
-        status_data = check_phonepe_status_sync(transaction_id)
-        if status_data and status_data.get("success"):
-            status_code = status_data.get("code")
-            if status_code == "PAYMENT_SUCCESS":
-                frontend_status = "SUCCESS"
-                # Update DB
-                try:
-                    payment = Payment.objects.get(transaction_id=UUID(transaction_id))
-                    if payment.status != "SUCCESS":
-                        payment.status = "SUCCESS"
-                        payment.response_data = status_data
-                        payment.save()
-                        print(f"DB updated to SUCCESS via sync check for {transaction_id}")
-                except:
-                    pass
-            elif status_code in ["PAYMENT_ERROR", "PAYMENT_DECLINED", "TIMED_OUT"]:
-                frontend_status = "FAILURE"
-            elif status_code == "PAYMENT_PENDING":
-                frontend_status = "PENDING"
+    frontend_status = PaymentService.verify_and_update_status(razorpay_payment_id, tid)
 
-    print(f"Redirecting to frontend with status={frontend_status}, tid={transaction_id}")
-    # Redirect to same URL but with our simplified parameters
-    return redirect(f"/payment-success/?status={frontend_status}&tid={transaction_id}")
+    return redirect(f"/payment-success/?status={frontend_status}&tid={tid}")
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -787,27 +486,14 @@ def check_payment_status_api(request, tid):
         from uuid import UUID
         payment = Payment.objects.get(transaction_id=UUID(tid))
         
-        # If still pending in DB, try a sync check once
-        if payment.status == "PENDING":
-             status_data = check_phonepe_status_sync(tid)
-             if status_data and status_data.get("success"):
-                 status_code = status_data.get("code")
-                 if status_code == "PAYMENT_SUCCESS":
-                     payment.status = "SUCCESS"
-                     payment.response_data = status_data
-                     payment.save()
-                 elif status_code == "PAYMENT_FAILED": # Simplified
-                     payment.status = "FAILURE"
-                     payment.save()
-        
         return Response({
             "status": payment.status,
-            "tid": str(payment.transaction_id),
+            "transaction_id": str(payment.transaction_id),
             "amount": payment.amount,
             "invoice_url": request.build_absolute_uri(payment.invoice.url) if payment.invoice else None
         })
     except (Payment.DoesNotExist, ValueError):
-        return Response({"error": "Payment not found"}, status=404)
+        return Response({"status": "NOT_FOUND", "error": "Payment not found"}, status=404)
     
 @api_view(['GET', 'POST', 'DELETE'])
 @admin_required

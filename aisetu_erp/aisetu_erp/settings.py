@@ -32,12 +32,12 @@ STATICFILES_DIRS = [
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-54*!$s_g01(7+l-h522603rapr+uk*c$#yp9s^btl*dw=#&^r*'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'default-insecure-key-for-dev-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -116,8 +116,8 @@ WSGI_APPLICATION = 'aisetu_erp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django_mongodb_backend',
-        'NAME': os.getenv('DB_NAME', ''),
-        'HOST': os.getenv('DB_HOST', 'mongodb+srv://HK_Digiverse:HK%40Digiverse%40123@cluster0.lcbyqbq.mongodb.net/aisetu_db?retryWrites=true&w=majority&appName=Cluster0'),
+        'NAME': os.getenv('DB_NAME', 'aisetu_db'),
+        'HOST': os.getenv('DB_HOST'),
     }
 }
 
@@ -166,7 +166,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django_mongodb_backend.fields.ObjectIdAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5004,http://127.0.0.1:5004').split(',')
+CORS_ALLOW_ALL_ORIGINS = False # Better security by default
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -193,10 +194,11 @@ if local_ip:
 # Instructions for manual override
 # "http://<your-server-ip>:5004", # if you need a specific external IP
 
-PHONEPE_MERCHANT_ID = os.getenv("PHONEPE_MERCHANT_ID")
-PHONEPE_SALT_KEY = os.getenv("PHONEPE_SALT_KEY")
-PHONEPE_SALT_INDEX = os.getenv("PHONEPE_SALT_INDEX")
-PHONEPE_BASE_URL = os.getenv("PHONEPE_BASE_URL")
+
+
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
+RAZORPAY_LINK_EXPIRE_MINUTES = int(os.getenv("RAZORPAY_LINK_EXPIRE_MINUTES", 15))
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 IMPORT_EXPORT_USE_TRANSACTIONS = True
@@ -212,3 +214,46 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'website': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
