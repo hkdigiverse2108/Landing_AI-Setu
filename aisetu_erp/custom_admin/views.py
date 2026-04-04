@@ -493,7 +493,7 @@ def manage_env(request):
                     elif key == 'EMAIL_HOST_PASSWORD':
                         gs.email_host_password = value
                     gs.save()
-                    db_status = "and Database"
+                    db_status = "and is now LIVE in the Database (Dynamic)"
                 except Exception as db_err:
                     # Log but don't fail the whole request
                     print(f"Database sync failed (likely pending migrations): {db_err}")

@@ -3,7 +3,7 @@ import uuid
 import logging
 import time
 from django.conf import settings
-from website.models import Payment
+from website.models import Payment, GlobalSettings
 from website.utils import generate_invoice
 from uuid import UUID
 
@@ -12,6 +12,17 @@ logger = logging.getLogger('website')
 class PaymentService:
     @staticmethod
     def _get_client():
+        # Primary source: Database GlobalSettings
+        try:
+            gs = GlobalSettings.objects.first()
+            if gs and gs.razorpay_key_id and gs.razorpay_key_secret:
+                logger.info("Initializing Razorpay Client using Database Configuration.")
+                return razorpay.Client(auth=(gs.razorpay_key_id, gs.razorpay_key_secret))
+        except Exception as e:
+            logger.warning(f"Database Razorpay lookup failed, falling back to .env: {e}")
+
+        # Fallback source: Environment variables (.env via settings.py)
+        logger.info("Initializing Razorpay Client using .env Configuration.")
         return razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
     @classmethod
